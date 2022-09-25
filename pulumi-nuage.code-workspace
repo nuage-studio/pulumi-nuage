@@ -1,0 +1,61 @@
+{
+  "folders": [
+    {
+      "name": "✨  pulumi-nuage",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "python.languageServer": "Pylance",
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.terminal.activateEnvironment": true,
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": ["--preview", "--line-length=120"],
+    "python.sortImports.args": [
+      // https://github.com/microsoft/vscode-isort
+      "--skip-gitignore",
+      "--profile",
+      "black",
+      "--line-length=120"
+    ],
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+      "--extend-ignore=E203,F821",
+      "--max-line-length=120",
+      "--max-complexity=10",
+      "--exclude=.venv,__pycache__,.git"
+    ],
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.python",
+      "editor.rulers": [120]
+    },
+    "[json|yaml]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "files.exclude": {
+      "**/Thumbs.db": true,
+      "**/__pycache__": true
+    },
+    "search.exclude": {
+      "**/.venv": true,
+      "**/.task": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "visualstudioexptteam.vscodeintellicode",
+      "esbenp.prettier-vscode",
+      "christian-kohler.path-intellisense",
+      "davidanson.vscode-markdownlint",
+      "boto3typed.boto3-ide",
+      "mark-tucker.aws-cli-configure"
+    ]
+  }
+}
