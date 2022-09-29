@@ -1,0 +1,43 @@
+{
+    "name": "nuage",
+    "resources": {
+        "nuage:index:bucket": {
+            "isComponent": true,
+            "properties": {
+                "bucket": {
+                    "$ref": "/aws/v4.0.0/schema.json#/resources/aws:s3%2Fbucket:Bucket",
+                    "description": "The bucket resource."
+                }
+            },
+            "required": [
+                "bucket"
+            ]
+        }
+    },
+    "language": {
+        "csharp": {
+            "packageReferences": {
+                "Pulumi": "3.*",
+                "Pulumi.Aws": "5.*"
+            }
+        },
+        "go": {
+            "generateResourceContainerTypes": true,
+            "importBasePath": "github.com/pulumi/pulumi-nuage/sdk/go/nuage"
+        },
+        "nodejs": {
+            "dependencies": {
+                "@pulumi/aws": "^5.0.0"
+            },
+            "devDependencies": {
+                "typescript": "^3.7.0"
+            }
+        },
+        "python": {
+            "requires": {
+                "pulumi": ">=3.0.0,<4.0.0",
+                "pulumi-aws": ">=5.0.0,<6.0.0"
+            }
+        }
+    }
+}
