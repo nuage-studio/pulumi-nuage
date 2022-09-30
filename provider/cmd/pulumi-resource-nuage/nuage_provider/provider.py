@@ -19,7 +19,7 @@ from pulumi import Inputs, ResourceOptions
 from pulumi.provider import ConstructResult
 
 import nuage_provider
-from nuage_provider.bucket import bucket
+from nuage_provider.bucket_nuage import bucket_nuage
 
 
 class Provider(provider.Provider):
@@ -30,7 +30,7 @@ class Provider(provider.Provider):
         self, name: str, resource_type: str, inputs: Inputs, options: Optional[ResourceOptions] = None
     ) -> ConstructResult:
 
-        if resource_type == "nuage:index:bucket":
+        if resource_type == "nuage:index:bucket_nuage":
             return _create_bucket(name, inputs, options)
 
         raise Exception(f"Unknown resource type {resource_type}")
@@ -39,7 +39,7 @@ class Provider(provider.Provider):
 def _create_bucket(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
 
     # Create the component resource
-    created_bucket = bucket(name, dict(inputs), options)
+    created_bucket = bucket_nuage(name, dict(inputs), options)
 
     # Return the component resource's URN and outputs as its state.
     return provider.ConstructResult(urn=created_bucket.urn, state={"bucket": created_bucket.bucket})

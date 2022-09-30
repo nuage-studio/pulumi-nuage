@@ -13,7 +13,7 @@
         "strict": true
     },
     "files": [
-        "bucket.ts",
+        "bucket_nuage.ts",
         "index.ts",
         "provider.ts",
         "utilities.ts"

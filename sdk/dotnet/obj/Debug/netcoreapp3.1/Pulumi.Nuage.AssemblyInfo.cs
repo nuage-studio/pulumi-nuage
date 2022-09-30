@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Pulumi Corp.")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("0.0.1.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.0.1+61a63740b5c0f5aceca8ff5aeca628e18881542d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.0.1+f124343b42b3d58883c0efaed672d3e71d513f5d")]
 [assembly: System.Reflection.AssemblyProductAttribute("Pulumi.Nuage")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Pulumi.Nuage")]
 [assembly: System.Reflection.AssemblyVersionAttribute("0.0.1.0")]

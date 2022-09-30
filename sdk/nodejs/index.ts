@@ -5,18 +5,18 @@ import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "./utilities";
 
 // Export members:
-export * from "./bucket";
+export * from "./bucket_nuage";
 export * from "./provider";
 
 // Import resources to register:
-import { Bucket } from "./bucket";
+import { Bucket_nuage } from "./bucket_nuage";
 
 const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {
         switch (type) {
-            case "nuage:index:bucket":
-                return new Bucket(name, <any>undefined, { urn })
+            case "nuage:index:bucket_nuage":
+                return new Bucket_nuage(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }

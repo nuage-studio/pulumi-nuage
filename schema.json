@@ -1,7 +1,7 @@
 {
     "name": "nuage",
     "resources": {
-        "nuage:index:bucket": {
+        "nuage:index:bucket_nuage": {
             "isComponent": true,
             "properties": {
                 "bucket": {
