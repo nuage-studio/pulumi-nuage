@@ -5,17 +5,24 @@
 from . import _utilities
 import typing
 # Export this package's modules as members:
-from .bucket_nuage import *
 from .provider import *
+
+# Make subpackages available:
+if typing.TYPE_CHECKING:
+    import pulumi_nuage.aws as __aws
+    aws = __aws
+else:
+    aws = _utilities.lazy_import('pulumi_nuage.aws')
+
 _utilities.register(
     resource_modules="""
 [
  {
   "pkg": "nuage",
-  "mod": "index",
-  "fqn": "pulumi_nuage",
+  "mod": "aws",
+  "fqn": "pulumi_nuage.aws",
   "classes": {
-   "nuage:index:bucket_nuage": "Bucket_nuage"
+   "nuage:aws:bucket_nuage": "Bucket_nuage"
   }
  }
 ]
