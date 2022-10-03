@@ -8,7 +8,7 @@ CODEGEN         := pulumi-gen-${PACK}
 VERSION_PATH    := provider/pkg/version.Version
 
 WORKING_DIR     := $(shell pwd)
-SCHEMA_PATH     := ${WORKING_DIR}/provider/cmd/pulumi-resource-nuage/pulumi_nuage/schema.json
+SCHEMA_PATH     := ${WORKING_DIR}/schema.json
 
 SRC             := provider/cmd/pulumi-resource-${PACK}
 

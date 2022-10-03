@@ -1,7 +1,7 @@
 import os.path
 from distutils.core import setup
 
-PKG = "pulumi_nuage"
+PKG = "nuage_provider"
 
 
 def read_version():

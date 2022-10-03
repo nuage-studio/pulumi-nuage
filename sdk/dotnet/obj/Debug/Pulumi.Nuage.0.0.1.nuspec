@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Pulumi.Nuage</id>
+    <version>0.0.1</version>
+    <authors>Pulumi Corp.</authors>
+    <icon>logo.png</icon>
+    <description>Package Description</description>
+    <repository type="git" url="https://github.com/nuage-studio/pulumi-nuage.git" commit="2f3c4cd3df75306bbb810bb410750b34ca906f12" />
+    <dependencies>
+      <group targetFramework=".NETCoreApp3.1">
+        <dependency id="Pulumi" version="3.40.2" exclude="Build,Analyzers" />
+        <dependency id="Pulumi.Aws" version="5.16.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="/Users/achrafessemlali/Documents/pulumi-nuage/sdk/dotnet/bin/Debug/netcoreapp3.1/Pulumi.Nuage.pdb" target="lib/netcoreapp3.1/Pulumi.Nuage.pdb" />
+    <file src="/Users/achrafessemlali/Documents/pulumi-nuage/sdk/dotnet/bin/Debug/netcoreapp3.1/Pulumi.Nuage.dll" target="lib/netcoreapp3.1/Pulumi.Nuage.dll" />
+    <file src="/Users/achrafessemlali/Documents/pulumi-nuage/sdk/dotnet/bin/Debug/netcoreapp3.1/Pulumi.Nuage.xml" target="lib/netcoreapp3.1/Pulumi.Nuage.xml" />
+    <file src="/Users/achrafessemlali/Documents/pulumi-nuage/sdk/dotnet/version.txt" target="content/version.txt" />
+    <file src="/Users/achrafessemlali/Documents/pulumi-nuage/sdk/dotnet/pulumi-plugin.json" target="content/pulumi-plugin.json" />
+    <file src="/Users/achrafessemlali/Documents/pulumi-nuage/sdk/dotnet/logo.png" target="logo.png" />
+  </files>
+</package>
