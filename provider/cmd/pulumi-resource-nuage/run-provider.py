@@ -15,9 +15,9 @@
 
 import sys
 
-import pulumi_nuage
-import pulumi_nuage.provider
 import pulumi.provider
+import nuage_provider
+import nuage_provider.provider
 
 if __name__ == "__main__":
-    pulumi.provider.main(pulumi_nuage.provider.Provider(), sys.argv[1:])
+    pulumi.provider.main(nuage_provider.provider.Provider(), sys.argv[1:])
