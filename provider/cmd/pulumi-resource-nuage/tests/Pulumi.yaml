@@ -4,3 +4,4 @@ runtime:
   options:
     virtualenv: venv
 description: A Integration Testing of pulumi nuage
+config: ./stacks/
