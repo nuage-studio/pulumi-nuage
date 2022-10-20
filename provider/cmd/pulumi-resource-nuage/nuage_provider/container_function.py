@@ -1,0 +1,231 @@
+# Copyright 2016-2021, Pulumi Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import json
+from enum import IntEnum
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
+
+import pulumi
+import pulumi_aws as aws
+import pulumi_awsx as awsx
+
+class Architecture(IntEnum):
+    """CPU architecture & instruction set to use"""
+
+    X86_64 = 1
+    ARM64 = 2
+
+    @property
+    def lambda_value(self) -> str:
+        """AWS Lambda value for the `architectures` argument"""
+        mapping = {self.X86_64.value: "x86_64", self.ARM64.value: "arm64"}
+        return mapping[self.value]
+
+    @property
+    def docker_value(self) -> str:
+        """Docker value for the `--platform` flag"""
+        mapping = {self.X86_64.value: "linux/amd64", self.ARM64.value: "linux/arm64"}
+        return mapping[self.value]
+        
+class ContainerFunctionArgs:
+
+    repository: pulumi.Input[awsx.ecr.Repository]
+    dockerfile: Optional[pulumi.Input[Union[str, Path]]]
+    context: Optional[pulumi.Input[Union[str, Path]]]
+    description: Optional[pulumi.Input[str]]
+    memory_size: Optional[pulumi.Input[int]]
+    timeout: Optional[pulumi.Input[int]]
+    architecture: Optional[pulumi.Input[Architecture]]
+    environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]]
+    policy_document: Optional[pulumi.Input[str]]
+    keep_warm: pulumi.Input[bool]
+    url: pulumi.Input[bool]
+    cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
+    opts: Optional[pulumi.Input[pulumi.ResourceOptions]]
+
+    @staticmethod
+    def from_inputs(inputs: pulumi.Inputs) -> 'ContainerFunctionArgs':
+        return ContainerFunctionArgs(
+            repository = inputs['repository'],
+            dockerfile = inputs['dockerfile'],
+            context = inputs['context'],
+            description = inputs['description'],
+            memory_size = inputs['memorySize'],
+            timeout = inputs['timeout'],
+            architecture = inputs['architecture'],
+            environment = inputs['environment'],
+            policy_document = inputs['policyDocument'],
+            keep_warm = inputs['keepWarm'],
+            url = inputs['url'],
+            cors_configuration = inputs['corsConfiguration'],
+            opts = inputs['opts']
+        )
+
+    def __init__(
+        self, 
+        repository: pulumi.Input[awsx.ecr.Repository],
+        dockerfile: Optional[pulumi.Input[Union[str, Path]]] = None,
+        context: Optional[pulumi.Input[Union[str, Path]]] = None,
+        description: Optional[pulumi.Input[str]] = None,
+        memory_size: Optional[pulumi.Input[int]] = 512,
+        timeout: Optional[pulumi.Input[int]] = 3,
+        architecture: Optional[pulumi.Input[Architecture]] = Architecture.X86_64,
+        environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]] = None,
+        policy_document: Optional[pulumi.Input[str]] = None,
+        keep_warm: pulumi.Input[bool] = False,
+        url: pulumi.Input[bool] = False,
+        cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]] = None,
+        opts: Optional[pulumi.Input[pulumi.ResourceOptions]] = None
+    ) -> None:
+        self.repository = repository
+        self.dockerfile = dockerfile
+        self.context = context
+        self.description = description
+        self.memory_size = memory_size
+        self.timeout = timeout
+        self.architecture = architecture
+        self.environment = environment
+        self.policy_document = policy_document
+        self.keep_warm = keep_warm
+        self.url = url
+        self.cors_configuration = cors_configuration
+        self.opts = opts
+
+class ContainerFunction(pulumi.ComponentResource):
+
+    def __init__(self, name: str, args: ContainerFunctionArgs, props: Optional[dict] = None, opts: Optional[pulumi.ResourceOptions] = None) -> None:
+
+        super().__init__("nuage:aws:ContainerFunction", name, props, opts)
+        
+        dockerfile = Path(args.dockerfile or "./Dockerfile")
+        context = str(dockerfile.parent) if not args.context else str(args.context)
+        dockerfile = str(dockerfile)
+
+        image = awsx.ecr.Image(
+            resource_name=f"{name}-image",
+            repository_url=args.repository.url,
+            path=context,
+            dockerfile=dockerfile,
+            extra_options=["--platform", args.architecture.docker_value, "--quiet"],
+            opts=pulumi.ResourceOptions(parent=self),
+        )
+
+        role = aws.iam.Role(
+            resource_name=f"{name}-lambda-role",
+            name=f"{name}-lambda-role",
+            description=f"Role used by {name}",
+            assume_role_policy=aws.iam.get_policy_document(
+                version="2012-10-17",
+                statements=[
+                    aws.iam.GetPolicyDocumentStatementArgs(
+                        actions=["sts:AssumeRole"],
+                        effect="Allow",
+                        sid="",
+                        principals=[
+                            aws.iam.GetPolicyDocumentStatementPrincipalArgs(
+                                type="Service", identifiers=["lambda.amazonaws.com"]
+                            ),
+                        ],
+                    ),
+                ],
+            ).json,
+            opts=pulumi.ResourceOptions(parent=self),
+        )
+        
+        policy_documents = [
+            # Can write logs to CloudWatch
+            aws.iam.get_policy(name="AWSLambdaBasicExecutionRole").policy,
+            # Can write Lambda Insights logs to CloudWatch
+            # NB: is actually a subset of the above
+            aws.iam.get_policy(name="CloudWatchLambdaInsightsExecutionRolePolicy").policy,
+            # Can push traces to X-Ray
+            aws.iam.get_policy(name="AWSXRayDaemonWriteAccess").policy,
+        ]
+        if args.policy_document:
+            # If we have a custom policy document, add it to the list
+            policy_documents.append(args.policy_document)
+
+        policy = aws.iam.Policy(
+            resource_name=f"{name}-lambda-policy",
+            name=f"{name}-lambda-policy",
+            description=f"Policy for {name}-lambda-function",
+            policy=aws.iam.get_policy_document(source_policy_documents=policy_documents).json,
+            opts=pulumi.ResourceOptions(parent=role),
+        )
+
+        aws.iam.RolePolicyAttachment(
+            resource_name=f"{name}-lambda-role-policy-attachment",
+            role=role.id,
+            policy_arn=policy.arn,
+            opts=pulumi.ResourceOptions(parent=role),
+        )
+
+        self.function = aws.lambda_.Function(
+            resource_name=f"{name}-lambda-function",
+            name=name,
+            description=args.description,
+            package_type="Image",
+            image_uri=image.image_uri,
+            memory_size=args.memory_size,
+            timeout=args.timeout,
+            architectures=[args.architecture.lambda_value],
+            role=role.arn,
+            environment=aws.lambda_.FunctionEnvironmentArgs(variables=args.environment) if args.environment else None,
+            tracing_config=aws.lambda_.FunctionTracingConfigArgs(mode="Active"),
+            opts=pulumi.ResourceOptions(parent=self),
+        )
+
+        if args.keep_warm:
+            # Keep warm by refreshing the lambda function every 5 minutes
+            rule = aws.cloudwatch.EventRule(
+                resource_name=f"{name}-keep-warm-rule",
+                description=f"Refreshes {name} regularly to keep the container warm",
+                is_enabled=True,
+                role_arn=None,
+                schedule_expression="rate(5 minutes)",
+                opts=pulumi.ResourceOptions(parent=self.function),
+            )
+            aws.lambda_.Permission(
+                resource_name=f"{name}-cloudwatch-invoke-permission",
+                action="lambda:InvokeFunction",
+                function=self.function.arn,
+                principal="events.amazonaws.com",
+                source_arn=rule.arn,
+                opts=pulumi.ResourceOptions(parent=rule),
+            )
+            aws.cloudwatch.EventTarget(
+                resource_name=f"{name}-keep-warm-target",
+                arn=self.function.arn,
+                input="{}",
+                rule=rule.id,
+                opts=pulumi.ResourceOptions(parent=rule),
+            )
+
+        outputs = {"arn": self.function.arn, "name": self.function.name}
+
+        if args.url:
+            # Lambda URL
+            self.function_url = aws.lambda_.FunctionUrl(
+                resource_name=f"{name}/url",
+                function_name=self.function.name,
+                authorization_type="NONE",
+                cors=args.cors_configuration,
+                opts=pulumi.ResourceOptions(parent=self.function),
+            )
+            outputs["url"] = self.function_url.function_url
+        else:
+            self.function_url = None
+
+        self.register_outputs(outputs)

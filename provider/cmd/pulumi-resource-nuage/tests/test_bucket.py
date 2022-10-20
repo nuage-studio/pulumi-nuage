@@ -4,8 +4,9 @@ import unittest
 
 import boto3
 from pulumi import automation as auto
+from pulumi_aws.s3.bucket import Bucket
 
-from constants import BUCKET_NAME, GLOBAL
+from constants import BUCKET_NAME, LAMBDA_NAME, GLOBAL
 
 class TestS3(unittest.TestCase):
 
@@ -62,6 +63,12 @@ class TestS3(unittest.TestCase):
         bucket_name = self.outputs.get("bucketName").value
         delete_response = self.s3.meta.client.delete_object(Bucket=bucket_name, Key=self.FILE_NAME)
         self.assertIsNotNone(delete_response)
+
+
+    def test_lambda_output_name(self):
+        # Test if lambda name setting is valid.
+        lambda_name = self.outputs.get("lambda_name").value
+        self.assertEqual(LAMBDA_NAME, lambda_name)
 
 
 if __name__ == '__main__':
