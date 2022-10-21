@@ -39,57 +39,57 @@ class Architecture(IntEnum):
         mapping = {self.X86_64.value: "linux/amd64", self.ARM64.value: "linux/arm64"}
         return mapping[self.value]
         
-class ContainerFunctionArgs:
-
-    repository: pulumi.Input[awsx.ecr.Repository]
-    dockerfile: Optional[pulumi.Input[Union[str, Path]]]
-    context: Optional[pulumi.Input[Union[str, Path]]]
+class ContainerFunctionArgs:    
+    ecr_repository_resource_name: pulumi.Input[str]
+    ecr_repository_name: pulumi.Input[str]
+    dockerfile: Optional[pulumi.Input[str]]
+    context: Optional[pulumi.Input[str]]
     description: Optional[pulumi.Input[str]]
     memory_size: Optional[pulumi.Input[int]]
     timeout: Optional[pulumi.Input[int]]
-    architecture: Optional[pulumi.Input[Architecture]]
+    architecture: Optional[str]
     environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]]
     policy_document: Optional[pulumi.Input[str]]
     keep_warm: pulumi.Input[bool]
     url: pulumi.Input[bool]
-    cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
-    opts: Optional[pulumi.Input[pulumi.ResourceOptions]]
+    #cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> 'ContainerFunctionArgs':
         return ContainerFunctionArgs(
-            repository = inputs['repository'],
-            dockerfile = inputs['dockerfile'],
-            context = inputs['context'],
-            description = inputs['description'],
-            memory_size = inputs['memorySize'],
-            timeout = inputs['timeout'],
-            architecture = inputs['architecture'],
-            environment = inputs['environment'],
-            policy_document = inputs['policyDocument'],
-            keep_warm = inputs['keepWarm'],
-            url = inputs['url'],
-            cors_configuration = inputs['corsConfiguration'],
-            opts = inputs['opts']
-        )
+            ecr_repository_resource_name = inputs['ecrRepositoryResourceName'],
+            ecr_repository_name = inputs['ecrRepositoryName'],
+            dockerfile = inputs.get('dockerfile', None),
+            context = inputs.get('context', None),
+            description = inputs.get('description', None),
+            memory_size = inputs.get('memorySize', 512),
+            timeout = inputs.get('timeout', 3),
+            architecture = inputs.get('architecture', "x86_64"),
+            environment = inputs.get('environment', None),
+            policy_document = inputs.get('policyDocument', None),
+            keep_warm = inputs.get('keepWarm', False),
+            url = inputs.get('url', False),
+            #cors_configuration = None,#inputs['corsConfiguration'],
+        )        
 
     def __init__(
         self, 
-        repository: pulumi.Input[awsx.ecr.Repository],
-        dockerfile: Optional[pulumi.Input[Union[str, Path]]] = None,
-        context: Optional[pulumi.Input[Union[str, Path]]] = None,
-        description: Optional[pulumi.Input[str]] = None,
-        memory_size: Optional[pulumi.Input[int]] = 512,
-        timeout: Optional[pulumi.Input[int]] = 3,
-        architecture: Optional[pulumi.Input[Architecture]] = Architecture.X86_64,
-        environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]] = None,
-        policy_document: Optional[pulumi.Input[str]] = None,
-        keep_warm: pulumi.Input[bool] = False,
-        url: pulumi.Input[bool] = False,
-        cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]] = None,
-        opts: Optional[pulumi.Input[pulumi.ResourceOptions]] = None
+        ecr_repository_resource_name: pulumi.Input[str],
+        ecr_repository_name: pulumi.Input[str],
+        dockerfile: Optional[pulumi.Input[Union[str, Path]]],
+        context: Optional[pulumi.Input[Union[str, Path]]],
+        description: Optional[pulumi.Input[str]],
+        memory_size: Optional[pulumi.Input[int]],
+        timeout: Optional[pulumi.Input[int]],
+        architecture: Optional[pulumi.Input[str]],
+        environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]],
+        policy_document: Optional[pulumi.Input[str]],
+        keep_warm: pulumi.Input[bool],
+        url: pulumi.Input[bool]
+        #cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]] = None,
     ) -> None:
-        self.repository = repository
+        self.ecr_repository_resource_name = ecr_repository_resource_name
+        self.ecr_repository_name = ecr_repository_name        
         self.dockerfile = dockerfile
         self.context = context
         self.description = description
@@ -100,8 +100,7 @@ class ContainerFunctionArgs:
         self.policy_document = policy_document
         self.keep_warm = keep_warm
         self.url = url
-        self.cors_configuration = cors_configuration
-        self.opts = opts
+        #self.cors_configuration = cors_configuration
 
 class ContainerFunction(pulumi.ComponentResource):
 
@@ -113,12 +112,21 @@ class ContainerFunction(pulumi.ComponentResource):
         context = str(dockerfile.parent) if not args.context else str(args.context)
         dockerfile = str(dockerfile)
 
+        repository = awsx.ecr.Repository(
+            resource_name="itest-lambda-ecr-repository",
+            name="itest-lambda-ecr",
+        )
+        if args.architecture == "x86_64":
+            architecture = Architecture.X86_64
+        else:
+            architecture = Architecture.ARM64
+        
         image = awsx.ecr.Image(
             resource_name=f"{name}-image",
-            repository_url=args.repository.url,
+            repository_url=repository.url,
             path=context,
             dockerfile=dockerfile,
-            extra_options=["--platform", args.architecture.docker_value, "--quiet"],
+            extra_options=["--platform", architecture.docker_value, "--quiet"],
             opts=pulumi.ResourceOptions(parent=self),
         )
 
@@ -180,7 +188,7 @@ class ContainerFunction(pulumi.ComponentResource):
             image_uri=image.image_uri,
             memory_size=args.memory_size,
             timeout=args.timeout,
-            architectures=[args.architecture.lambda_value],
+            architectures=[architecture.lambda_value],
             role=role.arn,
             environment=aws.lambda_.FunctionEnvironmentArgs(variables=args.environment) if args.environment else None,
             tracing_config=aws.lambda_.FunctionTracingConfigArgs(mode="Active"),
@@ -221,10 +229,10 @@ class ContainerFunction(pulumi.ComponentResource):
                 resource_name=f"{name}/url",
                 function_name=self.function.name,
                 authorization_type="NONE",
-                cors=args.cors_configuration,
+                cors=None,#args.cors_configuration,
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
-            outputs["url"] = self.function_url.function_url
+            outputs["function_url"] = self.function_url.function_url
         else:
             self.function_url = None
 

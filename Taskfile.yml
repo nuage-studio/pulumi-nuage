@@ -1,0 +1,18 @@
+version: "3"
+
+tasks:
+  generatesdks:
+    cmds:
+      - make generate
+  build:
+    cmds:
+      - rm -r provider/cmd/pulumi-resource-nuage/build || true
+      - make build
+      - make install
+  runtests:
+    cmds:
+      - python3 -m unittest discover provider/cmd/pulumi-resource-nuage/tests/
+  install:
+    cmds:
+      - source provider/cmd/pulumi-resource-nuage/tests/venv/bin/activate
+      - pip install -r provider/cmd/pulumi-resource-nuage/requirements.txt

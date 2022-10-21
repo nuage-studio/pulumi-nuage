@@ -25,10 +25,8 @@ function = ContainerFunction(
     timeout=30,
     keep_warm=True,
     architecture=Architecture.X86_64,
-    repository = awsx.ecr.Repository(
-        resource_name="itest-lambda-ecr-repository",
-        name="itest-lambda-ecr",
-    ),
+    ecr_repository_name="itest-lambda-ecr",
+    ecr_repository_resource_name="itest-lambda-ecr-repository",
     dockerfile="./lambda/Dockerfile.lambda",
     context="./lambda/",
     url=False,

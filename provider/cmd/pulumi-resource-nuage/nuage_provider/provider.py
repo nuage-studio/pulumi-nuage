@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from typing import Optional
+from venv import create
 
 import pulumi.provider as provider
 from pulumi import Inputs, ResourceOptions
@@ -20,6 +21,7 @@ from pulumi.provider import ConstructResult
 
 import nuage_provider
 from nuage_provider.bucket_nuage import bucket_nuage
+from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
 
 
 class Provider(provider.Provider):
@@ -32,9 +34,16 @@ class Provider(provider.Provider):
 
         if resource_type == "nuage:aws:bucket_nuage":
             return _create_bucket(name, inputs, options)
+        elif resource_type == "nuage:aws:ContainerFunction":
+            return _create_container(name, inputs, options)
 
         raise Exception(f"Unknown resource type {resource_type}")
 
+
+def _create_container(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+    created_container = ContainerFunction(name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options)
+
+    return provider.ConstructResult(urn = created_container.urn, state={"arn": created_container.function.arn, "name": created_container.function.name})
 
 def _create_bucket(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
 
