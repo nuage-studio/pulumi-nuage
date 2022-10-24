@@ -39,15 +39,14 @@ class Architecture(IntEnum):
         mapping = {self.X86_64.value: "linux/amd64", self.ARM64.value: "linux/arm64"}
         return mapping[self.value]
         
-class ContainerFunctionArgs:    
-    ecr_repository_resource_name: pulumi.Input[str]
-    ecr_repository_name: pulumi.Input[str]
+class ContainerFunctionArgs:        
+    description: Optional[pulumi.Input[str]]
     dockerfile: Optional[pulumi.Input[str]]
     context: Optional[pulumi.Input[str]]
-    description: Optional[pulumi.Input[str]]
-    memory_size: Optional[pulumi.Input[int]]
-    timeout: Optional[pulumi.Input[int]]
+    ecr_repository_name: pulumi.Input[str]    
     architecture: Optional[str]
+    memory_size: Optional[pulumi.Input[int]]
+    timeout: Optional[pulumi.Input[int]]    
     environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]]
     policy_document: Optional[pulumi.Input[str]]
     keep_warm: pulumi.Input[bool]
@@ -57,14 +56,13 @@ class ContainerFunctionArgs:
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> 'ContainerFunctionArgs':
         return ContainerFunctionArgs(
-            ecr_repository_resource_name = inputs['ecrRepositoryResourceName'],
-            ecr_repository_name = inputs['ecrRepositoryName'],
-            dockerfile = inputs.get('dockerfile', None),
-            context = inputs.get('context', None),
             description = inputs.get('description', None),
-            memory_size = inputs.get('memorySize', 512),
-            timeout = inputs.get('timeout', 3),
+            dockerfile = inputs.get('dockerfile', "./Dockerfile"),
+            context = inputs.get('context', None),
+            ecr_repository_name = inputs['ecrRepositoryName'],
             architecture = inputs.get('architecture', "x86_64"),
+            memory_size = inputs.get('memorySize', 512),
+            timeout = inputs.get('timeout', 3),            
             environment = inputs.get('environment', None),
             policy_document = inputs.get('policyDocument', None),
             keep_warm = inputs.get('keepWarm', False),
@@ -73,12 +71,11 @@ class ContainerFunctionArgs:
         )        
 
     def __init__(
-        self, 
-        ecr_repository_resource_name: pulumi.Input[str],
-        ecr_repository_name: pulumi.Input[str],
+        self,         
+        description: Optional[pulumi.Input[str]],
         dockerfile: Optional[pulumi.Input[Union[str, Path]]],
         context: Optional[pulumi.Input[Union[str, Path]]],
-        description: Optional[pulumi.Input[str]],
+        ecr_repository_name: pulumi.Input[str],        
         memory_size: Optional[pulumi.Input[int]],
         timeout: Optional[pulumi.Input[int]],
         architecture: Optional[pulumi.Input[str]],
@@ -88,14 +85,13 @@ class ContainerFunctionArgs:
         url: pulumi.Input[bool]
         #cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]] = None,
     ) -> None:
-        self.ecr_repository_resource_name = ecr_repository_resource_name
-        self.ecr_repository_name = ecr_repository_name        
+        self.description = description
         self.dockerfile = dockerfile
         self.context = context
-        self.description = description
-        self.memory_size = memory_size
-        self.timeout = timeout
+        self.ecr_repository_name = ecr_repository_name                
         self.architecture = architecture
+        self.memory_size = memory_size
+        self.timeout = timeout        
         self.environment = environment
         self.policy_document = policy_document
         self.keep_warm = keep_warm
@@ -108,13 +104,13 @@ class ContainerFunction(pulumi.ComponentResource):
 
         super().__init__("nuage:aws:ContainerFunction", name, props, opts)
         
-        dockerfile = Path(args.dockerfile or "./Dockerfile")
+        dockerfile = Path(args.dockerfile)
         context = str(dockerfile.parent) if not args.context else str(args.context)
         dockerfile = str(dockerfile)
 
         repository = awsx.ecr.Repository(
-            resource_name="itest-lambda-ecr-repository",
-            name="itest-lambda-ecr",
+            resource_name=f"{args.ecr_repository_name}-repository",
+            name=args.ecr_repository_name,
         )
         if args.architecture == "x86_64":
             architecture = Architecture.X86_64

@@ -1,8 +1,9 @@
 version: "3"
 
 tasks:
-  generatesdks:
+  sdk:
     cmds:
+      - rm -r sdk/ || true
       - make generate
   build:
     cmds:
