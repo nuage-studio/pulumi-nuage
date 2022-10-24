@@ -126,7 +126,7 @@ class ContainerFunction(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self),
         )
 
-        role = aws.iam.Role(
+        self.role = aws.iam.Role(
             resource_name=f"{name}-lambda-role",
             name=f"{name}-lambda-role",
             description=f"Role used by {name}",
@@ -166,14 +166,14 @@ class ContainerFunction(pulumi.ComponentResource):
             name=f"{name}-lambda-policy",
             description=f"Policy for {name}-lambda-function",
             policy=aws.iam.get_policy_document(source_policy_documents=policy_documents).json,
-            opts=pulumi.ResourceOptions(parent=role),
+            opts=pulumi.ResourceOptions(parent=self.role),
         )
 
         aws.iam.RolePolicyAttachment(
             resource_name=f"{name}-lambda-role-policy-attachment",
-            role=role.id,
+            role=self.role.id,
             policy_arn=policy.arn,
-            opts=pulumi.ResourceOptions(parent=role),
+            opts=pulumi.ResourceOptions(parent=self.role),
         )
 
         self.function = aws.lambda_.Function(
@@ -185,7 +185,7 @@ class ContainerFunction(pulumi.ComponentResource):
             memory_size=args.memory_size,
             timeout=args.timeout,
             architectures=[architecture.lambda_value],
-            role=role.arn,
+            role=self.role.arn,
             environment=aws.lambda_.FunctionEnvironmentArgs(variables=args.environment) if args.environment else None,
             tracing_config=aws.lambda_.FunctionTracingConfigArgs(mode="Active"),
             opts=pulumi.ResourceOptions(parent=self),
