@@ -130,7 +130,7 @@ class TestS3(unittest.TestCase):
                 architecture = function['Architectures'][0]        
                 break 
 
-        self.assertEqual(architecture, LAMBDA["ARCHITECTURE"]) 
+        self.assertEqual(architecture.upper(), LAMBDA["ARCHITECTURE"]) 
 
 
     def test_lambda_envvar_in_function(self):

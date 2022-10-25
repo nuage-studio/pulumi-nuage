@@ -40,9 +40,11 @@ class Architecture(IntEnum):
         return mapping[self.value]
         
 class ContainerFunctionArgs:        
+    resource_name: Optional[pulumi.Input[str]]
     description: Optional[pulumi.Input[str]]
     dockerfile: Optional[pulumi.Input[str]]
     context: Optional[pulumi.Input[str]]
+    repository: pulumi.Input[str]    
     ecr_repository_name: pulumi.Input[str]    
     architecture: Optional[str]
     memory_size: Optional[pulumi.Input[int]]
@@ -56,9 +58,11 @@ class ContainerFunctionArgs:
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> 'ContainerFunctionArgs':
         return ContainerFunctionArgs(
+            resource_name = inputs.get('resourceName', None),
             description = inputs.get('description', None),
             dockerfile = inputs.get('dockerfile', "./Dockerfile"),
             context = inputs.get('context', None),
+            repository = inputs['repository'],
             ecr_repository_name = inputs['ecrRepositoryName'],
             architecture = inputs.get('architecture', "x86_64"),
             memory_size = inputs.get('memorySize', 512),
@@ -72,10 +76,12 @@ class ContainerFunctionArgs:
 
     def __init__(
         self,         
+        resource_name: Optional[pulumi.Input[str]],
         description: Optional[pulumi.Input[str]],
         dockerfile: Optional[pulumi.Input[Union[str, Path]]],
         context: Optional[pulumi.Input[Union[str, Path]]],
-        ecr_repository_name: pulumi.Input[str],        
+        repository: Optional[pulumi.Input[str]],
+        ecr_repository_name: Optional[pulumi.Input[str]], 
         memory_size: Optional[pulumi.Input[int]],
         timeout: Optional[pulumi.Input[int]],
         architecture: Optional[pulumi.Input[str]],
@@ -85,9 +91,11 @@ class ContainerFunctionArgs:
         url: pulumi.Input[bool]
         #cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]] = None,
     ) -> None:
+        self.resource_name = resource_name
         self.description = description
         self.dockerfile = dockerfile
         self.context = context
+        self.repository = repository
         self.ecr_repository_name = ecr_repository_name                
         self.architecture = architecture
         self.memory_size = memory_size
@@ -103,28 +111,47 @@ class ContainerFunction(pulumi.ComponentResource):
     def __init__(self, name: str, args: ContainerFunctionArgs, props: Optional[dict] = None, opts: Optional[pulumi.ResourceOptions] = None) -> None:
 
         super().__init__("nuage:aws:ContainerFunction", name, props, opts)
-        
-        dockerfile = Path(args.dockerfile)
-        context = str(dockerfile.parent) if not args.context else str(args.context)
-        dockerfile = str(dockerfile)
-
+                
         repository = awsx.ecr.Repository(
             resource_name=f"{args.ecr_repository_name}-repository",
             name=args.ecr_repository_name,
-        )
-        if args.architecture == "x86_64":
-            architecture = Architecture.X86_64
-        else:
-            architecture = Architecture.ARM64
+        ).url
+        architecture = Architecture[args.architecture] 
+        #if args.architecture == "x86_64":
+        #    architecture = Architecture.X86_64
+        #else:
+        #    architecture = Architecture.ARM64
         
         image = awsx.ecr.Image(
             resource_name=f"{name}-image",
-            repository_url=repository.url,
-            path=context,
-            dockerfile=dockerfile,
+            repository_url=repository,
+            path=args.context,
+            dockerfile=args.dockerfile,
             extra_options=["--platform", architecture.docker_value, "--quiet"],
             opts=pulumi.ResourceOptions(parent=self),
         )
+
+        policy_documents = [
+            # Can write logs to CloudWatch
+            aws.iam.RoleInlinePolicyArgs(   
+                name="PolicyAWSLambdaBasicExecutionRole",
+                policy=aws.iam.get_policy(name="AWSLambdaBasicExecutionRole").policy,
+            ),
+            aws.iam.RoleInlinePolicyArgs(   
+                name="PolicyCloudWatchLambdaInsightsExecutionRolePolicy",
+                policy=aws.iam.get_policy(name="CloudWatchLambdaInsightsExecutionRolePolicy").policy,
+            ),
+            aws.iam.RoleInlinePolicyArgs(   
+                name="PolicyAWSXRayDaemonWriteAccess",
+                policy=aws.iam.get_policy(name="AWSXRayDaemonWriteAccess").policy,
+            )
+        ]
+        if args.policy_document:
+            # If we have a custom policy document, add it to the list
+            policy_documents.append(aws.iam.RoleInlinePolicyArgs(   
+                name="PolicyCustom",
+                policy=args.policy_document,
+            ))
 
         self.role = aws.iam.Role(
             resource_name=f"{name}-lambda-role",
@@ -145,39 +172,28 @@ class ContainerFunction(pulumi.ComponentResource):
                     ),
                 ],
             ).json,
+            inline_policies=policy_documents,
             opts=pulumi.ResourceOptions(parent=self),
         )
-        
-        policy_documents = [
-            # Can write logs to CloudWatch
-            aws.iam.get_policy(name="AWSLambdaBasicExecutionRole").policy,
-            # Can write Lambda Insights logs to CloudWatch
-            # NB: is actually a subset of the above
-            aws.iam.get_policy(name="CloudWatchLambdaInsightsExecutionRolePolicy").policy,
-            # Can push traces to X-Ray
-            aws.iam.get_policy(name="AWSXRayDaemonWriteAccess").policy,
-        ]
-        if args.policy_document:
-            # If we have a custom policy document, add it to the list
-            policy_documents.append(args.policy_document)
+                
 
-        policy = aws.iam.Policy(
-            resource_name=f"{name}-lambda-policy",
-            name=f"{name}-lambda-policy",
-            description=f"Policy for {name}-lambda-function",
-            policy=aws.iam.get_policy_document(source_policy_documents=policy_documents).json,
-            opts=pulumi.ResourceOptions(parent=self.role),
-        )
+        #policy = aws.iam.Policy(
+        #    resource_name=f"{name}-lambda-policy",
+        #    name=f"{name}-lambda-policy",
+        #    description=f"Policy for {name}-lambda-function",
+        #    policy=aws.iam.get_policy_document(source_policy_documents=policy_documents).json,
+        #    opts=pulumi.ResourceOptions(parent=self.role),
+        #)
 
-        aws.iam.RolePolicyAttachment(
-            resource_name=f"{name}-lambda-role-policy-attachment",
-            role=self.role.id,
-            policy_arn=policy.arn,
-            opts=pulumi.ResourceOptions(parent=self.role),
-        )
+        #aws.iam.RolePolicyAttachment(
+        #    resource_name=f"{name}-lambda-role-policy-attachment",
+        #    role=self.role.id,
+        #    policy_arn=policy.arn,
+        #    opts=pulumi.ResourceOptions(parent=self.role),
+        #)
 
         self.function = aws.lambda_.Function(
-            resource_name=f"{name}-lambda-function",
+            resource_name=args.resource_name or name,
             name=name,
             description=args.description,
             package_type="Image",
@@ -212,7 +228,7 @@ class ContainerFunction(pulumi.ComponentResource):
             aws.cloudwatch.EventTarget(
                 resource_name=f"{name}-keep-warm-target",
                 arn=self.function.arn,
-                input="{}",
+                input=json.dumps({"keep-warm":True}),
                 rule=rule.id,
                 opts=pulumi.ResourceOptions(parent=rule),
             )

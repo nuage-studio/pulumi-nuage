@@ -22,9 +22,11 @@ pulumi.export("bucketName", bucket.bucket.bucket)
 function = ContainerFunction(
     name=LAMBDA["NAME"], 
     args= ContainerFunctionArgs(
+        resource_name=None,
         description="Integration Tests Lambda Function",
         dockerfile="./lambda/Dockerfile.lambda",
         context="./lambda/",
+        repository=None,
         ecr_repository_name="itest-lambda-ecr",
         architecture=LAMBDA["ARCHITECTURE"],
         memory_size=LAMBDA["MEMORY"],

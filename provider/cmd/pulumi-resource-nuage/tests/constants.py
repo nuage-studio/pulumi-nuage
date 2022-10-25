@@ -8,6 +8,6 @@ LAMBDA = {
     "NAME": "itest-lambda-nuage",
     "TIMEOUT":30,
     "MEMORY":512,
-    "ARCHITECTURE":"x86_64",
+    "ARCHITECTURE":"X86_64",
     "ENV_TEST_VAL":"env_ok"
 }
