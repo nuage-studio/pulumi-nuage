@@ -132,5 +132,4 @@ dmypy.json
 .pyre/
 
 # Pulumi binaries
-sdk/
 nuget/
