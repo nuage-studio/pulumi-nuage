@@ -3,4 +3,4 @@ FROM public.ecr.aws/lambda/python:3.8
 
 COPY lambdatestfunction.py ./
 
-CMD ["myfunction.lambda_handler"]
+CMD ["lambdatestfunction.lambda_handler"]

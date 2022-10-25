@@ -9,5 +9,5 @@ LAMBDA = {
     "TIMEOUT":30,
     "MEMORY":512,
     "ARCHITECTURE":"x86_64",
-    "ENV_TEST_KEY":"TEST_ENV_VAR"
+    "ENV_TEST_VAL":"env_ok"
 }

@@ -1,9 +1,11 @@
+import os
 import json
 import sys
 
+
 def lambda_handler(event, context):
-    print("Hello AWS!")
-    print("event = {}".format(event))
     return {
-        'statusCode': 200,
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps({"running ": True, os.environ["ENV_TEST_VAL"]:1}),
     }

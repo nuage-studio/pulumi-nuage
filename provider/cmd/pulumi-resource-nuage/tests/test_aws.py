@@ -1,5 +1,6 @@
 
 import os
+import json
 import unittest
 
 import boto3
@@ -132,7 +133,7 @@ class TestS3(unittest.TestCase):
         self.assertEqual(architecture, LAMBDA["ARCHITECTURE"]) 
 
 
-    def test_lambda_envvar(self):
+    def test_lambda_envvar_in_function(self):
         # Test environment variables in lambda.
         functions = self.lambda_client.list_functions()['Functions']
         lambda_name = self.outputs.get("lambda_name").value
@@ -143,9 +144,20 @@ class TestS3(unittest.TestCase):
                 env = function['Environment']['Variables']
                 break 
         
-        self.assertIn(LAMBDA["ENV_TEST_KEY"],env)
+        self.assertIn("ENV_TEST_VAL",env)
 
-        
+    def test_lambda_requests(self):
+        # Test lambda response is valid and can access the environment variables.
+        lambda_name = self.outputs.get("lambda_name").value
+
+        response = self.lambda_client.invoke(
+            FunctionName = lambda_name,
+            Payload = json.dumps({}),
+        )
+        response_payload = json.loads(response['Payload'].read().decode("utf-8"))['body']
+        self.assertIn(LAMBDA["ENV_TEST_VAL"],response_payload)
 
 if __name__ == '__main__':
     unittest.main()
+
+    
