@@ -1,0 +1,25 @@
+[tool.poetry]
+authors = ["Louis Amon <louis@nuage.studio>"]
+description = ""
+name = "pulumi-nuage"
+packages = [{include = "pulumi_nuage"}]
+readme = "README.md"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^2.15.3"
+flake8 = "^5.0.4"
+black = "^22.8.0"
+pyright = "^1.1.272"
+
+
+[tool.poetry.group.pulumi.dependencies]
+pulumi = "^3.40.1"
+pulumi-aws = "^5.15.0"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]

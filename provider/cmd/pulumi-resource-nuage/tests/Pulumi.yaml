@@ -1,0 +1,7 @@
+name: pulumi-nuage
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: A Integration Testing of pulumi nuage
+config: ./stacks/

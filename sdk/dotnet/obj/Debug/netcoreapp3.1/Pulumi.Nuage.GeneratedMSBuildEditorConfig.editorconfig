@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = Pulumi.Nuage
+build_property.ProjectDir = /Users/burakgozutok/Documents/Development/Nuage/pulumi-nuage/sdk/dotnet/
