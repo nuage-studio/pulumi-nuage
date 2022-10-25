@@ -120,7 +120,7 @@ class TestS3(unittest.TestCase):
         self.assertEqual(memory, LAMBDA["MEMORY"])    
 
     def test_lambda_architecture(self):
-        # Test if lambda has correct memory value.
+        # Test if lambda has correct architecture type.
         functions = self.lambda_client.list_functions()['Functions']
         lambda_name = self.outputs.get("lambda_name").value
         
