@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import json
 from enum import IntEnum
 from pathlib import Path
@@ -20,6 +21,7 @@ from typing import Any, Dict, Optional, Union
 import pulumi
 import pulumi_aws as aws
 import pulumi_awsx as awsx
+import pulumi_docker as docker
 
 class Architecture(IntEnum):
     """CPU architecture & instruction set to use"""
@@ -107,48 +109,6 @@ class ContainerFunctionArgs:
         #self.cors_configuration = cors_configuration
 
 class ContainerFunction(pulumi.ComponentResource):
-    """
-    def __init__(
-        self, 
-        name: str, 
-        resource_name: Optional[pulumi.Input[str]],
-        description: Optional[pulumi.Input[str]],
-        dockerfile: Optional[pulumi.Input[Union[str, Path]]],
-        context: Optional[pulumi.Input[Union[str, Path]]],
-        repository: Optional[pulumi.Input[str]],
-        ecr_repository_name: Optional[pulumi.Input[str]], 
-        memory_size: Optional[pulumi.Input[int]],
-        timeout: Optional[pulumi.Input[int]],
-        architecture: Optional[pulumi.Input[str]],
-        environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]],
-        policy_document: Optional[pulumi.Input[str]],
-        keep_warm: pulumi.Input[bool],
-        url: pulumi.Input[bool], 
-        props: Optional[dict] = None, 
-        opts: Optional[pulumi.ResourceOptions] = None
-    ) -> None:
-        self.__init__(
-            name,
-            ContainerFunctionArgs(
-                resource_name = resource_name,
-                description = description,
-                dockerfile = dockerfile,
-                context = context,
-                repository = repository,
-                ecr_repository_name = ecr_repository_name,
-                memory_size = memory_size,
-                timeout = timeout,
-                architecture = architecture,
-                environment = environment,
-                policy_document = policy_document,
-                keep_warm = keep_warm,
-                url = url
-            ),
-            props = props,
-            opts = opts
-        )
-    """
-        
     def __init__(self, name: str, args: ContainerFunctionArgs, props: Optional[dict] = None, opts: Optional[pulumi.ResourceOptions] = None) -> None:
 
         super().__init__("nuage:aws:ContainerFunction", name, props, opts)
@@ -161,17 +121,15 @@ class ContainerFunction(pulumi.ComponentResource):
                 name=args.ecr_repository_name,
             ).url
         architecture = Architecture[args.architecture] 
-        #if args.architecture == "x86_64":
-        #    architecture = Architecture.X86_64
-        #else:
-        #    architecture = Architecture.ARM64
-        
-        image = awsx.ecr.Image(
-            resource_name=f"{name}-image",
-            repository_url=repository,
-            path=args.context,
-            dockerfile=args.dockerfile,
-            extra_options=["--platform", architecture.docker_value, "--quiet"],
+               
+        image = docker.Image(
+            name=f"{name}-image",
+            build = docker.DockerBuild(
+                context=args.context or "./",
+                dockerfile=args.dockerfile,
+                extra_options=["--platform", architecture.docker_value, "--quiet"]
+            ),
+            image_name = repository,
             opts=pulumi.ResourceOptions(parent=self),
         )
 
@@ -241,7 +199,7 @@ class ContainerFunction(pulumi.ComponentResource):
             name=name,
             description=args.description,
             package_type="Image",
-            image_uri=image.image_uri,
+            image_uri=image.image_name,#image.image_uri,
             memory_size=args.memory_size,
             timeout=args.timeout,
             architectures=[architecture.lambda_value],

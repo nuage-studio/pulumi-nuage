@@ -79,10 +79,6 @@
                 "url": {
                     "type": "boolean",
                     "description":"Use Lambda URL. Defaults to `false`"
-                },
-                "test": {
-                    "type": "boolean",
-                    "description":"Use Lambda URL. Defaults to `false`"
                 }
             },
             "requiredInputs": [
@@ -111,7 +107,8 @@
             "packageReferences": {
                 "Pulumi": "3.*",
                 "Pulumi.Aws": "5.*",
-                "Pulumi.Awsx":"1.0.0-beta.*"
+                "Pulumi.Awsx":"1.0.0-beta.*",
+                "Pulumi.Docker":"3.*"
             }
         },
         "go": {
@@ -121,7 +118,8 @@
         "nodejs": {
             "dependencies": {
                 "@pulumi/aws": "^5.0.0",
-                "@pulumi/awsx": "^0.40.0"
+                "@pulumi/awsx": "^0.40.0",
+                "@pulumi/docker": "^3.0.0"
             },
             "devDependencies": {
                 "@types/node": "^17.0.21",
@@ -132,7 +130,8 @@
             "requires": {
                 "pulumi": ">=3.0.0,<4.0.0",
                 "pulumi-aws": ">=5.0.0,<6.0.0",
-                "pulumi-awsx": ">=1.0.0b11"
+                "pulumi-awsx": ">=1.0.0b11",
+                "pulumi_docker": ">=3.0.0,<4.0.0"
             }
         }
     }
