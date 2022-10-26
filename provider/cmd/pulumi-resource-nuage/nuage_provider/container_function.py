@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base64
 import json
 from enum import IntEnum
 from pathlib import Path
@@ -62,7 +61,7 @@ class ContainerFunctionArgs:
         return ContainerFunctionArgs(
             resource_name = inputs.get('resourceName', None),
             description = inputs.get('description', None),
-            dockerfile = inputs.get('dockerfile', "./Dockerfile"),
+            dockerfile = inputs.get('dockerfile', None),
             context = inputs.get('context', None),
             repository = inputs.get('repository', None),
             ecr_repository_name = inputs.get('ecrRepositoryName', None),
@@ -121,14 +120,30 @@ class ContainerFunction(pulumi.ComponentResource):
                 name=args.ecr_repository_name,
             ).url
         architecture = Architecture[args.architecture] 
-               
-        image = docker.Image(
-            name=f"{name}-image",
+        
+        if args.dockerfile:
             build = docker.DockerBuild(
                 context=args.context or "./",
                 dockerfile=args.dockerfile,
                 extra_options=["--platform", architecture.docker_value, "--quiet"]
-            ),
+            )
+        else:
+            with open('Dockerfile.awslambda.generated','w') as f:
+                f.writelines([
+                    'FROM public.ecr.aws/lambda/provided:al2',
+                    '\n'
+                    'CMD [ "function.handler" ]'
+                ])
+
+            build = docker.DockerBuild(
+                context="./",
+                dockerfile="./Dockerfile.awslambda.generated",
+                extra_options=["--platform", architecture.docker_value, "--quiet"]
+            )
+
+        image = docker.Image(
+            name=f"{name}-image",
+            build = build,
             image_name = repository,
             opts=pulumi.ResourceOptions(parent=self),
         )
@@ -176,30 +191,14 @@ class ContainerFunction(pulumi.ComponentResource):
             ).json,
             inline_policies=policy_documents,
             opts=pulumi.ResourceOptions(parent=self),
-        )
-                
-
-        #policy = aws.iam.Policy(
-        #    resource_name=f"{name}-lambda-policy",
-        #    name=f"{name}-lambda-policy",
-        #    description=f"Policy for {name}-lambda-function",
-        #    policy=aws.iam.get_policy_document(source_policy_documents=policy_documents).json,
-        #    opts=pulumi.ResourceOptions(parent=self.role),
-        #)
-
-        #aws.iam.RolePolicyAttachment(
-        #    resource_name=f"{name}-lambda-role-policy-attachment",
-        #    role=self.role.id,
-        #    policy_arn=policy.arn,
-        #    opts=pulumi.ResourceOptions(parent=self.role),
-        #)
+        )            
 
         self.function = aws.lambda_.Function(
             resource_name=args.resource_name or name,
             name=name,
             description=args.description,
             package_type="Image",
-            image_uri=image.image_name,#image.image_uri,
+            image_uri=image.image_name,
             memory_size=args.memory_size,
             timeout=args.timeout,
             architectures=[architecture.lambda_value],
