@@ -111,11 +111,14 @@ class ContainerFunction(pulumi.ComponentResource):
     def __init__(self, name: str, args: ContainerFunctionArgs, props: Optional[dict] = None, opts: Optional[pulumi.ResourceOptions] = None) -> None:
 
         super().__init__("nuage:aws:ContainerFunction", name, props, opts)
-                
-        repository = awsx.ecr.Repository(
-            resource_name=f"{args.ecr_repository_name}-repository",
-            name=args.ecr_repository_name,
-        ).url
+        
+        if args.repository:
+            repository = aws.ecr.get_repository(name=args.repository).repository_url
+        else:
+            repository = awsx.ecr.Repository(
+                resource_name=f"{args.ecr_repository_name}-repository",
+                name=args.ecr_repository_name,
+            ).url
         architecture = Architecture[args.architecture] 
         #if args.architecture == "x86_64":
         #    architecture = Architecture.X86_64
