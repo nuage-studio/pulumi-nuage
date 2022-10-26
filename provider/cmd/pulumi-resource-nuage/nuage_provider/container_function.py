@@ -62,8 +62,8 @@ class ContainerFunctionArgs:
             description = inputs.get('description', None),
             dockerfile = inputs.get('dockerfile', "./Dockerfile"),
             context = inputs.get('context', None),
-            repository = inputs['repository'],
-            ecr_repository_name = inputs['ecrRepositoryName'],
+            repository = inputs.get('repository', None),
+            ecr_repository_name = inputs.get('ecrRepositoryName', None),
             architecture = inputs.get('architecture', "x86_64"),
             memory_size = inputs.get('memorySize', 512),
             timeout = inputs.get('timeout', 3),            
@@ -107,7 +107,48 @@ class ContainerFunctionArgs:
         #self.cors_configuration = cors_configuration
 
 class ContainerFunction(pulumi.ComponentResource):
-
+    """
+    def __init__(
+        self, 
+        name: str, 
+        resource_name: Optional[pulumi.Input[str]],
+        description: Optional[pulumi.Input[str]],
+        dockerfile: Optional[pulumi.Input[Union[str, Path]]],
+        context: Optional[pulumi.Input[Union[str, Path]]],
+        repository: Optional[pulumi.Input[str]],
+        ecr_repository_name: Optional[pulumi.Input[str]], 
+        memory_size: Optional[pulumi.Input[int]],
+        timeout: Optional[pulumi.Input[int]],
+        architecture: Optional[pulumi.Input[str]],
+        environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]],
+        policy_document: Optional[pulumi.Input[str]],
+        keep_warm: pulumi.Input[bool],
+        url: pulumi.Input[bool], 
+        props: Optional[dict] = None, 
+        opts: Optional[pulumi.ResourceOptions] = None
+    ) -> None:
+        self.__init__(
+            name,
+            ContainerFunctionArgs(
+                resource_name = resource_name,
+                description = description,
+                dockerfile = dockerfile,
+                context = context,
+                repository = repository,
+                ecr_repository_name = ecr_repository_name,
+                memory_size = memory_size,
+                timeout = timeout,
+                architecture = architecture,
+                environment = environment,
+                policy_document = policy_document,
+                keep_warm = keep_warm,
+                url = url
+            ),
+            props = props,
+            opts = opts
+        )
+    """
+        
     def __init__(self, name: str, args: ContainerFunctionArgs, props: Optional[dict] = None, opts: Optional[pulumi.ResourceOptions] = None) -> None:
 
         super().__init__("nuage:aws:ContainerFunction", name, props, opts)
