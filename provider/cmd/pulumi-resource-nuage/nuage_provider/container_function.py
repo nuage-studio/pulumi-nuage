@@ -127,6 +127,7 @@ class ContainerFunction(pulumi.ComponentResource):
                 dockerfile=args.dockerfile,
                 extra_options=["--platform", architecture.docker_value, "--quiet"]
             )
+            image_ignore_changes = []
         else:
             with open('Dockerfile.awslambda.generated','w') as f:
                 f.writelines([
@@ -140,14 +141,25 @@ class ContainerFunction(pulumi.ComponentResource):
                 dockerfile="./Dockerfile.awslambda.generated",
                 extra_options=["--platform", architecture.docker_value, "--quiet"]
             )
-
+            image_ignore_changes = ["image_name"]
+        
+        registry_id = repository.apply(lambda x: x.split(".")[0])
+        auth = aws.ecr.get_authorization_token(registry_id=registry_id)
         image = docker.Image(
             name=f"{name}-image",
             build = build,
             image_name = repository,
-            opts=pulumi.ResourceOptions(parent=self),
+            registry=docker.ImageRegistry(
+                server=auth.proxy_endpoint,
+                username=auth.user_name,
+                password=auth.password
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                ignore_changes=[image_ignore_changes]
+            )
         )
-
+        
         policy_documents = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(   
