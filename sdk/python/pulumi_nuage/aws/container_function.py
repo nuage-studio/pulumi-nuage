@@ -22,12 +22,13 @@ class ContainerFunctionArgs:
                  keep_warm: Optional[pulumi.Input[bool]] = None,
                  memory_size: Optional[pulumi.Input[float]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
+                 repository: Optional[pulumi.Input[str]] = None,
                  timeout: Optional[pulumi.Input[float]] = None,
                  url: Optional[pulumi.Input[bool]] = None):
         """
         The set of arguments for constructing a ContainerFunction resource.
-        :param pulumi.Input[str] ecr_repository_name: ECR repository name
-        :param pulumi.Input[str] architecture: Architecture, either `x86_64` or `arm64`. Defaults to `x86_64`
+        :param pulumi.Input[str] ecr_repository_name: ECR repository name for new definition.
+        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
         :param pulumi.Input[str] context: Dockerfile context path.
         :param pulumi.Input[str] description: Description of the function.
         :param pulumi.Input[str] dockerfile: Dockerfile path. Defaults to `./Dockerfile`
@@ -35,6 +36,7 @@ class ContainerFunctionArgs:
         :param pulumi.Input[bool] keep_warm: Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
         :param pulumi.Input[float] memory_size: Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
+        :param pulumi.Input[str] repository: Existing ECR repository name
         :param pulumi.Input[float] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
         :param pulumi.Input[bool] url: Use Lambda URL. Defaults to `false`
         """
@@ -55,6 +57,8 @@ class ContainerFunctionArgs:
             pulumi.set(__self__, "memory_size", memory_size)
         if policy_document is not None:
             pulumi.set(__self__, "policy_document", policy_document)
+        if repository is not None:
+            pulumi.set(__self__, "repository", repository)
         if timeout is not None:
             pulumi.set(__self__, "timeout", timeout)
         if url is not None:
@@ -64,7 +68,7 @@ class ContainerFunctionArgs:
     @pulumi.getter(name="ecrRepositoryName")
     def ecr_repository_name(self) -> pulumi.Input[str]:
         """
-        ECR repository name
+        ECR repository name for new definition.
         """
         return pulumi.get(self, "ecr_repository_name")
 
@@ -76,7 +80,7 @@ class ContainerFunctionArgs:
     @pulumi.getter
     def architecture(self) -> Optional[pulumi.Input[str]]:
         """
-        Architecture, either `x86_64` or `arm64`. Defaults to `x86_64`
+        Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
         """
         return pulumi.get(self, "architecture")
 
@@ -170,6 +174,18 @@ class ContainerFunctionArgs:
 
     @property
     @pulumi.getter
+    def repository(self) -> Optional[pulumi.Input[str]]:
+        """
+        Existing ECR repository name
+        """
+        return pulumi.get(self, "repository")
+
+    @repository.setter
+    def repository(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "repository", value)
+
+    @property
+    @pulumi.getter
     def timeout(self) -> Optional[pulumi.Input[float]]:
         """
         Amount of time your Lambda Function has to run in seconds. Defaults to `3`
@@ -207,6 +223,7 @@ class ContainerFunction(pulumi.ComponentResource):
                  keep_warm: Optional[pulumi.Input[bool]] = None,
                  memory_size: Optional[pulumi.Input[float]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
+                 repository: Optional[pulumi.Input[str]] = None,
                  timeout: Optional[pulumi.Input[float]] = None,
                  url: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
@@ -214,15 +231,16 @@ class ContainerFunction(pulumi.ComponentResource):
         Create a ContainerFunction resource with the given unique name, props, and options.
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
-        :param pulumi.Input[str] architecture: Architecture, either `x86_64` or `arm64`. Defaults to `x86_64`
+        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
         :param pulumi.Input[str] context: Dockerfile context path.
         :param pulumi.Input[str] description: Description of the function.
         :param pulumi.Input[str] dockerfile: Dockerfile path. Defaults to `./Dockerfile`
-        :param pulumi.Input[str] ecr_repository_name: ECR repository name
+        :param pulumi.Input[str] ecr_repository_name: ECR repository name for new definition.
         :param pulumi.Input[Mapping[str, pulumi.Input[str]]] environment: Environment Variables
         :param pulumi.Input[bool] keep_warm: Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
         :param pulumi.Input[float] memory_size: Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
+        :param pulumi.Input[str] repository: Existing ECR repository name
         :param pulumi.Input[float] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
         :param pulumi.Input[bool] url: Use Lambda URL. Defaults to `false`
         """
@@ -258,6 +276,7 @@ class ContainerFunction(pulumi.ComponentResource):
                  keep_warm: Optional[pulumi.Input[bool]] = None,
                  memory_size: Optional[pulumi.Input[float]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
+                 repository: Optional[pulumi.Input[str]] = None,
                  timeout: Optional[pulumi.Input[float]] = None,
                  url: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
@@ -285,6 +304,7 @@ class ContainerFunction(pulumi.ComponentResource):
             __props__.__dict__["keep_warm"] = keep_warm
             __props__.__dict__["memory_size"] = memory_size
             __props__.__dict__["policy_document"] = policy_document
+            __props__.__dict__["repository"] = repository
             __props__.__dict__["timeout"] = timeout
             __props__.__dict__["url"] = url
             __props__.__dict__["arn"] = None

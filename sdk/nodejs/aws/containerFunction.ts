@@ -46,6 +46,7 @@ export class ContainerFunction extends pulumi.ComponentResource {
             resourceInputs["keepWarm"] = args ? args.keepWarm : undefined;
             resourceInputs["memorySize"] = args ? args.memorySize : undefined;
             resourceInputs["policyDocument"] = args ? args.policyDocument : undefined;
+            resourceInputs["repository"] = args ? args.repository : undefined;
             resourceInputs["timeout"] = args ? args.timeout : undefined;
             resourceInputs["url"] = args ? args.url : undefined;
             resourceInputs["arn"] = undefined /*out*/;
@@ -66,7 +67,7 @@ export class ContainerFunction extends pulumi.ComponentResource {
  */
 export interface ContainerFunctionArgs {
     /**
-     * Architecture, either `x86_64` or `arm64`. Defaults to `x86_64`
+     * Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
      */
     architecture?: pulumi.Input<string>;
     /**
@@ -82,7 +83,7 @@ export interface ContainerFunctionArgs {
      */
     dockerfile?: pulumi.Input<string>;
     /**
-     * ECR repository name
+     * ECR repository name for new definition.
      */
     ecrRepositoryName: pulumi.Input<string>;
     /**
@@ -101,6 +102,10 @@ export interface ContainerFunctionArgs {
      * Policy Document for lambda.
      */
     policyDocument?: pulumi.Input<string>;
+    /**
+     * Existing ECR repository name
+     */
+    repository?: pulumi.Input<string>;
     /**
      * Amount of time your Lambda Function has to run in seconds. Defaults to `3`
      */

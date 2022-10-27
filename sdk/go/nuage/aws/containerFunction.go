@@ -38,7 +38,7 @@ func NewContainerFunction(ctx *pulumi.Context,
 }
 
 type containerFunctionArgs struct {
-	// Architecture, either `x86_64` or `arm64`. Defaults to `x86_64`
+	// Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
 	Architecture *string `pulumi:"architecture"`
 	// Dockerfile context path.
 	Context *string `pulumi:"context"`
@@ -46,7 +46,7 @@ type containerFunctionArgs struct {
 	Description *string `pulumi:"description"`
 	// Dockerfile path. Defaults to `./Dockerfile`
 	Dockerfile *string `pulumi:"dockerfile"`
-	// ECR repository name
+	// ECR repository name for new definition.
 	EcrRepositoryName string `pulumi:"ecrRepositoryName"`
 	// Environment Variables
 	Environment map[string]string `pulumi:"environment"`
@@ -56,6 +56,8 @@ type containerFunctionArgs struct {
 	MemorySize *float64 `pulumi:"memorySize"`
 	// Policy Document for lambda.
 	PolicyDocument *string `pulumi:"policyDocument"`
+	// Existing ECR repository name
+	Repository *string `pulumi:"repository"`
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout *float64 `pulumi:"timeout"`
 	// Use Lambda URL. Defaults to `false`
@@ -64,7 +66,7 @@ type containerFunctionArgs struct {
 
 // The set of arguments for constructing a ContainerFunction resource.
 type ContainerFunctionArgs struct {
-	// Architecture, either `x86_64` or `arm64`. Defaults to `x86_64`
+	// Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
 	Architecture pulumi.StringPtrInput
 	// Dockerfile context path.
 	Context pulumi.StringPtrInput
@@ -72,7 +74,7 @@ type ContainerFunctionArgs struct {
 	Description pulumi.StringPtrInput
 	// Dockerfile path. Defaults to `./Dockerfile`
 	Dockerfile pulumi.StringPtrInput
-	// ECR repository name
+	// ECR repository name for new definition.
 	EcrRepositoryName pulumi.StringInput
 	// Environment Variables
 	Environment pulumi.StringMapInput
@@ -82,6 +84,8 @@ type ContainerFunctionArgs struct {
 	MemorySize pulumi.Float64PtrInput
 	// Policy Document for lambda.
 	PolicyDocument pulumi.StringPtrInput
+	// Existing ECR repository name
+	Repository pulumi.StringPtrInput
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout pulumi.Float64PtrInput
 	// Use Lambda URL. Defaults to `false`

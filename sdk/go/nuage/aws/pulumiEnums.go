@@ -3,14 +3,14 @@
 
 package aws
 
-// Architecture, either 'x86_64' or 'arm64'.
+// Architecture, either 'X86_64' or 'arm64'.
 type ArchitectureType string
 
 const (
-	// x86_64 architecture.
-	ArchitectureType_X86_64 = ArchitectureType("x86_64")
-	// Arm64 architecture.
-	ArchitectureTypeArm64 = ArchitectureType("arm64")
+	// X86_64 architecture.
+	ArchitectureType_X86_64 = ArchitectureType("X86_64")
+	// ARM64 architecture.
+	ArchitectureTypeARM64 = ArchitectureType("ARM64")
 )
 
 func init() {

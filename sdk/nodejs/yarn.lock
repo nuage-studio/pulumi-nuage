@@ -121,9 +121,9 @@
   integrity sha512-FGBx/Qd09lMaqQcogCHyYrFEpTx4cAjeS+48lMIR12z7LdH+zofGDVQSubN59nL6IpubfKqTeIDu9rNO28iHVA==
 
 "@pulumi/aws@^5.0.0":
-  version "5.18.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-5.18.0.tgz#2ecc1b2e45749aaa03255d6a3f99bec9e30668ec"
-  integrity sha512-pfp9B0Qzlm3DmqxmyCIHdiKu0fJIt7taKhyPn8ddp7k8gqsCoorn6WKzxhTQ6fTYTRtdurjMXCaMRyGGoQrWaQ==
+  version "5.19.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-5.19.0.tgz#ea65b59b1688f911a1ca12a1711c59a17bc2768d"
+  integrity sha512-kuSJfRn03AT92nwvKHRt9PFaEkMB3M33BRWWOteHlIFHHQi8ZRQI5b2XLNMADlp4Q3YVnObiuwMjgSTulNdgZQ==
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
     aws-sdk "^2.0.0"
@@ -150,9 +150,9 @@
     semver "^5.4.0"
 
 "@pulumi/pulumi@^3.0.0":
-  version "3.44.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/pulumi/-/pulumi-3.44.0.tgz#f51b3cbade92f0381d2a5aac785a52bb9e27e5af"
-  integrity sha512-kMORUqZoOapOXuCO4BqHoeixAC3cfEsYP+XJiJCQhEwEsUZTXxi0ySVtbP7W1U6eO0nvlBp6s/qkH3WvSENkkg==
+  version "3.44.2"
+  resolved "https://registry.yarnpkg.com/@pulumi/pulumi/-/pulumi-3.44.2.tgz#7d13e31ffe711bcfda50de770f24637e584bf056"
+  integrity sha512-CQ+T11yb8hLv0LyEU9CtGhvTVGh/OZuGLG1zu2gybM5+UbOjLdlPv/HwW8/kExnKioQc+l4huDAF3dtAGOOv3w==
   dependencies:
     "@grpc/grpc-js" "~1.3.8"
     "@logdna/tail-file" "^2.0.6"
@@ -189,9 +189,9 @@
   integrity sha512-Vsyi9ogDAY3REZDjYnXMRJJa62SDvxHXxJI5nGDQdZW058dDE+av/anynN2rLKbCKXDRNw3D/sQmqxVflZFi4A==
 
 "@types/node@>=12.12.47":
-  version "18.11.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.5.tgz#1bc94cf2f9ab5fe33353bc7c79c797dcc5325bef"
-  integrity sha512-3JRwhbjI+cHLAkUorhf8RnqUbFXajvzX4q6fMn5JwkgtuwfYtRQYI3u4V92vI6NJuTsbBQWWh3RZjFsuevyMGQ==
+  version "18.11.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.7.tgz#8ccef136f240770c1379d50100796a6952f01f94"
+  integrity sha512-LhFTglglr63mNXUSRYD8A+ZAIu5sFqNJ4Y2fPuY7UlrySJH87rRRlhtVmMHplmfk5WkoJGmDjE9oiTfyX94CpQ==
 
 "@types/node@^17.0.21":
   version "17.0.45"
@@ -232,9 +232,9 @@ available-typed-arrays@^1.0.5:
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
 aws-sdk@^2.0.0:
-  version "2.1239.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1239.0.tgz#606e4fb0345da86db801538e13925828a9acbb31"
-  integrity sha512-746OlzNxjaMux93cTr5//WyY8t2HwRuJOO41qKDhXmklZibFDBc/3v/8CYzb1jsEYy77AO2J045+TkP9N10Wcw==
+  version "2.1241.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1241.0.tgz#168a716b735f56f5f75cbdc9e3939273fb9ec875"
+  integrity sha512-62Zhl5pVD5GN1ZdzEEyNxdH20zMlJBUaiQ7epCHnt+Zp12nd9y0uOHHiWWGDOrECQX/KAUIcDBiE4B04MeqP4g==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"

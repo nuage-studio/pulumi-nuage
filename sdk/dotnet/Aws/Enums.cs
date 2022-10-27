@@ -8,7 +8,7 @@ using Pulumi;
 namespace Pulumi.Nuage.Aws
 {
     /// <summary>
-    /// Architecture, either 'x86_64' or 'arm64'.
+    /// Architecture, either 'X86_64' or 'arm64'.
     /// </summary>
     [EnumType]
     public readonly struct ArchitectureType : IEquatable<ArchitectureType>
@@ -21,13 +21,13 @@ namespace Pulumi.Nuage.Aws
         }
 
         /// <summary>
-        /// x86_64 architecture.
+        /// X86_64 architecture.
         /// </summary>
-        public static ArchitectureType X86_64 { get; } = new ArchitectureType("x86_64");
+        public static ArchitectureType X86_64 { get; } = new ArchitectureType("X86_64");
         /// <summary>
-        /// Arm64 architecture.
+        /// ARM64 architecture.
         /// </summary>
-        public static ArchitectureType Arm64 { get; } = new ArchitectureType("arm64");
+        public static ArchitectureType ARM64 { get; } = new ArchitectureType("ARM64");
 
         public static bool operator ==(ArchitectureType left, ArchitectureType right) => left.Equals(right);
         public static bool operator !=(ArchitectureType left, ArchitectureType right) => !left.Equals(right);

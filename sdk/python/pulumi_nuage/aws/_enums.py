@@ -11,13 +11,13 @@ __all__ = [
 
 class ArchitectureType(str, Enum):
     """
-    Architecture, either 'x86_64' or 'arm64'.
+    Architecture, either 'X86_64' or 'arm64'.
     """
-    X86_64 = "x86_64"
+    X86_64 = "X86_64"
     """
-    x86_64 architecture.
+    X86_64 architecture.
     """
-    ARM64 = "arm64"
+    ARM64 = "ARM64"
     """
-    Arm64 architecture.
+    ARM64 architecture.
     """

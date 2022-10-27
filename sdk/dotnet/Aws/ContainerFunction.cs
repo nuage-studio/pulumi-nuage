@@ -50,7 +50,7 @@ namespace Pulumi.Nuage.Aws
     public sealed class ContainerFunctionArgs : Pulumi.ResourceArgs
     {
         /// <summary>
-        /// Architecture, either `x86_64` or `arm64`. Defaults to `x86_64`
+        /// Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
         /// </summary>
         [Input("architecture")]
         public Input<string>? Architecture { get; set; }
@@ -74,7 +74,7 @@ namespace Pulumi.Nuage.Aws
         public Input<string>? Dockerfile { get; set; }
 
         /// <summary>
-        /// ECR repository name
+        /// ECR repository name for new definition.
         /// </summary>
         [Input("ecrRepositoryName", required: true)]
         public Input<string> EcrRepositoryName { get; set; } = null!;
@@ -108,6 +108,12 @@ namespace Pulumi.Nuage.Aws
         /// </summary>
         [Input("policyDocument")]
         public Input<string>? PolicyDocument { get; set; }
+
+        /// <summary>
+        /// Existing ECR repository name
+        /// </summary>
+        [Input("repository")]
+        public Input<string>? Repository { get; set; }
 
         /// <summary>
         /// Amount of time your Lambda Function has to run in seconds. Defaults to `3`

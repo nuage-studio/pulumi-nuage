@@ -4,16 +4,16 @@
 
 export const ArchitectureType = {
     /**
-     * x86_64 architecture.
+     * X86_64 architecture.
      */
-    X86_64: "x86_64",
+    X86_64: "X86_64",
     /**
-     * Arm64 architecture.
+     * ARM64 architecture.
      */
-    Arm64: "arm64",
+    ARM64: "ARM64",
 } as const;
 
 /**
- * Architecture, either 'x86_64' or 'arm64'.
+ * Architecture, either 'X86_64' or 'arm64'.
  */
 export type ArchitectureType = (typeof ArchitectureType)[keyof typeof ArchitectureType];
