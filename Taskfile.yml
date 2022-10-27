@@ -1,0 +1,34 @@
+version: "3"
+
+tasks:
+  sdk:
+    desc: Generates sdk folder.
+    sources:
+      - ./provider/cmd/pulumi-resource-nuage/**/*.py
+      - ./schema.json
+    generates:
+      - ./sdk
+    cmds:
+      - rm -r sdk/ || true
+      - make generate
+  build:
+    desc: Build binaries from the sdk folder.
+    sources:
+      - ./provider/cmd/pulumi-resource-nuage/**/*.py
+      - ./schema.json
+    generates:
+      - ./sdk
+    deps: [sdk]
+    cmds:
+      - rm -r provider/cmd/pulumi-resource-nuage/build || true
+      - make build
+      - make install
+  runtests:
+    desc: Run python integration tests.
+    cmds:
+      - python3 -m unittest discover provider/cmd/pulumi-resource-nuage/tests/
+  install:
+    desc: Install requirements for integration tests.
+    cmds:
+      - source provider/cmd/pulumi-resource-nuage/tests/venv/bin/activate
+      - pip install -r provider/cmd/pulumi-resource-nuage/requirements.txt
