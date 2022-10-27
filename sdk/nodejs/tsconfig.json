@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "outDir": "bin",
+        "target": "es2016",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "declaration": true,
+        "sourceMap": true,
+        "stripInternal": true,
+        "experimentalDecorators": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true
+    },
+    "files": [
+        "aws/bucket_nuage.ts",
+        "aws/containerFunction.ts",
+        "aws/index.ts",
+        "index.ts",
+        "provider.ts",
+        "types/enums/aws/index.ts",
+        "types/enums/index.ts",
+        "utilities.ts"
+    ]
+}
