@@ -15,7 +15,7 @@
 import json
 from enum import IntEnum
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 import pulumi
 import pulumi_aws as aws
@@ -113,8 +113,10 @@ class ContainerFunction(pulumi.ComponentResource):
         super().__init__("nuage:aws:ContainerFunction", name, props, opts)
         
         if args.repository:
+            # Get existing repository using repository name.
             repository = aws.ecr.get_repository(name=args.repository).repository_url
         else:
+            # If repository is not defined, create new ecr repository using `ecr_repository_name`.
             repository = awsx.ecr.Repository(
                 resource_name=f"{args.ecr_repository_name}-repository",
                 name=args.ecr_repository_name,
@@ -122,6 +124,7 @@ class ContainerFunction(pulumi.ComponentResource):
         architecture = Architecture[args.architecture] 
         
         if args.dockerfile:
+            # Use specified dockerfile.
             build = docker.DockerBuild(
                 context=args.context or "./",
                 dockerfile=args.dockerfile,
@@ -129,6 +132,7 @@ class ContainerFunction(pulumi.ComponentResource):
             )
             image_ignore_changes = []
         else:
+            # Use default aws lambda docker image.
             with open('Dockerfile.awslambda.generated','w') as f:
                 f.writelines([
                     'FROM public.ecr.aws/lambda/provided:al2',
@@ -141,10 +145,14 @@ class ContainerFunction(pulumi.ComponentResource):
                 dockerfile="./Dockerfile.awslambda.generated",
                 extra_options=["--platform", architecture.docker_value, "--quiet"]
             )
+            # Ignore changes on image_name if default docker image is used.
             image_ignore_changes = ["image_name"]
         
+        # Authenticate with ECR and get cridentals.
         registry_id = repository.apply(lambda x: x.split(".")[0])
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
+        
+        # Build and Push docker Image.
         image = docker.Image(
             name=f"{name}-image",
             build = build,
@@ -156,10 +164,11 @@ class ContainerFunction(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                ignore_changes=[image_ignore_changes]
+                ignore_changes=image_ignore_changes
             )
         )
         
+        # Define inline policies for role definition
         policy_documents = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(   
@@ -181,7 +190,7 @@ class ContainerFunction(pulumi.ComponentResource):
                 name="PolicyCustom",
                 policy=args.policy_document,
             ))
-
+    
         self.role = aws.iam.Role(
             resource_name=f"{name}-lambda-role",
             name=f"{name}-lambda-role",
@@ -205,6 +214,7 @@ class ContainerFunction(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self),
         )            
 
+        # Lambda Function
         self.function = aws.lambda_.Function(
             resource_name=args.resource_name or name,
             name=name,
