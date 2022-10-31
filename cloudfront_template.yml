@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ""
+Parameters:
+  SamlMeta:
+    Description: SAML Meta Document
+    Type: String
+Resources:
+  IAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: "NuageAccessRole"
+      AssumeRolePolicyDocument: !Sub '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Federated":"${IAMSAMLProvider}"},"Action":"sts:AssumeRoleWithSAML","Condition":{"StringEquals":{"SAML:aud":"https://signin.aws.amazon.com/saml"}}}]}'
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
+
+  IAMSAMLProvider:
+    Type: "AWS::IAM::SAMLProvider"
+    Properties:
+      Name: "Nuage-SSO"
+      SamlMetadataDocument: !Ref SamlMeta
