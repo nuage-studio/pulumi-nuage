@@ -137,3 +137,5 @@ sdk/**/bin/
 **/node_modules/
 /provider/cmd/pulumi-resource-*/*/schema.json
 nuget/
+sdk/*/README.md
+.task/
