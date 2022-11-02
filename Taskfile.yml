@@ -2,33 +2,49 @@ version: "3"
 
 tasks:
   sdk:
-    desc: Generates sdk folder.
-    sources:
-      - ./provider/cmd/pulumi-resource-nuage/**/*.py
-      - ./schema.json
-    generates:
-      - ./sdk
+    desc: Generates SDKs
     cmds:
-      - rm -r sdk/ || true
       - make generate
-  build:
-    desc: Build binaries from the sdk folder.
     sources:
-      - ./provider/cmd/pulumi-resource-nuage/**/*.py
-      - ./schema.json
+      - provider/cmd/pulumi-resource-nuage/nuage_provider/*.py
+      - provider/cmd/pulumi-resource-nuage/requirements.txt
+      - schema.json
     generates:
-      - ./sdk
-    deps: [sdk]
+      - sdk/**/*
+
+  build:
+    desc: Build binaries for each SDK
+    deps:
+      - sdk
     cmds:
-      - rm -r provider/cmd/pulumi-resource-nuage/build || true
       - make build
-      - make install
-  runtests:
+      # - make install
+    sources:
+      - sdk/**/*
+    generates:
+      - bin/**/*
+      - provider/cmd/pulumi-resource-nuage/build/**/*
+      - provider/cmd/pulumi-resource-nuage/nuage_provider.egg-info/*
+
+  test:
     desc: Run python integration tests.
     cmds:
       - python3 -m unittest discover provider/cmd/pulumi-resource-nuage/tests/
+
   install:
     desc: Install requirements for integration tests.
+    deps:
+      - virtualenv
     cmds:
       - source provider/cmd/pulumi-resource-nuage/tests/venv/bin/activate
+      - pip install -U pip wheel
       - pip install -r provider/cmd/pulumi-resource-nuage/requirements.txt
+    sources:
+      - ./provider/cmd/pulumi-resource-nuage/requirements.txt
+
+  virtualenv:
+    desc: Creates a virtualenv for integration tests.
+    cmds:
+      - python3 -m venv provider/cmd/pulumi-resource-nuage/tests/venv
+    status:
+      - test -d provider/cmd/pulumi-resource-nuage/tests/venv
