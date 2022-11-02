@@ -2,11 +2,11 @@
 
 Pulumi components carefully crafted by Nuage
 
-# Install the Pulumi Plugin
+## Install the Pulumi Plugin
 
 To use this resource, you need to install Pulumi plugin first (independent from the development language).
 
-1. Download the latest release from https://github.com/nuage-studio/pulumi-nuage/releases/
+1. Download the latest release from <https://github.com/nuage-studio/pulumi-nuage/releases/>
 2. Install the .tar.gz package using Pulumi
 
 ```bash
@@ -14,6 +14,7 @@ pulumi plugin install resource nuage 0.0.1 --file pulumi-resource-nuage-v0.0.1-d
 ```
 
 You may also automate this process via Taskfile. Here is an example:
+
 ```yaml
 version: "3"
 
@@ -29,16 +30,17 @@ tasks:
       - rm {{.FILE_NAME}}
 ```
 
-# Setup Instructions for Python SDK
+## Setup Instructions for Python SDK
 
 You can use the following command to add python library via Poetry:
+
 ```bash
 poetry add "https://github.com/nuage-studio/pulumi-nuage.git#subdirectory=sdk/python"
 ```
 
 You can check related [Poetry Docs](https://python-poetry.org/docs/dependency-specification/) for more detailed information about subdirectory dependency.
 
-# Start Working with us
+## Start Working with us
 
 If you want to collaborate with us, feel free to contact us at contact@nuage.studio
 
