@@ -102,6 +102,86 @@
             ]
         }
     },
+    "nuage:aws:ServerlessDatabase": {
+        "isComponent": true,
+        "inputProperties": {
+            "resourceName": {
+                "type": "string",
+                "description":"Resource name."
+            },
+            "vpcId": {
+                "type": "string",
+                "description":"Vpc id."
+            },
+            "vpcSubnets": {
+                "type": "array[string]",
+                "description":"List of subnet ip addresses."
+            },
+            "databaseName": {
+                "type": "string",
+                "description":"Name of the database."
+            },
+            "masterUserName": {
+                "type": "string",
+                "description":"Master user name of the db."
+            },
+            "ipWhitelist": {
+                "description":"List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0",  
+                "type":"array[string]"
+            },
+            "skipFinalSnapshot": {
+                "type": "boolean",
+                "description":"Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`"
+            },
+            "dataApi": {
+                "type": "boolean",
+                "description":"Enable data api. Defaults to `false`"
+            },
+            "s3Extension": {
+                "type": "boolean",
+                "description":"Enable s3 extension. Defaults to `false`"
+            }
+        },
+        "requiredInputs": [
+            "resourceName",
+            "vpcId",
+            "vpcSubnets"
+        ],
+        "properties": {
+            "user": {
+                "type": "string"
+            },
+            "password": {
+                "type": "string"
+            },
+            "host": {
+                "type": "string"
+            },
+            "port": {
+                "type": "number"
+            },
+            "name": {
+                "type": "string"
+            },
+            "cluster_arn": {
+                "type": "string"
+            },
+            "uri": {
+                "type": "string"
+            },
+            "policy_document": {
+                "type": "string"
+            }
+        },
+        "required": [
+            "user",
+            "host",
+            "port",
+            "name",
+            "cluster_arn",
+            "uri"
+        ]
+    },
     "language": {
         "csharp": {
             "packageReferences": {

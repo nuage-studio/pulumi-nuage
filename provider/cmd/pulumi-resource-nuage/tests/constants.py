@@ -11,3 +11,7 @@ LAMBDA = {
     "ARCHITECTURE":"X86_64",
     "ENV_TEST_VAL":"env_ok"
 }
+
+DB = {
+    "NAME":"itest-database"
+}
