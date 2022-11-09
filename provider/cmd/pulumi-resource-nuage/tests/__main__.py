@@ -23,7 +23,7 @@ from nuage_provider.container_function import (
     Architecture,
 )
 
-
+"""
 # S3 Bucket
 bucket = bucket_nuage(name=BUCKET_NAME)
 pulumi.export("bucketName", bucket.bucket.bucket)
@@ -52,7 +52,7 @@ pulumi.export("lambda_name", function.function.name)
 pulumi.export("lambda_role_arn", function.role.arn)
 if function.function_url:
     pulumi.export("lambda_function_url", function.function_url)
-
+"""
 # DATABASE
 vpc = awsx.ec2.Vpc(
     resource_name=f"itest-vpc",
@@ -76,6 +76,7 @@ database = ServerlessDatabase(
         resource_name="database",
         vpc_id=vpc.vpc_id,
         vpc_subnets=vpc.subnets,
+        database_type="postgresql",
         database_name=DB["NAME"],
         master_username=DB["USER"],
         ip_whitelist=None,

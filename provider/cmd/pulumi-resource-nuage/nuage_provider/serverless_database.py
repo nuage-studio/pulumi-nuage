@@ -18,6 +18,7 @@ class ServerlessDatabaseArgs:
     resource_name: pulumi.Input[str]
     vpc_id: pulumi.Input[str]
     vpc_subnets: pulumi.Input[List[str]]
+    database_type: pulumi.Input[str]
 
     database_name: Optional[pulumi.Input[str]]
     master_username: Optional[pulumi.Input[str]]
@@ -45,6 +46,7 @@ class ServerlessDatabaseArgs:
         resource_name: pulumi.Input[str],
         vpc_id: pulumi.Input[str],
         vpc_subnets: pulumi.Input[List[str]],
+        database_type: pulumi.Input[str],
         database_name: Optional[pulumi.Input[str]],
         master_username: Optional[pulumi.Input[str]],
         ip_whitelist: Optional[pulumi.Input[List[str]]],
@@ -55,6 +57,7 @@ class ServerlessDatabaseArgs:
         self.resource_name = resource_name
         self.vpc_id = vpc_id
         self.vpc_subnets = vpc_subnets
+        self.database_type = database_type
         self.database_name = database_name
         self.master_username = master_username
         self.ip_whitelist = ip_whitelist
@@ -108,7 +111,11 @@ class ServerlessDatabase(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self),
         )
 
-        port = 5432  # PostgreSQL default
+        if args.database_type == "mysql":
+            port = 3306
+        else:
+            # PostgreSQL default
+            port = 5432
 
         aws.ec2.SecurityGroupRule(
             resource_name=f"{args.resource_name}/security-group/ingress-rule",
@@ -122,34 +129,60 @@ class ServerlessDatabase(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=security_group),
         )
 
-        # Aurora cluster
-        cluster = aws.rds.Cluster(
-            resource_name=f"{args.resource_name}-cluster",
-            cluster_identifier_prefix=f"{name}-cluster-",
-            database_name=args.database_name or name,
-            master_username=args.master_username or name,
-            master_password=aurora_master_password.result,
-            # Aurora Serverless v2 does not currently support the Data API
-            enable_http_endpoint=False,
-            iam_database_authentication_enabled=True,
-            vpc_security_group_ids=[security_group.id],
-            db_subnet_group_name=subnet_group.name,
-            db_cluster_parameter_group_name="default.aurora-postgresql13",
-            enabled_cloudwatch_logs_exports=["postgresql"],
-            engine=aws.rds.EngineType.AURORA_POSTGRESQL,
-            engine_version="13.7",
-            port=port,
-            serverlessv2_scaling_configuration=aws.rds.ClusterServerlessv2ScalingConfigurationArgs(
-                min_capacity=0.5,
-                max_capacity=128,
-            ),
-            # iam_roles=[aws.iam.get_role(name="AWSServiceRoleForRDS").arn],
-            # https://github.com/terraform-aws-modules/terraform-aws-rds-aurora/issues/129
-            skip_final_snapshot=args.skip_final_snapshot,
-            storage_encrypted=True,
-            opts=pulumi.ResourceOptions(parent=self, depends_on=[subnet_group]),
-        )
-
+        if args.database_type == "mysql":
+            cluster = aws.rds.Cluster(
+                resource_name=f"{args.resource_name}-cluster",
+                cluster_identifier_prefix=f"{name}-cluster-",
+                database_name=args.database_name or name,
+                master_username=args.master_username or name,
+                master_password=aurora_master_password.result,
+                # Aurora Serverless v2 does not currently support the Data API
+                enable_http_endpoint=False,
+                iam_database_authentication_enabled=True,
+                vpc_security_group_ids=[security_group.id],
+                db_subnet_group_name=subnet_group.name,
+                db_cluster_parameter_group_name="default.aurora-mysql8.0",
+                engine=aws.rds.EngineType.AURORA_MYSQL,
+                engine_version="8.0.mysql_aurora.3.02.0",
+                port=port,
+                serverlessv2_scaling_configuration=aws.rds.ClusterServerlessv2ScalingConfigurationArgs(
+                    min_capacity=0.5,
+                    max_capacity=128,
+                ),
+                # iam_roles=[aws.iam.get_role(name="AWSServiceRoleForRDS").arn],
+                # https://github.com/terraform-aws-modules/terraform-aws-rds-aurora/issues/129
+                skip_final_snapshot=args.skip_final_snapshot,
+                storage_encrypted=True,
+                opts=pulumi.ResourceOptions(parent=self, depends_on=[subnet_group]),
+            )
+        else:
+            # Aurora cluster
+            cluster = aws.rds.Cluster(
+                resource_name=f"{args.resource_name}-cluster",
+                cluster_identifier_prefix=f"{name}-cluster-",
+                database_name=args.database_name or name,
+                master_username=args.master_username or name,
+                master_password=aurora_master_password.result,
+                # Aurora Serverless v2 does not currently support the Data API
+                enable_http_endpoint=False,
+                iam_database_authentication_enabled=True,
+                vpc_security_group_ids=[security_group.id],
+                db_subnet_group_name=subnet_group.name,
+                db_cluster_parameter_group_name="default.aurora-postgresql13",
+                enabled_cloudwatch_logs_exports=["postgresql"],
+                engine=aws.rds.EngineType.AURORA_POSTGRESQL,
+                engine_version="13.7",
+                port=port,
+                serverlessv2_scaling_configuration=aws.rds.ClusterServerlessv2ScalingConfigurationArgs(
+                    min_capacity=0.5,
+                    max_capacity=128,
+                ),
+                # iam_roles=[aws.iam.get_role(name="AWSServiceRoleForRDS").arn],
+                # https://github.com/terraform-aws-modules/terraform-aws-rds-aurora/issues/129
+                skip_final_snapshot=args.skip_final_snapshot,
+                storage_encrypted=True,
+                opts=pulumi.ResourceOptions(parent=self, depends_on=[subnet_group]),
+            )
         # Create a cluster instance
 
         aws.rds.ClusterInstance(
