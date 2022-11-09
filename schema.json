@@ -109,6 +109,10 @@
                 "type": "string",
                 "description":"Resource name."
             },
+            "databaseType": {
+                "type": "string",
+                "description":"Database type. `mysql` or `postgresql`"
+            },
             "vpcId": {
                 "type": "string",
                 "description":"Vpc id."
@@ -145,7 +149,8 @@
         "requiredInputs": [
             "resourceName",
             "vpcId",
-            "vpcSubnets"
+            "vpcSubnets",
+            "databaseType"
         ],
         "properties": {
             "user": {
