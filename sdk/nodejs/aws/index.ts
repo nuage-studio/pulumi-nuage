@@ -7,12 +7,14 @@ import * as utilities from "../utilities";
 // Export members:
 export * from "./bucket_nuage";
 export * from "./containerFunction";
+export * from "./serverlessDatabase";
 
 // Export enums:
 export * from "../types/enums/aws";
 
 // Import resources to register:
 import { ContainerFunction } from "./containerFunction";
+import { ServerlessDatabase } from "./serverlessDatabase";
 import { Bucket_nuage } from "./bucket_nuage";
 
 const _module = {
@@ -21,6 +23,8 @@ const _module = {
         switch (type) {
             case "nuage:aws:ContainerFunction":
                 return new ContainerFunction(name, <any>undefined, { urn })
+            case "nuage:aws:ServerlessDatabase":
+                return new ServerlessDatabase(name, <any>undefined, { urn })
             case "nuage:aws:bucket_nuage":
                 return new Bucket_nuage(name, <any>undefined, { urn })
             default:

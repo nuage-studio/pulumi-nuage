@@ -22,6 +22,10 @@ from pulumi.provider import ConstructResult
 import nuage_provider
 from nuage_provider.bucket_nuage import bucket_nuage
 from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
+from nuage_provider.serverless_database import (
+    ServerlessDatabase,
+    ServerlessDatabaseArgs,
+)
 
 
 class Provider(provider.Provider):
@@ -29,26 +33,66 @@ class Provider(provider.Provider):
         super().__init__(nuage_provider.__version__, nuage_provider.__schema__)
 
     def construct(
-        self, name: str, resource_type: str, inputs: Inputs, options: Optional[ResourceOptions] = None
+        self,
+        name: str,
+        resource_type: str,
+        inputs: Inputs,
+        options: Optional[ResourceOptions] = None,
     ) -> ConstructResult:
 
         if resource_type == "nuage:aws:bucket_nuage":
             return _create_bucket(name, inputs, options)
         elif resource_type == "nuage:aws:ContainerFunction":
             return _create_container(name, inputs, options)
+        elif resource_type == "nuage:aws:ServerlessDatabase":
+            return _create_container(name, inputs, options)
 
         raise Exception(f"Unknown resource type {resource_type}")
 
 
-def _create_container(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
-    created_container = ContainerFunction(name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options)
+def _create_database(
+    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
+) -> ConstructResult:
+    created_resource = ServerlessDatabase(
+        name, ServerlessDatabaseArgs.from_inputs(inputs), dict(inputs), options
+    )
+    return provider.ConstructResult(
+        urn=created_resource.urn,
+        state={
+            "user": created_resource.user,
+            "host": created_resource.host,
+            "port": created_resource.port,
+            "name": created_resource.name,
+            "cluster_arn": created_resource.cluster_arn,
+            "uri": created_resource.uri,
+        },
+    )
 
-    return provider.ConstructResult(urn = created_container.urn, state={"arn": created_container.function.arn, "name": created_container.function.name})
 
-def _create_bucket(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+def _create_container(
+    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
+) -> ConstructResult:
+    created_container = ContainerFunction(
+        name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options
+    )
+
+    return provider.ConstructResult(
+        urn=created_container.urn,
+        state={
+            "arn": created_container.function.arn,
+            "name": created_container.function.name,
+        },
+    )
+
+
+def _create_bucket(
+    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
+) -> ConstructResult:
 
     # Create the component resource
     created_bucket = bucket_nuage(name, dict(inputs), options)
 
     # Return the component resource's URN and outputs as its state.
-    return provider.ConstructResult(urn=created_bucket.urn, state={"bucket": created_bucket.bucket})
+    return provider.ConstructResult(
+        urn=created_bucket.urn, state={"bucket": created_bucket.bucket}
+    )
