@@ -12,4 +12,8 @@ LAMBDA = {
     "ENV_TEST_VAL": "env_ok",
 }
 
-DB = {"NAME": "itestdatabase", "USER": "itestdatabaseuser"}
+DB = {
+    "POSTGRESQL_NAME": "itestpostgresqldb",
+    "MYSQL_NAME": "itestmysqldb",
+    "USER": "itestdatabaseuser",
+}

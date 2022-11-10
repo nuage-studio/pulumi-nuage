@@ -5,10 +5,12 @@ import boto3
 from pulumi import automation as auto
 
 from constants import GLOBAL
+from test_bucket import TestsBucket
 from test_database import TestsDB
+from test_lambda import TestsLambda
 
 
-class TestS3(unittest.TestCase, TestsDB):
+class TestS3(unittest.TestCase, TestsBucket, TestsDB, TestsLambda):
     @classmethod
     def setUpClass(cls) -> None:
         """

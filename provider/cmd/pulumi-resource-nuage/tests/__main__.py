@@ -23,7 +23,7 @@ from nuage_provider.container_function import (
     Architecture,
 )
 
-"""
+
 # S3 Bucket
 bucket = bucket_nuage(name=BUCKET_NAME)
 pulumi.export("bucketName", bucket.bucket.bucket)
@@ -52,7 +52,7 @@ pulumi.export("lambda_name", function.function.name)
 pulumi.export("lambda_role_arn", function.role.arn)
 if function.function_url:
     pulumi.export("lambda_function_url", function.function_url)
-"""
+
 # DATABASE
 vpc = awsx.ec2.Vpc(
     resource_name=f"itest-vpc",
@@ -69,15 +69,38 @@ vpc = awsx.ec2.Vpc(
     ],
 )
 
+database = ServerlessDatabase(
+    name=DB["MYSQL_NAME"],
+    args=ServerlessDatabaseArgs(
+        resource_name="mysqldatabase",
+        vpc_id=vpc.vpc_id,
+        vpc_subnets=vpc.subnets,
+        database_type="mysql",
+        database_name=DB["MYSQL_NAME"],
+        master_username=DB["USER"],
+        ip_whitelist=None,
+        skip_final_snapshot=True,
+        data_api=False,
+        s3_extension=False,
+    ),
+)
+pulumi.export("database_mysql_user", database.user)
+pulumi.export("database_mysql_password", database.password)
+pulumi.export("database_mysql_name", database.name)
+pulumi.export("database_mysql_port", database.port)
+pulumi.export("database_mysql_host", database.host)
+pulumi.export("database_mysql_uri", database.uri)
+pulumi.export("database_mysql_cluster_arn", database.cluster_arn)
+
 
 database = ServerlessDatabase(
-    name=DB["NAME"],
+    name=DB["POSTGRESQL_NAME"],
     args=ServerlessDatabaseArgs(
-        resource_name="database",
+        resource_name="postgresqldatabase",
         vpc_id=vpc.vpc_id,
         vpc_subnets=vpc.subnets,
         database_type="postgresql",
-        database_name=DB["NAME"],
+        database_name=DB["POSTGRESQL_NAME"],
         master_username=DB["USER"],
         ip_whitelist=None,
         skip_final_snapshot=True,
@@ -86,10 +109,10 @@ database = ServerlessDatabase(
     ),
 )
 
-pulumi.export("database_user", database.user)
-pulumi.export("database_password", database.password)
-pulumi.export("database_name", database.name)
-pulumi.export("database_port", database.port)
-pulumi.export("database_host", database.host)
-pulumi.export("database_uri", database.uri)
-pulumi.export("database_cluster_arn", database.cluster_arn)
+pulumi.export("database_postgresql_user", database.user)
+pulumi.export("database_postgresql_password", database.password)
+pulumi.export("database_postgresql_name", database.name)
+pulumi.export("database_postgresql_port", database.port)
+pulumi.export("database_postgresql_host", database.host)
+pulumi.export("database_postgresql_uri", database.uri)
+pulumi.export("database_postgresql_cluster_arn", database.cluster_arn)
