@@ -145,10 +145,6 @@
                 "dataApi": {
                     "type": "boolean",
                     "description":"Enable data api. Defaults to `false`"
-                },
-                "s3Extension": {
-                    "type": "boolean",
-                    "description":"Enable s3 extension. Defaults to `false`"
                 }
             },
             "requiredInputs": [

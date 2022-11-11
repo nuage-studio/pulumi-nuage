@@ -57,7 +57,6 @@ export class ServerlessDatabase extends pulumi.ComponentResource {
             resourceInputs["ipWhitelist"] = args ? args.ipWhitelist : undefined;
             resourceInputs["masterUserName"] = args ? args.masterUserName : undefined;
             resourceInputs["resourceName"] = args ? args.resourceName : undefined;
-            resourceInputs["s3Extension"] = args ? args.s3Extension : undefined;
             resourceInputs["skipFinalSnapshot"] = args ? args.skipFinalSnapshot : undefined;
             resourceInputs["vpcId"] = args ? args.vpcId : undefined;
             resourceInputs["vpcSubnets"] = args ? args.vpcSubnets : undefined;
@@ -112,10 +111,6 @@ export interface ServerlessDatabaseArgs {
      * Resource name.
      */
     resourceName: pulumi.Input<string>;
-    /**
-     * Enable s3 extension. Defaults to `false`
-     */
-    s3Extension?: pulumi.Input<boolean>;
     /**
      * Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
      */

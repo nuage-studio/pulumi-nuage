@@ -45,7 +45,7 @@ class Provider(provider.Provider):
         elif resource_type == "nuage:aws:ContainerFunction":
             return _create_container(name, inputs, options)
         elif resource_type == "nuage:aws:ServerlessDatabase":
-            return _create_container(name, inputs, options)
+            return _create_database(name, inputs, options)
 
         raise Exception(f"Unknown resource type {resource_type}")
 

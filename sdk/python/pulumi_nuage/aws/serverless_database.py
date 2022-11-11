@@ -21,7 +21,6 @@ class ServerlessDatabaseArgs:
                  database_name: Optional[pulumi.Input[str]] = None,
                  ip_whitelist: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  master_user_name: Optional[pulumi.Input[str]] = None,
-                 s3_extension: Optional[pulumi.Input[bool]] = None,
                  skip_final_snapshot: Optional[pulumi.Input[bool]] = None):
         """
         The set of arguments for constructing a ServerlessDatabase resource.
@@ -33,7 +32,6 @@ class ServerlessDatabaseArgs:
         :param pulumi.Input[str] database_name: Name of the database.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] ip_whitelist: List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0
         :param pulumi.Input[str] master_user_name: Master user name of the db.
-        :param pulumi.Input[bool] s3_extension: Enable s3 extension. Defaults to `false`
         :param pulumi.Input[bool] skip_final_snapshot: Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
         """
         pulumi.set(__self__, "database_type", database_type)
@@ -48,8 +46,6 @@ class ServerlessDatabaseArgs:
             pulumi.set(__self__, "ip_whitelist", ip_whitelist)
         if master_user_name is not None:
             pulumi.set(__self__, "master_user_name", master_user_name)
-        if s3_extension is not None:
-            pulumi.set(__self__, "s3_extension", s3_extension)
         if skip_final_snapshot is not None:
             pulumi.set(__self__, "skip_final_snapshot", skip_final_snapshot)
 
@@ -150,18 +146,6 @@ class ServerlessDatabaseArgs:
         pulumi.set(self, "master_user_name", value)
 
     @property
-    @pulumi.getter(name="s3Extension")
-    def s3_extension(self) -> Optional[pulumi.Input[bool]]:
-        """
-        Enable s3 extension. Defaults to `false`
-        """
-        return pulumi.get(self, "s3_extension")
-
-    @s3_extension.setter
-    def s3_extension(self, value: Optional[pulumi.Input[bool]]):
-        pulumi.set(self, "s3_extension", value)
-
-    @property
     @pulumi.getter(name="skipFinalSnapshot")
     def skip_final_snapshot(self) -> Optional[pulumi.Input[bool]]:
         """
@@ -185,7 +169,6 @@ class ServerlessDatabase(pulumi.ComponentResource):
                  ip_whitelist: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  master_user_name: Optional[pulumi.Input[str]] = None,
                  resource_name_: Optional[pulumi.Input[str]] = None,
-                 s3_extension: Optional[pulumi.Input[bool]] = None,
                  skip_final_snapshot: Optional[pulumi.Input[bool]] = None,
                  vpc_id: Optional[pulumi.Input[str]] = None,
                  vpc_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
@@ -200,7 +183,6 @@ class ServerlessDatabase(pulumi.ComponentResource):
         :param pulumi.Input[Sequence[pulumi.Input[str]]] ip_whitelist: List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0
         :param pulumi.Input[str] master_user_name: Master user name of the db.
         :param pulumi.Input[str] resource_name_: Resource name.
-        :param pulumi.Input[bool] s3_extension: Enable s3 extension. Defaults to `false`
         :param pulumi.Input[bool] skip_final_snapshot: Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
         :param pulumi.Input[str] vpc_id: Vpc id.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] vpc_subnets: List of subnet ip addresses.
@@ -234,7 +216,6 @@ class ServerlessDatabase(pulumi.ComponentResource):
                  ip_whitelist: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  master_user_name: Optional[pulumi.Input[str]] = None,
                  resource_name_: Optional[pulumi.Input[str]] = None,
-                 s3_extension: Optional[pulumi.Input[bool]] = None,
                  skip_final_snapshot: Optional[pulumi.Input[bool]] = None,
                  vpc_id: Optional[pulumi.Input[str]] = None,
                  vpc_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
@@ -262,7 +243,6 @@ class ServerlessDatabase(pulumi.ComponentResource):
             if resource_name_ is None and not opts.urn:
                 raise TypeError("Missing required property 'resource_name_'")
             __props__.__dict__["resource_name"] = resource_name_
-            __props__.__dict__["s3_extension"] = s3_extension
             __props__.__dict__["skip_final_snapshot"] = skip_final_snapshot
             if vpc_id is None and not opts.urn:
                 raise TypeError("Missing required property 'vpc_id'")

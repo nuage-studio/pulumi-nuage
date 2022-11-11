@@ -107,12 +107,6 @@ namespace Pulumi.Nuage.Aws
         public Input<string> ResourceName { get; set; } = null!;
 
         /// <summary>
-        /// Enable s3 extension. Defaults to `false`
-        /// </summary>
-        [Input("s3Extension")]
-        public Input<bool>? S3Extension { get; set; }
-
-        /// <summary>
         /// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
         /// </summary>
         [Input("skipFinalSnapshot")]

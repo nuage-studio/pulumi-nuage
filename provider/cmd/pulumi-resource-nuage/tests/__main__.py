@@ -81,7 +81,6 @@ database = ServerlessDatabase(
         ip_whitelist=None,
         skip_final_snapshot=True,
         data_api=False,
-        s3_extension=False,
     ),
 )
 pulumi.export("database_mysql_user", database.user)

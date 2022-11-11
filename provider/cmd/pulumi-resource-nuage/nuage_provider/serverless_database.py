@@ -1,19 +1,16 @@
 import json
 import string
 from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
 
 import pulumi
 import pulumi_aws as aws
-import pulumi_awsx as awsx
 import pulumi_random
 
 from .postgres_extension import PgExtension
 
-aws_config = pulumi.Config("aws")
-region = aws_config.require("region")
-profile = aws_config.require("profile")
 
-
+@dataclass
 class ServerlessDatabaseArgs:
     resource_name: pulumi.Input[str]
     vpc_id: pulumi.Input[str]
@@ -25,7 +22,6 @@ class ServerlessDatabaseArgs:
     ip_whitelist: Optional[pulumi.Input[List[str]]]
     skip_final_snapshot: Optional[pulumi.Input[bool]]
     data_api: Optional[pulumi.Input[bool]]  # Aurora SLS v2 does not support Data API
-    s3_extension: Optional[pulumi.Input[bool]]
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ServerlessDatabaseArgs":
@@ -33,37 +29,13 @@ class ServerlessDatabaseArgs:
             resource_name=inputs["resourceName"],
             vpc_id=inputs["vpcId"],
             vpc_subnets=inputs["vpcSubnets"],
+            database_type=inputs["databaseType"],
             database_name=inputs.get("databaseName", None),
             master_username=inputs.get("masterUserName", None),
             ip_whitelist=inputs.get("ipWhitelist", None),
             skip_final_snapshot=inputs.get("skipFinalSnapshot", False),
             data_api=inputs.get("dataApi", False),
-            s3_extension=inputs.get("s3Extension", False),
         )
-
-    def __init__(
-        self,
-        resource_name: pulumi.Input[str],
-        vpc_id: pulumi.Input[str],
-        vpc_subnets: pulumi.Input[List[str]],
-        database_type: pulumi.Input[str],
-        database_name: Optional[pulumi.Input[str]],
-        master_username: Optional[pulumi.Input[str]],
-        ip_whitelist: Optional[pulumi.Input[List[str]]],
-        skip_final_snapshot: Optional[pulumi.Input[bool]],
-        data_api: Optional[pulumi.Input[bool]],
-        s3_extension: Optional[pulumi.Input[bool]],
-    ) -> None:
-        self.resource_name = resource_name
-        self.vpc_id = vpc_id
-        self.vpc_subnets = vpc_subnets
-        self.database_type = database_type
-        self.database_name = database_name
-        self.master_username = master_username
-        self.ip_whitelist = ip_whitelist
-        self.skip_final_snapshot = skip_final_snapshot
-        self.data_api = data_api
-        self.s3_extension = s3_extension
 
 
 class ServerlessDatabase(pulumi.ComponentResource):
@@ -111,11 +83,8 @@ class ServerlessDatabase(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self),
         )
 
-        if args.database_type == "mysql":
-            port = 3306
-        else:
-            # PostgreSQL default
-            port = 5432
+        # mysql and psotgresql default ports
+        port = 3306 if args.database_type == "mysql" else 5432
 
         aws.ec2.SecurityGroupRule(
             resource_name=f"{args.resource_name}/security-group/ingress-rule",
@@ -129,60 +98,41 @@ class ServerlessDatabase(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=security_group),
         )
 
-        if args.database_type == "mysql":
-            cluster = aws.rds.Cluster(
-                resource_name=f"{args.resource_name}-cluster",
-                cluster_identifier_prefix=f"{name}-cluster-",
-                database_name=args.database_name or name,
-                master_username=args.master_username or name,
-                master_password=aurora_master_password.result,
-                # Aurora Serverless v2 does not currently support the Data API
-                enable_http_endpoint=False,
-                iam_database_authentication_enabled=True,
-                vpc_security_group_ids=[security_group.id],
-                db_subnet_group_name=subnet_group.name,
-                db_cluster_parameter_group_name="default.aurora-mysql8.0",
-                engine=aws.rds.EngineType.AURORA_MYSQL,
-                engine_version="8.0.mysql_aurora.3.02.0",
-                port=port,
-                serverlessv2_scaling_configuration=aws.rds.ClusterServerlessv2ScalingConfigurationArgs(
-                    min_capacity=0.5,
-                    max_capacity=128,
-                ),
-                # iam_roles=[aws.iam.get_role(name="AWSServiceRoleForRDS").arn],
-                # https://github.com/terraform-aws-modules/terraform-aws-rds-aurora/issues/129
-                skip_final_snapshot=args.skip_final_snapshot,
-                storage_encrypted=True,
-                opts=pulumi.ResourceOptions(parent=self, depends_on=[subnet_group]),
-            )
-        else:
-            # Aurora cluster
-            cluster = aws.rds.Cluster(
-                resource_name=f"{args.resource_name}-cluster",
-                cluster_identifier_prefix=f"{name}-cluster-",
-                database_name=args.database_name or name,
-                master_username=args.master_username or name,
-                master_password=aurora_master_password.result,
-                # Aurora Serverless v2 does not currently support the Data API
-                enable_http_endpoint=False,
-                iam_database_authentication_enabled=True,
-                vpc_security_group_ids=[security_group.id],
-                db_subnet_group_name=subnet_group.name,
-                db_cluster_parameter_group_name="default.aurora-postgresql13",
-                enabled_cloudwatch_logs_exports=["postgresql"],
-                engine=aws.rds.EngineType.AURORA_POSTGRESQL,
-                engine_version="13.7",
-                port=port,
-                serverlessv2_scaling_configuration=aws.rds.ClusterServerlessv2ScalingConfigurationArgs(
-                    min_capacity=0.5,
-                    max_capacity=128,
-                ),
-                # iam_roles=[aws.iam.get_role(name="AWSServiceRoleForRDS").arn],
-                # https://github.com/terraform-aws-modules/terraform-aws-rds-aurora/issues/129
-                skip_final_snapshot=args.skip_final_snapshot,
-                storage_encrypted=True,
-                opts=pulumi.ResourceOptions(parent=self, depends_on=[subnet_group]),
-            )
+        cluster = aws.rds.Cluster(
+            resource_name=f"{args.resource_name}-cluster",
+            cluster_identifier_prefix=f"{name}-cluster-",
+            database_name=args.database_name or name,
+            master_username=args.master_username or name,
+            master_password=aurora_master_password.result,
+            # Aurora Serverless v2 does not currently support the Data API
+            enable_http_endpoint=False,
+            iam_database_authentication_enabled=True,
+            vpc_security_group_ids=[security_group.id],
+            db_subnet_group_name=subnet_group.name,
+            db_cluster_parameter_group_name=(
+                "default.aurora-mysql8.0"
+                if args.database_type == "mysql"
+                else "default.aurora-postgresql13"
+            ),
+            engine=(
+                aws.rds.EngineType.AURORA_MYSQL
+                if args.database_type == "mysql"
+                else aws.rds.EngineType.AURORA_POSTGRESQL
+            ),
+            engine_version=(
+                "8.0.mysql_aurora.3.02.0" if args.database_type == "mysql" else "13.7"
+            ),
+            port=port,
+            serverlessv2_scaling_configuration=aws.rds.ClusterServerlessv2ScalingConfigurationArgs(
+                min_capacity=0.5,
+                max_capacity=128,
+            ),
+            # iam_roles=[aws.iam.get_role(name="AWSServiceRoleForRDS").arn],
+            # https://github.com/terraform-aws-modules/terraform-aws-rds-aurora/issues/129
+            skip_final_snapshot=args.skip_final_snapshot,
+            storage_encrypted=True,
+            opts=pulumi.ResourceOptions(parent=self, depends_on=[subnet_group]),
+        )
         # Create a cluster instance
 
         aws.rds.ClusterInstance(
@@ -210,13 +160,14 @@ class ServerlessDatabase(pulumi.ComponentResource):
 
         # Build the URI for convenience
         outputs["uri"] = pulumi.Output.all(
+            database_type=args.database_type,
             user=cluster.master_username,
             password=cluster.master_password,
             host=cluster.endpoint,
             port=cluster.port,
             name=cluster.database_name,
         ).apply(
-            lambda kwargs: "postgresql://{user}:{password}@{host}:{port}/{name}".format(
+            lambda kwargs: "{database_type}://{user}:{password}@{host}:{port}/{name}".format(
                 **kwargs
             )
         )
@@ -297,33 +248,6 @@ class ServerlessDatabase(pulumi.ComponentResource):
                 ]
             )
             outputs["policy_document"] = data_api_policy_document.json
-
-            if args.s3_extension:
-                # PostgreSQL extensions required for S3 export
-
-                aws_commons = PgExtension(
-                    resource_name="postgres-extension-aws-commons",
-                    name="aws_commons",
-                    aws_profile=profile,
-                    aws_region=region,
-                    cluster_arn=cluster.arn,
-                    secret_arn=secret.arn,
-                )
-
-                PgExtension(
-                    resource_name="postgres-extension-aws-s3",
-                    name="aws_s3",
-                    aws_profile=profile,
-                    aws_region=region,
-                    cluster_arn=cluster.arn,
-                    secret_arn=secret.arn,
-                    opts=pulumi.ResourceOptions(
-                        depends_on=[
-                            # Commons needs to be created before we can make the aws_s3 ext
-                            aws_commons
-                        ]
-                    ),
-                )
 
         self.set_outputs(outputs)
 
