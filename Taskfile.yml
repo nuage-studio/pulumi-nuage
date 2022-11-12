@@ -28,23 +28,23 @@ tasks:
 
   test:
     desc: Run python integration tests.
+    deps:
+      - install
     cmds:
-      - python3 -m unittest discover provider/cmd/pulumi-resource-nuage/tests/
+      - pytest --capture=sys provider/cmd/pulumi-resource-nuage/pytests/tests/ -s
 
   install:
     desc: Install requirements for integration tests.
     deps:
       - virtualenv
     cmds:
-      - source provider/cmd/pulumi-resource-nuage/tests/venv/bin/activate
-      - pip install -U pip wheel
-      - pip install -r provider/cmd/pulumi-resource-nuage/requirements.txt
+      - provider/cmd/pulumi-resource-nuage/pytests/venv/bin/pip install -r provider/cmd/pulumi-resource-nuage/pytests/requirements.txt
     sources:
-      - ./provider/cmd/pulumi-resource-nuage/requirements.txt
+      - ./provider/cmd/pulumi-resource-nuage/pytests/requirements.txt
 
   virtualenv:
     desc: Creates a virtualenv for integration tests.
     cmds:
-      - python3 -m venv provider/cmd/pulumi-resource-nuage/tests/venv
+      - python3 -m venv provider/cmd/pulumi-resource-nuage/pytests/venv
     status:
-      - test -d provider/cmd/pulumi-resource-nuage/tests/venv
+      - test -d provider/cmd/pulumi-resource-nuage/pytests/venv
