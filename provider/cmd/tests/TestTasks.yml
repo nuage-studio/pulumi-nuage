@@ -1,0 +1,30 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Run python integration tests.
+    deps:
+      - install
+    cmds:
+      - .venv/bin/python -m pytest --capture=sys ./tests/ -s
+
+  install:
+    desc: Installs the Python dependencies
+    deps:
+      - virtualenv
+    preconditions:
+      - sh: command -v poetry
+        msg: "Make sure Poetry is installed"
+    cmds:
+      - poetry install --no-root
+    sources:
+      - poetry.lock
+      - pyproject.toml
+      - poetry.toml
+
+  virtualenv:
+    desc: Creates a Python virtualenv for the project
+    cmds:
+      - python3.9 -m venv .venv
+    status:
+      - test -d .venv
