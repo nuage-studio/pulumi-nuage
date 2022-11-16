@@ -6,7 +6,7 @@ tasks:
     deps:
       - install
     cmds:
-      - .venv/bin/python -m pytest --capture=sys ./tests/ -s
+      - poetry run pytest --capture=sys ./tests/ -s
 
   install:
     desc: Installs the Python dependencies
