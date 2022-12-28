@@ -4,8 +4,7 @@ meta_desc: Provides an overview of the Nuage Provider for Pulumi.
 layout: overview
 ---
 
-Pulumi Nuage provider can be used to provision AWS cloud resources  any of the network resources available in a Unifi based network controlled by a Unifi controller.
-The Unifi provider must be configured with credentials to deploy and update resources in Unifi.
+Pulumi Nuage provider can be used to provision AWS cloud resources.
 
 ## Example
 
