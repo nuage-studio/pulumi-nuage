@@ -1,10 +1,5 @@
 version: "3"
 
-includes:
-  test:
-    dir: ./provider/cmd/tests/
-    taskfile: ./provider/cmd/tests/TestTasks.yml
-
 tasks:
   sdk:
     desc: Generates SDKs
@@ -30,3 +25,26 @@ tasks:
       - bin/**/*
       - provider/cmd/pulumi-resource-nuage/build/**/*
       - provider/cmd/pulumi-resource-nuage/nuage_provider.egg-info/*
+
+  test:
+    desc: Run python integration tests.
+    cmds:
+      - python3 -m unittest discover provider/cmd/pulumi-resource-nuage/tests/
+
+  install:
+    desc: Install requirements for integration tests.
+    deps:
+      - virtualenv
+    cmds:
+      - source provider/cmd/pulumi-resource-nuage/tests/venv/bin/activate
+      - pip install -U pip wheel
+      - pip install -r provider/cmd/pulumi-resource-nuage/requirements.txt
+    sources:
+      - ./provider/cmd/pulumi-resource-nuage/requirements.txt
+
+  virtualenv:
+    desc: Creates a virtualenv for integration tests.
+    cmds:
+      - python3 -m venv provider/cmd/pulumi-resource-nuage/tests/venv
+    status:
+      - test -d provider/cmd/pulumi-resource-nuage/tests/venv

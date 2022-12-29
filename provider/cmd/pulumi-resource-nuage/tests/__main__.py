@@ -1,18 +1,74 @@
 """An AWS Python Pulumi program"""
 
-import pulumi
-from constants import DB
+from os import name
 
-# Linked resources
-from .vpc import vpc
+import pulumi
+import pulumi_awsx as awsx
+from constants import BUCKET_NAME, LAMBDA, DB
+
+# Append provider root to path.
+import sys
+
+sys.path.append("../")
 
 # Import pulumi provider methods.
+from nuage_provider.bucket_nuage import bucket_nuage
 from nuage_provider.serverless_database import (
     ServerlessDatabase,
     ServerlessDatabaseArgs,
 )
+from nuage_provider.container_function import (
+    ContainerFunction,
+    ContainerFunctionArgs,
+    Architecture,
+)
 
-# MySQL DATABASE
+
+# S3 Bucket
+bucket = bucket_nuage(name=BUCKET_NAME)
+pulumi.export("bucketName", bucket.bucket.bucket)
+
+# Lambda Container
+function = ContainerFunction(
+    name=LAMBDA["NAME"],
+    args=ContainerFunctionArgs(
+        resource_name=None,
+        description="Integration Tests Lambda Function",
+        dockerfile="./lambda/Dockerfile.lambda",
+        context="./lambda/",
+        repository=None,  # "test-ecr"
+        ecr_repository_name="itest-lambda-ecr",
+        architecture=LAMBDA["ARCHITECTURE"],
+        memory_size=LAMBDA["MEMORY"],
+        timeout=LAMBDA["TIMEOUT"],
+        environment={"ENV_TEST_VAL": LAMBDA["ENV_TEST_VAL"]},
+        policy_document=None,
+        keep_warm=True,
+        url=False,
+    ),
+)
+pulumi.export("lambda_arn", function.function.arn)
+pulumi.export("lambda_name", function.function.name)
+pulumi.export("lambda_role_arn", function.role.arn)
+if function.function_url:
+    pulumi.export("lambda_function_url", function.function_url)
+
+# DATABASE
+vpc = awsx.ec2.Vpc(
+    resource_name=f"itest-vpc",
+    enable_dns_hostnames=True,
+    number_of_availability_zones=2,
+    nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(
+        strategy=awsx.ec2.NatGatewayStrategy.NONE
+    ),
+    subnet_specs=[
+        awsx.ec2.SubnetSpecArgs(
+            cidr_mask=24,
+            type=awsx.ec2.SubnetType.PUBLIC,
+        )
+    ],
+)
+
 database = ServerlessDatabase(
     name=DB["MYSQL_NAME"],
     args=ServerlessDatabaseArgs(
@@ -35,7 +91,7 @@ pulumi.export("database_mysql_host", database.host)
 pulumi.export("database_mysql_uri", database.uri)
 pulumi.export("database_mysql_cluster_arn", database.cluster_arn)
 
-# PostgreSQL DATABASE
+
 database = ServerlessDatabase(
     name=DB["POSTGRESQL_NAME"],
     args=ServerlessDatabaseArgs(
@@ -48,6 +104,7 @@ database = ServerlessDatabase(
         ip_whitelist=None,
         skip_final_snapshot=True,
         data_api=False,
+        s3_extension=False,
     ),
 )
 
