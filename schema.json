@@ -187,6 +187,42 @@
                 "cluster_arn",
                 "uri"
             ]
+        },
+        "nuage:aws:Bastion": {
+            "isComponent": true,
+            "inputProperties": {
+                "vpcId": {
+                    "type": "string",
+                    "description":"Vpc id."
+                },
+                "vpcSubnets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description":"List of subnet ip addresses of Vpc."
+                },
+                "sshPort": {
+                    "type": "number",
+                    "description":"Ssh port for bastion host. Defaults to 22"
+                }
+            },
+            "requiredInputs": [
+                "vpcId",
+                "vpcSubnets"
+            ],
+            "properties": {
+                "public_ip": {
+                    "type": "string"
+                },
+                "private_key_pem": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "public_ip",
+                "private_key_pem"
+            ]
         }    
     },
     "language": {
