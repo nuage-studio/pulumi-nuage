@@ -36,7 +36,7 @@ class ServerlessDatabaseArgs:
             ip_whitelist=inputs.get("ipWhitelist", None),
             skip_final_snapshot=inputs.get("skipFinalSnapshot", False),
             data_api=inputs.get("dataApi", False),
-            bastion_subnets=inputs.get("bastionSubnets", False),
+            bastion_subnets=inputs.get("bastionSubnets", []),
             bastion_enabled=inputs.get("bastionEnabled", False),
         )
 
