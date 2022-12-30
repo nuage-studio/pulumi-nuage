@@ -14,14 +14,16 @@ import (
 type ServerlessDatabase struct {
 	pulumi.ResourceState
 
-	Cluster_arn     pulumi.StringOutput    `pulumi:"cluster_arn"`
-	Host            pulumi.StringOutput    `pulumi:"host"`
-	Name            pulumi.StringOutput    `pulumi:"name"`
-	Password        pulumi.StringPtrOutput `pulumi:"password"`
-	Policy_document pulumi.StringPtrOutput `pulumi:"policy_document"`
-	Port            pulumi.Float64Output   `pulumi:"port"`
-	Uri             pulumi.StringOutput    `pulumi:"uri"`
-	User            pulumi.StringOutput    `pulumi:"user"`
+	Bastion_ip          pulumi.StringPtrOutput `pulumi:"bastion_ip"`
+	Bastion_private_key pulumi.StringPtrOutput `pulumi:"bastion_private_key"`
+	Cluster_arn         pulumi.StringOutput    `pulumi:"cluster_arn"`
+	Host                pulumi.StringOutput    `pulumi:"host"`
+	Name                pulumi.StringOutput    `pulumi:"name"`
+	Password            pulumi.StringPtrOutput `pulumi:"password"`
+	Policy_document     pulumi.StringPtrOutput `pulumi:"policy_document"`
+	Port                pulumi.Float64Output   `pulumi:"port"`
+	Uri                 pulumi.StringOutput    `pulumi:"uri"`
+	User                pulumi.StringOutput    `pulumi:"user"`
 }
 
 // NewServerlessDatabase registers a new resource with the given unique name, arguments, and options.
@@ -33,9 +35,6 @@ func NewServerlessDatabase(ctx *pulumi.Context,
 
 	if args.DatabaseType == nil {
 		return nil, errors.New("invalid value for required argument 'DatabaseType'")
-	}
-	if args.ResourceName == nil {
-		return nil, errors.New("invalid value for required argument 'ResourceName'")
 	}
 	if args.VpcId == nil {
 		return nil, errors.New("invalid value for required argument 'VpcId'")
@@ -53,6 +52,10 @@ func NewServerlessDatabase(ctx *pulumi.Context,
 
 type serverlessDatabaseArgs struct {
 	// Enable data api. Defaults to `false`
+	BastionEnabled *bool `pulumi:"bastionEnabled"`
+	// List of public subnet ip addresses for the bastion host.
+	BastionSubnets []string `pulumi:"bastionSubnets"`
+	// Enable data api. Defaults to `false`
 	DataApi *bool `pulumi:"dataApi"`
 	// Name of the database.
 	DatabaseName *string `pulumi:"databaseName"`
@@ -62,10 +65,6 @@ type serverlessDatabaseArgs struct {
 	IpWhitelist []string `pulumi:"ipWhitelist"`
 	// Master user name of the db.
 	MasterUserName *string `pulumi:"masterUserName"`
-	// Resource name.
-	ResourceName string `pulumi:"resourceName"`
-	// Enable s3 extension. Defaults to `false`
-	S3Extension *bool `pulumi:"s3Extension"`
 	// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
 	SkipFinalSnapshot *bool `pulumi:"skipFinalSnapshot"`
 	// Vpc id.
@@ -77,6 +76,10 @@ type serverlessDatabaseArgs struct {
 // The set of arguments for constructing a ServerlessDatabase resource.
 type ServerlessDatabaseArgs struct {
 	// Enable data api. Defaults to `false`
+	BastionEnabled pulumi.BoolPtrInput
+	// List of public subnet ip addresses for the bastion host.
+	BastionSubnets pulumi.StringArrayInput
+	// Enable data api. Defaults to `false`
 	DataApi pulumi.BoolPtrInput
 	// Name of the database.
 	DatabaseName pulumi.StringPtrInput
@@ -86,10 +89,6 @@ type ServerlessDatabaseArgs struct {
 	IpWhitelist pulumi.StringArrayInput
 	// Master user name of the db.
 	MasterUserName pulumi.StringPtrInput
-	// Resource name.
-	ResourceName pulumi.StringInput
-	// Enable s3 extension. Defaults to `false`
-	S3Extension pulumi.BoolPtrInput
 	// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
 	SkipFinalSnapshot pulumi.BoolPtrInput
 	// Vpc id.

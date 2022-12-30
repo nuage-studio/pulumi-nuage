@@ -104,10 +104,6 @@
         "nuage:aws:ServerlessDatabase": {
             "isComponent": true,
             "inputProperties": {
-                "resourceName": {
-                    "type": "string",
-                    "description":"Resource name."
-                },
                 "databaseType": {
                     "type": "string",
                     "description":"Database type. `mysql` or `postgresql`"
@@ -145,10 +141,20 @@
                 "dataApi": {
                     "type": "boolean",
                     "description":"Enable data api. Defaults to `false`"
+                },
+                "bastionSubnets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description":"List of public subnet ip addresses for the bastion host."
+                },
+                "bastionEnabled": {
+                    "type": "boolean",
+                    "description":"Enable data api. Defaults to `false`"
                 }
             },
             "requiredInputs": [
-                "resourceName",
                 "vpcId",
                 "vpcSubnets",
                 "databaseType"
@@ -176,6 +182,12 @@
                     "type": "string"
                 },
                 "policy_document": {
+                    "type": "string"
+                },
+                "bastion_ip": {
+                    "type": "string"
+                },
+                "bastion_private_key": {
                     "type": "string"
                 }
             },

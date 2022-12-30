@@ -83,6 +83,8 @@ def _create_database(
             "name": created_resource.name,
             "cluster_arn": created_resource.cluster_arn,
             "uri": created_resource.uri,
+            "bastion_ip": created_resource.bastion_ip,
+            "bastion_private_key": created_resource.bastion_private_key,
         },
     )
 

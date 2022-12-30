@@ -12,6 +12,12 @@ namespace Pulumi.Nuage.Aws
     [NuageResourceType("nuage:aws:ServerlessDatabase")]
     public partial class ServerlessDatabase : Pulumi.ComponentResource
     {
+        [Output("bastion_ip")]
+        public Output<string?> Bastion_ip { get; private set; } = null!;
+
+        [Output("bastion_private_key")]
+        public Output<string?> Bastion_private_key { get; private set; } = null!;
+
         [Output("cluster_arn")]
         public Output<string> Cluster_arn { get; private set; } = null!;
 
@@ -67,6 +73,24 @@ namespace Pulumi.Nuage.Aws
         /// <summary>
         /// Enable data api. Defaults to `false`
         /// </summary>
+        [Input("bastionEnabled")]
+        public Input<bool>? BastionEnabled { get; set; }
+
+        [Input("bastionSubnets")]
+        private InputList<string>? _bastionSubnets;
+
+        /// <summary>
+        /// List of public subnet ip addresses for the bastion host.
+        /// </summary>
+        public InputList<string> BastionSubnets
+        {
+            get => _bastionSubnets ?? (_bastionSubnets = new InputList<string>());
+            set => _bastionSubnets = value;
+        }
+
+        /// <summary>
+        /// Enable data api. Defaults to `false`
+        /// </summary>
         [Input("dataApi")]
         public Input<bool>? DataApi { get; set; }
 
@@ -99,12 +123,6 @@ namespace Pulumi.Nuage.Aws
         /// </summary>
         [Input("masterUserName")]
         public Input<string>? MasterUserName { get; set; }
-
-        /// <summary>
-        /// Resource name.
-        /// </summary>
-        [Input("resourceName", required: true)]
-        public Input<string> ResourceName { get; set; } = null!;
 
         /// <summary>
         /// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`

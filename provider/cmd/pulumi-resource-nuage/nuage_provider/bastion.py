@@ -105,7 +105,6 @@ class Bastion(pulumi.ComponentResource):
             ami=bastion_ami.id,
             key_name=key_pair.key_name,
             tags={"Name": f"{name} bastion instance"},
-            user_data_replace_on_change=True,
             vpc_security_group_ids=[security_group.id],
             subnet_id=args.vpc_subnets[0],
             associate_public_ip_address=True,
