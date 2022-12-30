@@ -11,6 +11,10 @@ vpc = awsx.ec2.Vpc(
         awsx.ec2.SubnetSpecArgs(
             cidr_mask=24,
             type=awsx.ec2.SubnetType.PUBLIC,
-        )
+        ),
+        awsx.ec2.SubnetSpecArgs(
+            cidr_mask=24,
+            type=awsx.ec2.SubnetType.PRIVATE,
+        ),
     ],
 )

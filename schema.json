@@ -104,10 +104,6 @@
         "nuage:aws:ServerlessDatabase": {
             "isComponent": true,
             "inputProperties": {
-                "resourceName": {
-                    "type": "string",
-                    "description":"Resource name."
-                },
                 "databaseType": {
                     "type": "string",
                     "description":"Database type. `mysql` or `postgresql`"
@@ -145,10 +141,20 @@
                 "dataApi": {
                     "type": "boolean",
                     "description":"Enable data api. Defaults to `false`"
+                },
+                "bastionSubnets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description":"List of public subnet ip addresses for the bastion host."
+                },
+                "bastionEnabled": {
+                    "type": "boolean",
+                    "description":"Enable data api. Defaults to `false`"
                 }
             },
             "requiredInputs": [
-                "resourceName",
                 "vpcId",
                 "vpcSubnets",
                 "databaseType"
@@ -177,6 +183,12 @@
                 },
                 "policy_document": {
                     "type": "string"
+                },
+                "bastion_ip": {
+                    "type": "string"
+                },
+                "bastion_private_key": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -186,6 +198,42 @@
                 "name",
                 "cluster_arn",
                 "uri"
+            ]
+        },
+        "nuage:aws:Bastion": {
+            "isComponent": true,
+            "inputProperties": {
+                "vpcId": {
+                    "type": "string",
+                    "description":"Vpc id."
+                },
+                "vpcSubnets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description":"List of subnet ip addresses of Vpc."
+                },
+                "sshPort": {
+                    "type": "number",
+                    "description":"Ssh port for bastion host. Defaults to 22"
+                }
+            },
+            "requiredInputs": [
+                "vpcId",
+                "vpcSubnets"
+            ],
+            "properties": {
+                "public_ip": {
+                    "type": "string"
+                },
+                "private_key_pem": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "public_ip",
+                "private_key_pem"
             ]
         }    
     },

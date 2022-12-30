@@ -1,6 +1,9 @@
+from io import StringIO
 import pytest
 import pymysql
 import psycopg2
+import paramiko
+from sshtunnel import SSHTunnelForwarder
 from ..constants import DB
 
 
@@ -34,16 +37,35 @@ class TestDatabase:
         database_port = stack_outputs.get("database_postgresql_port").value
         database_host = stack_outputs.get("database_postgresql_host").value
 
+        # Get bastion config
+        bastion_ip = stack_outputs.get("database_postgresql_bastion_ip").value
+        bastion_private_key = stack_outputs.get(
+            "database_postgresql_bastion_private_key"
+        ).value
+
+        keyfile = StringIO(bastion_private_key)
+        pkey = paramiko.RSAKey.from_private_key(keyfile)
+
+        tunnel = SSHTunnelForwarder(
+            bastion_ip,
+            ssh_username="ubuntu",
+            ssh_pkey=pkey,
+            remote_bind_address=(database_host, database_port),
+            local_bind_address=("127.0.0.1", database_port),
+        )
+
+        tunnel.start()
         conn = psycopg2.connect(
             dbname=database_name,
             user=database_username,
-            host=database_host,
             password=database_password,
-            port=database_port,
+            host=tunnel.local_bind_host,
+            port=tunnel.local_bind_port,
         )
         yield conn
         # Close connection at the end of tests.
         conn.close()
+        tunnel.stop()
 
     def test_postgresql_output_name(self, stack_outputs):
         # Test if database name setting is valid.

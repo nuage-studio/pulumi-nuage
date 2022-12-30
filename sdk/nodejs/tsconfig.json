@@ -13,6 +13,7 @@
         "strict": true
     },
     "files": [
+        "aws/bastion.ts",
         "aws/bucket_nuage.ts",
         "aws/containerFunction.ts",
         "aws/index.ts",

@@ -7,6 +7,9 @@ tasks:
       - install
     cmds:
       - poetry run pytest --capture=sys ./tests/ -s
+    env:
+      AWS_PROFILE: "nuage-dev"
+      AWS_DEFAULT_REGION: "eu-west-1"
 
   install:
     desc: Installs the Python dependencies

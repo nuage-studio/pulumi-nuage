@@ -22,6 +22,7 @@ _utilities.register(
   "mod": "aws",
   "fqn": "pulumi_nuage.aws",
   "classes": {
+   "nuage:aws:Bastion": "Bastion",
    "nuage:aws:ContainerFunction": "ContainerFunction",
    "nuage:aws:ServerlessDatabase": "ServerlessDatabase",
    "nuage:aws:bucket_nuage": "Bucket_nuage"
