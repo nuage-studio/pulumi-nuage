@@ -21,5 +21,5 @@ def stack_outputs():
     yield outputs
 
     # Teardown - Destroy stack
-    # stack.destroy(on_output=print)
-    # stack.workspace.remove_stack(STACK_NAME)
+    stack.destroy(on_output=print)
+    stack.workspace.remove_stack(STACK_NAME)
