@@ -64,8 +64,6 @@ type serverlessDatabaseArgs struct {
 	MasterUserName *string `pulumi:"masterUserName"`
 	// Resource name.
 	ResourceName string `pulumi:"resourceName"`
-	// Enable s3 extension. Defaults to `false`
-	S3Extension *bool `pulumi:"s3Extension"`
 	// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
 	SkipFinalSnapshot *bool `pulumi:"skipFinalSnapshot"`
 	// Vpc id.
@@ -88,8 +86,6 @@ type ServerlessDatabaseArgs struct {
 	MasterUserName pulumi.StringPtrInput
 	// Resource name.
 	ResourceName pulumi.StringInput
-	// Enable s3 extension. Defaults to `false`
-	S3Extension pulumi.BoolPtrInput
 	// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
 	SkipFinalSnapshot pulumi.BoolPtrInput
 	// Vpc id.
