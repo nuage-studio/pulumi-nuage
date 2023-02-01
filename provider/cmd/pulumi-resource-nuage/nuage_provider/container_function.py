@@ -296,12 +296,7 @@ class ContainerFunction(pulumi.ComponentResource):
             role=self.role.arn,
             environment=aws.lambda_.FunctionEnvironmentArgs(variables=args.environment) if args.environment else None,
             tracing_config=aws.lambda_.FunctionTracingConfigArgs(mode="Active"),
-            opts=pulumi.ResourceOptions(
-                parent=self,
-                depends_on=[
-                    
-                ]
-            ),
+            opts=pulumi.ResourceOptions(parent=self),
         )
 
         if args.keep_warm:
