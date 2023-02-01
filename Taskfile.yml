@@ -45,7 +45,9 @@ tasks:
     desc: Install Project locally
     deps:
       - distribute
+    vars:
+      IMAGE_NAME: $(sh DetectPlatformName.sh)
     cmds:
       - make install
       - pulumi plugin rm resource nuage -y
-      - pulumi plugin install resource nuage ${versionNumber} --file dist/pulumi-resource-nuage-v${versionNumber}-darwin-amd64.tar.gz
+      - pulumi plugin install resource nuage ${versionNumber} --file dist/pulumi-resource-nuage-v${versionNumber}-{{.IMAGE_NAME}}.tar.gz
