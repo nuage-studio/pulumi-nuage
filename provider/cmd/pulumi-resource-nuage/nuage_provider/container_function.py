@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import json
 from enum import IntEnum
 from pathlib import Path
@@ -21,6 +22,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_awsx as awsx
 import pulumi_docker as docker
+# from pulumi_command import local
 
 class Architecture(IntEnum):
     """CPU architecture & instruction set to use"""
@@ -121,14 +123,42 @@ class ContainerFunction(pulumi.ComponentResource):
                 resource_name=f"{args.ecr_repository_name}-repository",
                 name=args.ecr_repository_name,
             ).url
+
+            repository_lifecycle = aws.ecr.LifecyclePolicy(
+                f"{args.ecr_repository_name}-ecr-lifecycle",
+                repository=args.ecr_repository_name,
+                policy="""{
+                "rules": [
+                    {
+                        "rulePriority": 1,
+                        "description": "Expire images older than 30 days",
+                        "selection": {
+                            "tagStatus": "untagged",
+                            "countType": "sinceImagePushed",
+                            "countUnit": "days",
+                            "countNumber": 30
+                        },
+                        "action": {
+                            "type": "expire"
+                        }
+                    }
+                ]
+            }
+            """)
+
         architecture = Architecture[args.architecture] 
-        
+
+        extra_options = ["--platform", architecture.docker_value, "--quiet"]
+        if os.getenv("GITHUB_ACTIONS"):
+            # If we're running on a GitHub Actions runner, enable Caching API
+            extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
+
         if args.dockerfile:
             # Use specified dockerfile.
             build = docker.DockerBuild(
                 context=args.context or "./",
                 dockerfile=args.dockerfile,
-                extra_options=["--platform", architecture.docker_value, "--quiet"]
+                extra_options=extra_options
             )
             image_ignore_changes = []
         else:
@@ -143,7 +173,7 @@ class ContainerFunction(pulumi.ComponentResource):
             build = docker.DockerBuild(
                 context="./",
                 dockerfile="./Dockerfile.awslambda.generated",
-                extra_options=["--platform", architecture.docker_value, "--quiet"]
+                extra_options=extra_options
             )
             # Ignore changes on image_name if default docker image is used.
             image_ignore_changes = ["image_name"]
@@ -157,6 +187,7 @@ class ContainerFunction(pulumi.ComponentResource):
             name=f"{name}-image",
             build = build,
             image_name = repository,
+            local_image_name=f"{name}",
             registry=docker.ImageRegistry(
                 server=auth.proxy_endpoint,
                 username=auth.user_name,
@@ -167,6 +198,16 @@ class ContainerFunction(pulumi.ComponentResource):
                 ignore_changes=image_ignore_changes
             )
         )
+        
+        # FIXME: Thhis doesn't work because pulumi Command doesn't have option to run on update right now 
+        # As it work only on create, it keeps having the same tag on updates
+        #untag_command = local.Command(
+        #    f"untag-{name}-image",
+        #    create=repository.apply(
+        #        lambda repository_url: f"docker rmi {repository_url}"
+        #    ), 
+        #    opts=pulumi.ResourceOptions(depends_on=[image])
+        #)
         
         # Define inline policies for role definition
         policy_documents = [
