@@ -116,35 +116,38 @@ class ContainerFunction(pulumi.ComponentResource):
         
         if args.repository:
             # Get existing repository using repository name.
-            repository = aws.ecr.get_repository(name=args.repository).repository_url
+            repository_url = aws.ecr.get_repository(name=args.repository).repository_url
         else:
             # If repository is not defined, create new ecr repository using `ecr_repository_name`.
             repository = awsx.ecr.Repository(
                 resource_name=f"{args.ecr_repository_name}-repository",
                 name=args.ecr_repository_name,
-            ).url
+            )
+            repository_url = repository.url
 
             repository_lifecycle = aws.ecr.LifecyclePolicy(
                 f"{args.ecr_repository_name}-ecr-lifecycle",
                 repository=args.ecr_repository_name,
                 policy="""{
-                "rules": [
-                    {
-                        "rulePriority": 1,
-                        "description": "Expire images older than 30 days",
-                        "selection": {
-                            "tagStatus": "untagged",
-                            "countType": "sinceImagePushed",
-                            "countUnit": "days",
-                            "countNumber": 30
-                        },
-                        "action": {
-                            "type": "expire"
+                    "rules": [
+                        {
+                            "rulePriority": 1,
+                            "description": "Expire images older than 30 days",
+                            "selection": {
+                                "tagStatus": "untagged",
+                                "countType": "sinceImagePushed",
+                                "countUnit": "days",
+                                "countNumber": 30
+                            },
+                            "action": {
+                                "type": "expire"
+                            }
                         }
-                    }
-                ]
-            }
-            """)
+                    ]
+                }
+                """,
+                opts=pulumi.ResourceOptions(parent=repository)
+            )
 
         architecture = Architecture[args.architecture] 
 
@@ -179,14 +182,14 @@ class ContainerFunction(pulumi.ComponentResource):
             image_ignore_changes = ["image_name"]
         
         # Authenticate with ECR and get cridentals.
-        registry_id = repository.apply(lambda x: x.split(".")[0])
+        registry_id = repository_url.apply(lambda x: x.split(".")[0])
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
         
         # Build and Push docker Image.
         image = docker.Image(
             name=f"{name}-image",
             build = build,
-            image_name = repository,
+            image_name = repository_url,
             local_image_name=f"{name}",
             registry=docker.ImageRegistry(
                 server=auth.proxy_endpoint,
@@ -203,18 +206,43 @@ class ContainerFunction(pulumi.ComponentResource):
         # As it work only on create, it keeps having the same tag on updates
         #untag_command = local.Command(
         #    f"untag-{name}-image",
-        #    create=repository.apply(
+        #    create=repository_url.apply(
         #        lambda repository_url: f"docker rmi {repository_url}"
         #    ), 
         #    opts=pulumi.ResourceOptions(depends_on=[image])
         #)
         
         # Define inline policies for role definition
+        log_group = aws.cloudwatch.LogGroup(
+            f"{name}-log-group", 
+            name=f"/aws/lambda/{name}",
+            retention_in_days=90
+        )
+        lambda_logging = aws.iam.Policy(
+            f"{name}-logging-policy",
+            path="/",
+            description="IAM policy for logging from a lambda",
+            policy="""{
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ],
+                "Resource": "arn:aws:logs:*:*:*",
+                "Effect": "Allow"
+                }
+            ]
+            }
+            """
+        )
+        
         policy_documents = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(   
-                name="PolicyAWSLambdaBasicExecutionRole",
-                policy=aws.iam.get_policy(name="AWSLambdaBasicExecutionRole").policy,
+                name=f"{name}-logging-policy",
+                policy=lambda_logging.policy,
             ),
             aws.iam.RoleInlinePolicyArgs(   
                 name="PolicyCloudWatchLambdaInsightsExecutionRolePolicy",
@@ -268,7 +296,12 @@ class ContainerFunction(pulumi.ComponentResource):
             role=self.role.arn,
             environment=aws.lambda_.FunctionEnvironmentArgs(variables=args.environment) if args.environment else None,
             tracing_config=aws.lambda_.FunctionTracingConfigArgs(mode="Active"),
-            opts=pulumi.ResourceOptions(parent=self),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[
+                    
+                ]
+            ),
         )
 
         if args.keep_warm:
