@@ -22,6 +22,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_awsx as awsx
 import pulumi_docker as docker
+import pulumi_random as random
 # from pulumi_command import local
 
 class Architecture(IntEnum):
@@ -43,11 +44,11 @@ class Architecture(IntEnum):
         return mapping[self.value]
         
 class ContainerFunctionArgs:        
-    resource_name: Optional[pulumi.Input[str]]
+    name: Optional[pulumi.Input[str]]
+    name_prefix: Optional[pulumi.Input[str]]
     description: Optional[pulumi.Input[str]]
     dockerfile: Optional[pulumi.Input[str]]
     context: Optional[pulumi.Input[str]]
-    repository: pulumi.Input[str]    
     ecr_repository_name: pulumi.Input[str]    
     architecture: Optional[str]
     memory_size: Optional[pulumi.Input[int]]
@@ -61,11 +62,11 @@ class ContainerFunctionArgs:
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> 'ContainerFunctionArgs':
         return ContainerFunctionArgs(
-            resource_name = inputs.get('resourceName', None),
+            name = inputs.get('name', None),
+            name_prefix = inputs.get('namePrefix', None),
             description = inputs.get('description', None),
             dockerfile = inputs.get('dockerfile', None),
             context = inputs.get('context', None),
-            repository = inputs.get('repository', None),
             ecr_repository_name = inputs.get('ecrRepositoryName', None),
             architecture = inputs.get('architecture', "x86_64"),
             memory_size = inputs.get('memorySize', 512),
@@ -79,11 +80,11 @@ class ContainerFunctionArgs:
 
     def __init__(
         self,         
-        resource_name: Optional[pulumi.Input[str]],
+        name: Optional[pulumi.Input[str]],
+        name_prefix: Optional[pulumi.Input[str]],
         description: Optional[pulumi.Input[str]],
         dockerfile: Optional[pulumi.Input[Union[str, Path]]],
         context: Optional[pulumi.Input[Union[str, Path]]],
-        repository: Optional[pulumi.Input[str]],
         ecr_repository_name: Optional[pulumi.Input[str]], 
         memory_size: Optional[pulumi.Input[int]],
         timeout: Optional[pulumi.Input[int]],
@@ -94,11 +95,11 @@ class ContainerFunctionArgs:
         url: pulumi.Input[bool]
         #cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]] = None,
     ) -> None:
-        self.resource_name = resource_name
+        self.name = name
+        self.name_prefix = name_prefix
         self.description = description
         self.dockerfile = dockerfile
         self.context = context
-        self.repository = repository
         self.ecr_repository_name = ecr_repository_name                
         self.architecture = architecture
         self.memory_size = memory_size
@@ -113,39 +114,50 @@ class ContainerFunction(pulumi.ComponentResource):
     def __init__(self, name: str, args: ContainerFunctionArgs, props: Optional[dict] = None, opts: Optional[pulumi.ResourceOptions] = None) -> None:
 
         super().__init__("nuage:aws:ContainerFunction", name, props, opts)
+        if args.name_prefix and args.name:
+            raise Exception("name and name_prefix cannot be set at the same time.")
+        elif not (args.name_prefix or args.name):
+            raise Exception("Either name or name_prefix should be set.")
         
-        if args.repository:
-            # Get existing repository using repository name.
-            repository_url = aws.ecr.get_repository(name=args.repository).repository_url
-        else:
-            # If repository is not defined, create new ecr repository using `ecr_repository_name`.
-            repository = awsx.ecr.Repository(
-                resource_name=f"{args.ecr_repository_name}-repository",
-                name=args.ecr_repository_name,
+        if args.name_prefix:
+            suffix = random.RandomString(f"{args.name_prefix}-suffix",
+                length=5,
+                special=False
             )
-            repository_url = repository.url
+            common_name:str = f"{args.name_prefix}-{suffix.result}"
+        else:
+            common_name:str = args.name
+
+        if args.ecr_repository_name:
+            # Get existing repository using repository name.
+            repository = aws.ecr.get_repository_output(name=args.ecr_repository_name)
+        else:
+            # If repository is not defined, create new ecr repository using `name`.
+            repository = aws.ecr.Repository(
+                f"{common_name}-ecr-repository",
+                name=f"{common_name}-repo",
+            )
 
             repository_lifecycle = aws.ecr.LifecyclePolicy(
-                f"{args.ecr_repository_name}-ecr-lifecycle",
-                repository=args.ecr_repository_name,
-                policy="""{
-                    "rules": [
-                        {
-                            "rulePriority": 1,
-                            "description": "Expire images older than 30 days",
-                            "selection": {
-                                "tagStatus": "untagged",
-                                "countType": "sinceImagePushed",
-                                "countUnit": "days",
-                                "countNumber": 30
-                            },
-                            "action": {
-                                "type": "expire"
+                f"{common_name}-ecr-lifecycle",
+                repository=repository.name,
+                policy=json.dumps(
+                    {
+                        "rules": [
+                            {
+                                "rulePriority": 1,
+                                "description": "Expire images older than 30 days",
+                                "selection": {
+                                    "tagStatus": "untagged",
+                                    "countType": "sinceImagePushed",
+                                    "countUnit": "days",
+                                    "countNumber": 30,
+                                },
+                                "action": {"type": "expire"},
                             }
-                        }
-                    ]
-                }
-                """,
+                        ]
+                    }
+                ),
                 opts=pulumi.ResourceOptions(parent=repository)
             )
 
@@ -182,14 +194,14 @@ class ContainerFunction(pulumi.ComponentResource):
             image_ignore_changes = ["image_name"]
         
         # Authenticate with ECR and get cridentals.
-        registry_id = repository_url.apply(lambda x: x.split(".")[0])
+        registry_id = repository.repository_url.apply(lambda x: x.split(".")[0])
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
         
         # Build and Push docker Image.
         image = docker.Image(
-            name=f"{name}-image",
+            name=f"{common_name}-image",
             build = build,
-            image_name = repository_url,
+            image_name = repository.repository_url,
             local_image_name=f"{name}",
             registry=docker.ImageRegistry(
                 server=auth.proxy_endpoint,
@@ -214,15 +226,16 @@ class ContainerFunction(pulumi.ComponentResource):
         
         # Define inline policies for role definition
         log_group = aws.cloudwatch.LogGroup(
-            f"{name}-log-group", 
-            name=f"/aws/lambda/{name}",
+            f"{common_name}-log-group", 
+            name=f"/aws/lambda/{common_name}-function",
             retention_in_days=90
         )
         lambda_logging = aws.iam.Policy(
-            f"{name}-logging-policy",
+            f"{common_name}-logging-policy",
+            name=f"{common_name}-logging",
             path="/",
             description="IAM policy for logging from a lambda",
-            policy="""{
+            policy=json.dumps({
             "Version": "2012-10-17",
             "Statement": [
                 {
@@ -234,35 +247,34 @@ class ContainerFunction(pulumi.ComponentResource):
                 "Effect": "Allow"
                 }
             ]
-            }
-            """
+            })
         )
         
         policy_documents = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(   
-                name=f"{name}-logging-policy",
+                name=f"{common_name}-logging-policy",
                 policy=lambda_logging.policy,
             ),
             aws.iam.RoleInlinePolicyArgs(   
-                name="PolicyCloudWatchLambdaInsightsExecutionRolePolicy",
+                name=f"{common_name}-PolicyCloudWatchLambdaInsightsExecutionRolePolicy",
                 policy=aws.iam.get_policy(name="CloudWatchLambdaInsightsExecutionRolePolicy").policy,
             ),
             aws.iam.RoleInlinePolicyArgs(   
-                name="PolicyAWSXRayDaemonWriteAccess",
+                name=f"{common_name}-PolicyAWSXRayDaemonWriteAccess",
                 policy=aws.iam.get_policy(name="AWSXRayDaemonWriteAccess").policy,
             )
         ]
         if args.policy_document:
             # If we have a custom policy document, add it to the list
             policy_documents.append(aws.iam.RoleInlinePolicyArgs(   
-                name="PolicyCustom",
+                name=f"{common_name}-PolicyCustom",
                 policy=args.policy_document,
             ))
     
         self.role = aws.iam.Role(
-            resource_name=f"{name}-lambda-role",
-            name=f"{name}-lambda-role",
+            resource_name=f"{common_name}-lambda-role",
+            name=f"{common_name}-lambda-role",
             description=f"Role used by {name}",
             assume_role_policy=aws.iam.get_policy_document(
                 version="2012-10-17",
@@ -285,8 +297,8 @@ class ContainerFunction(pulumi.ComponentResource):
 
         # Lambda Function
         self.function = aws.lambda_.Function(
-            resource_name=args.resource_name or name,
-            name=name,
+            resource_name=f"{common_name}-function",
+            name=f"{common_name}",
             description=args.description,
             package_type="Image",
             image_uri=image.image_name,
@@ -302,15 +314,16 @@ class ContainerFunction(pulumi.ComponentResource):
         if args.keep_warm:
             # Keep warm by refreshing the lambda function every 5 minutes
             rule = aws.cloudwatch.EventRule(
-                resource_name=f"{name}-keep-warm-rule",
-                description=f"Refreshes {name} regularly to keep the container warm",
+                resource_name=f"{common_name}-keep-warm-rule",
+                name=f"{common_name}-keep-warm",
+                description=f"Refreshes {common_name} regularly to keep the container warm",
                 is_enabled=True,
                 role_arn=None,
                 schedule_expression="rate(5 minutes)",
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
             aws.lambda_.Permission(
-                resource_name=f"{name}-cloudwatch-invoke-permission",
+                resource_name=f"{common_name}-cloudwatch-invoke-permission",
                 action="lambda:InvokeFunction",
                 function=self.function.arn,
                 principal="events.amazonaws.com",
@@ -318,7 +331,7 @@ class ContainerFunction(pulumi.ComponentResource):
                 opts=pulumi.ResourceOptions(parent=rule),
             )
             aws.cloudwatch.EventTarget(
-                resource_name=f"{name}-keep-warm-target",
+                resource_name=f"{common_name}-keep-warm-target",
                 arn=self.function.arn,
                 input=json.dumps({"keep-warm":True}),
                 rule=rule.id,
@@ -330,7 +343,7 @@ class ContainerFunction(pulumi.ComponentResource):
         if args.url:
             # Lambda URL
             self.function_url = aws.lambda_.FunctionUrl(
-                resource_name=f"{name}/url",
+                resource_name=f"{common_name}-url",
                 function_name=self.function.name,
                 authorization_type="NONE",
                 cors=None,#args.cors_configuration,
