@@ -236,7 +236,7 @@ class ContainerFunction(pulumi.ComponentResource):
             create=pulumi.Output.all(repository.repository_url, resource_name).apply(
                 lambda args: f"docker rmi {args[0]}:{args[1]}"
             ),
-            opts=pulumi.ResourceOptions(depends_on=[image]),
+            opts=pulumi.ResourceOptions(parent=image),
         )
 
         # Define inline policies for role definition
