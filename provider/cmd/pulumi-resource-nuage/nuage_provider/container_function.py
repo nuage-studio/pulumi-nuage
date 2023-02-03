@@ -14,6 +14,7 @@
 
 import os
 import json
+import string
 from enum import IntEnum
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -22,7 +23,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_awsx as awsx
 import pulumi_docker as docker
-import pulumi_random as random
+import random
 # from pulumi_command import local
 
 class Architecture(IntEnum):
@@ -111,22 +112,19 @@ class ContainerFunctionArgs:
         #self.cors_configuration = cors_configuration
 
 class ContainerFunction(pulumi.ComponentResource):
-    def __init__(self, name: str, args: ContainerFunctionArgs, props: Optional[dict] = None, opts: Optional[pulumi.ResourceOptions] = None) -> None:
+    def __init__(self, resource_name: str, args: ContainerFunctionArgs, props: Optional[dict] = None, opts: Optional[pulumi.ResourceOptions] = None) -> None:
 
-        super().__init__("nuage:aws:ContainerFunction", name, props, opts)
+        super().__init__("nuage:aws:ContainerFunction", resource_name, props, opts)
         if args.name_prefix and args.name:
             raise Exception("name and name_prefix cannot be set at the same time.")
-        elif not (args.name_prefix or args.name):
-            raise Exception("Either name or name_prefix should be set.")
         
         if args.name_prefix:
-            suffix = random.RandomString(f"{args.name_prefix}-suffix",
-                length=5,
-                special=False
-            )
-            common_name:str = f"{args.name_prefix}-{suffix.result}"
+            suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=5))
+            common_name:str = f"{args.name_prefix}-{suffix}"
+        elif args.name:
+            common_name = args.name
         else:
-            common_name:str = args.name
+            common_name = resource_name
 
         if args.ecr_repository_name:
             # Get existing repository using repository name.
@@ -202,7 +200,7 @@ class ContainerFunction(pulumi.ComponentResource):
             name=f"{common_name}-image",
             build = build,
             image_name = repository.repository_url,
-            local_image_name=f"{name}",
+            local_image_name=common_name,
             registry=docker.ImageRegistry(
                 server=auth.proxy_endpoint,
                 username=auth.user_name,
@@ -275,7 +273,7 @@ class ContainerFunction(pulumi.ComponentResource):
         self.role = aws.iam.Role(
             resource_name=f"{common_name}-lambda-role",
             name=f"{common_name}-lambda-role",
-            description=f"Role used by {name}",
+            description=f"Role used by {common_name}",
             assume_role_policy=aws.iam.get_policy_document(
                 version="2012-10-17",
                 statements=[

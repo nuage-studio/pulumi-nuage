@@ -6,14 +6,14 @@ from nuage_provider.container_function import ContainerFunction, ContainerFuncti
 
 # Lambda Container
 function = ContainerFunction(
-    name=LAMBDA["NAME"],
+    LAMBDA["NAME"],
     args=ContainerFunctionArgs(
-        resource_name=None,
+        name=LAMBDA["NAME"],
+        name_prefix=None,
         description="Integration Tests Lambda Function",
         dockerfile="./files/lambda/Dockerfile.lambda",
         context="./files/lambda/",
-        repository=None,  # "test-ecr"
-        ecr_repository_name="itest-lambda-ecr",
+        ecr_repository_name="test-ecr",
         architecture=LAMBDA["ARCHITECTURE"],
         memory_size=LAMBDA["MEMORY"],
         timeout=LAMBDA["TIMEOUT"],
