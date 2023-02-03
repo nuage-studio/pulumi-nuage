@@ -26,7 +26,7 @@ import pulumi_awsx as awsx
 import pulumi_docker as docker
 import random
 
-# from pulumi_command import local
+from pulumi_command import local
 
 
 class Architecture(IntEnum):
@@ -216,7 +216,9 @@ class ContainerFunction(pulumi.ComponentResource):
         image = docker.Image(
             name=f"{resource_name}-image",
             build=build,
-            image_name=repository.repository_url,
+            image_name=repository.repository_url.apply(
+                lambda url: f"{url}:{resource_name}"
+            ),
             local_image_name=f"{pulumi.get_organization()}:{resource_name}",
             registry=docker.ImageRegistry(
                 server=auth.proxy_endpoint,
@@ -228,15 +230,14 @@ class ContainerFunction(pulumi.ComponentResource):
             ),
         )
 
-        # FIXME: Thhis doesn't work because pulumi Command doesn't have option to run on update right now
-        # As it work only on create, it keeps having the same tag on updates
-        # untag_command = local.Command(
-        #    f"untag-{name}-image",
-        #    create=repository_url.apply(
-        #        lambda repository_url: f"docker rmi {repository_url}"
-        #    ),
-        #    opts=pulumi.ResourceOptions(depends_on=[image])
-        # )
+        # FIXME: this command doesn't run after push and not working
+        untag_command = local.Command(
+            f"untag-{resource_name}-image",
+            create=pulumi.Output.all(repository.repository_url, resource_name).apply(
+                lambda args: f"docker rmi {args[0]}:{args[1]}"
+            ),
+            opts=pulumi.ResourceOptions(depends_on=[image]),
+        )
 
         # Define inline policies for role definition
         log_group = aws.cloudwatch.LogGroup(
