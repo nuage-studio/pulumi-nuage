@@ -134,14 +134,12 @@ class ContainerFunction(pulumi.ComponentResource):
             raise Exception("name and name_prefix cannot be set at the same time.")
 
         if args.name_prefix:
-            suffix = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=5)
-            )
-            common_name: str = f"{args.name_prefix}-{suffix}"
-        elif args.name:
-            common_name = args.name
+            suffix = random.RandomString(
+                f"{args.name_prefix}-suffix", length=5, special=False
+            ).result
+            name: str = suffix.apply(lambda suffix: f"{args.name_prefix}-{suffix}")
         else:
-            common_name = resource_name
+            name = pulumi.Output.from_input(args.name if args.name else resource_name)
 
         if args.ecr_repository_name:
             # Get existing repository using repository name.
@@ -149,12 +147,12 @@ class ContainerFunction(pulumi.ComponentResource):
         else:
             # If repository is not defined, create new ecr repository using `name`.
             repository = aws.ecr.Repository(
-                f"{common_name}-ecr-repository",
-                name=f"{common_name}-repo",
+                f"{resource_name}-ecr-repository",
+                name=name.apply(lambda name: f"{name}-repo"),
             )
 
             repository_lifecycle = aws.ecr.LifecyclePolicy(
-                f"{common_name}-ecr-lifecycle",
+                f"{resource_name}-ecr-lifecycle",
                 repository=repository.name,
                 policy=json.dumps(
                     {
@@ -216,7 +214,7 @@ class ContainerFunction(pulumi.ComponentResource):
 
         # Build and Push docker Image.
         image = docker.Image(
-            name=f"{common_name}-image",
+            name=f"{resource_name}-image",
             build=build,
             image_name=repository.repository_url,
             local_image_name=f"{pulumi.get_organization()}:{resource_name}",
@@ -242,15 +240,15 @@ class ContainerFunction(pulumi.ComponentResource):
 
         # Define inline policies for role definition
         log_group = aws.cloudwatch.LogGroup(
-            f"{common_name}-log-group",
-            name=f"/aws/lambda/{common_name}",
+            f"{resource_name}-log-group",
+            name=name.apply(lambda name: f"/aws/lambda/{name}"),
             retention_in_days=args.log_retention_in_days,
         )
 
         policy_documents = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(
-                name=f"{common_name}-logging-policy",
+                name=name.apply(lambda name: f"{name}-logging-policy"),
                 policy=aws.iam.get_policy_document(
                     version="2012-10-17",
                     statements=[
@@ -263,13 +261,15 @@ class ContainerFunction(pulumi.ComponentResource):
                 ).json,
             ),
             aws.iam.RoleInlinePolicyArgs(
-                name=f"{common_name}-PolicyCloudWatchLambdaInsightsExecutionRolePolicy",
+                name=name.apply(
+                    lambda name: f"{name}-PolicyCloudWatchLambdaInsightsExecutionRolePolicy"
+                ),
                 policy=aws.iam.get_policy(
                     name="CloudWatchLambdaInsightsExecutionRolePolicy"
                 ).policy,
             ),
             aws.iam.RoleInlinePolicyArgs(
-                name=f"{common_name}-PolicyAWSXRayDaemonWriteAccess",
+                name=name.apply(lambda name: f"{name}-PolicyAWSXRayDaemonWriteAccess"),
                 policy=aws.iam.get_policy(name="AWSXRayDaemonWriteAccess").policy,
             ),
         ]
@@ -277,15 +277,15 @@ class ContainerFunction(pulumi.ComponentResource):
             # If we have a custom policy document, add it to the list
             policy_documents.append(
                 aws.iam.RoleInlinePolicyArgs(
-                    name=f"{common_name}-PolicyCustom",
+                    name=name.apply(lambda name: f"{name}-PolicyCustom"),
                     policy=args.policy_document,
                 )
             )
 
         self.role = aws.iam.Role(
-            resource_name=f"{common_name}-lambda-role",
-            name=f"{common_name}-lambda-role",
-            description=f"Role used by {common_name}",
+            resource_name=f"{resource_name}-lambda-role",
+            name=name.apply(lambda name: f"{name}-lambda-role"),
+            description=name.apply(lambda name: f"Role used by {name}"),
             assume_role_policy=aws.iam.get_policy_document(
                 version="2012-10-17",
                 statements=[
@@ -307,8 +307,8 @@ class ContainerFunction(pulumi.ComponentResource):
 
         # Lambda Function
         self.function = aws.lambda_.Function(
-            resource_name=f"{common_name}-function",
-            name=f"{common_name}",
+            resource_name=f"{resource_name}-function",
+            name=name,
             description=args.description,
             package_type="Image",
             image_uri=image.image_name,
@@ -328,16 +328,18 @@ class ContainerFunction(pulumi.ComponentResource):
         if args.keep_warm:
             # Keep warm by refreshing the lambda function every 5 minutes
             rule = aws.cloudwatch.EventRule(
-                resource_name=f"{common_name}-keep-warm-rule",
-                name=f"{common_name}-keep-warm",
-                description=f"Refreshes {common_name} regularly to keep the container warm",
+                resource_name=f"{resource_name}-keep-warm-rule",
+                name=name.apply(lambda name: f"{name}-keep-warm"),
+                description=name.apply(
+                    lambda name: f"Refreshes {name} regularly to keep the container warm"
+                ),
                 is_enabled=True,
                 role_arn=None,
                 schedule_expression="rate(5 minutes)",
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
             aws.lambda_.Permission(
-                resource_name=f"{common_name}-cloudwatch-invoke-permission",
+                resource_name=f"{resource_name}-cloudwatch-invoke-permission",
                 action="lambda:InvokeFunction",
                 function=self.function.arn,
                 principal="events.amazonaws.com",
@@ -345,7 +347,7 @@ class ContainerFunction(pulumi.ComponentResource):
                 opts=pulumi.ResourceOptions(parent=rule),
             )
             aws.cloudwatch.EventTarget(
-                resource_name=f"{common_name}-keep-warm-target",
+                resource_name=f"{resource_name}-keep-warm-target",
                 arn=self.function.arn,
                 input=json.dumps({"keep-warm": True}),
                 rule=rule.id,
@@ -357,7 +359,7 @@ class ContainerFunction(pulumi.ComponentResource):
         if args.url:
             # Lambda URL
             self.function_url = aws.lambda_.FunctionUrl(
-                resource_name=f"{common_name}-url",
+                resource_name=f"{resource_name}-url",
                 function_name=self.function.name,
                 authorization_type="NONE",
                 cors=None,  # args.cors_configuration,
