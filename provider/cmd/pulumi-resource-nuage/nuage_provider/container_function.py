@@ -15,6 +15,7 @@
 import os
 import json
 import string
+import tempfile
 from enum import IntEnum
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -191,8 +192,9 @@ class ContainerFunction(pulumi.ComponentResource):
             )
             image_ignore_changes = []
         else:
+            tmp = tempfile.NamedTemporaryFile(dir="./")
             # Use default aws lambda docker image.
-            with open("Dockerfile.awslambda.generated", "w") as f:
+            with open(tmp.name, "w") as f:
                 f.writelines(
                     [
                         "FROM public.ecr.aws/lambda/provided:al2",
@@ -202,7 +204,7 @@ class ContainerFunction(pulumi.ComponentResource):
 
             build = docker.DockerBuild(
                 context="./",
-                dockerfile="./Dockerfile.awslambda.generated",
+                dockerfile=tmp.name,
                 extra_options=extra_options,
             )
             # Ignore changes on image_name if default docker image is used.
