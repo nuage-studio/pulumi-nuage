@@ -80,7 +80,7 @@ class ContainerFunctionArgs:
             policy_document=inputs.get("policyDocument", None),
             keep_warm=inputs.get("keepWarm", False),
             url=inputs.get("url", False),
-            log_retention_in_days=inputs.get("logRetentionInDays",90)
+            log_retention_in_days=inputs.get("logRetentionInDays", 90)
             # cors_configuration = None,#inputs['corsConfiguration'],
         )
 
@@ -244,30 +244,21 @@ class ContainerFunction(pulumi.ComponentResource):
             name=f"/aws/lambda/{common_name}",
             retention_in_days=args.log_retention_in_days,
         )
-        lambda_logging = aws.iam.Policy(
-            f"{common_name}-logging-policy",
-            name=f"{common_name}-logging",
-            path="/",
-            description="IAM policy for logging from a lambda",
-            policy=json.dumps(
-                {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
-                            "Resource": "arn:aws:logs:*:*:*",
-                            "Effect": "Allow",
-                        }
-                    ],
-                }
-            ),
-        )
 
         policy_documents = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(
                 name=f"{common_name}-logging-policy",
-                policy=lambda_logging.policy,
+                policy=aws.iam.get_policy_document(
+                    version="2012-10-17",
+                    statements=[
+                        aws.iam.GetPolicyDocumentStatementArgs(
+                            actions=["logs:CreateLogStream", "logs:PutLogEvents"],
+                            resources=["arn:aws:logs:*:*:*"],
+                            effect="Allow",
+                        ),
+                    ],
+                ).json,
             ),
             aws.iam.RoleInlinePolicyArgs(
                 name=f"{common_name}-PolicyCloudWatchLambdaInsightsExecutionRolePolicy",
