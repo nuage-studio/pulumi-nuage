@@ -5,6 +5,9 @@ includes:
     dir: ./provider/cmd/tests/
     taskfile: ./provider/cmd/tests/TestTasks.yml
 
+env:
+  versionNumber: 0.0.2
+
 tasks:
   sdk:
     desc: Generates SDKs
@@ -30,3 +33,21 @@ tasks:
       - bin/**/*
       - provider/cmd/pulumi-resource-nuage/build/**/*
       - provider/cmd/pulumi-resource-nuage/nuage_provider.egg-info/*
+
+  distribute:
+    desc: Create Distribution
+    deps:
+      - build
+    cmds:
+      - make dist
+
+  install-local:
+    desc: Install Project locally
+    deps:
+      - distribute
+    vars:
+      IMAGE_NAME: $(sh DetectPlatformName.sh)
+    cmds:
+      - make install
+      - pulumi plugin rm resource nuage -y
+      - pulumi plugin install resource nuage ${versionNumber} --file dist/pulumi-resource-nuage-v${versionNumber}-{{.IMAGE_NAME}}.tar.gz

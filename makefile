@@ -1,4 +1,4 @@
-VERSION         := 0.0.1
+VERSION         := ${versionNumber}
 
 PACK            := nuage
 PROJECT         := github.com/pulumi/pulumi-${PACK}

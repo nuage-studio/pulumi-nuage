@@ -1,6 +1,7 @@
 GLOBAL = {
     "STACK_NAME": "nuage/staging",
     "REGION_NAME": "eu-west-1",
+    "AWS_PROFILE": "nuage-dev",
 }
 BUCKET_NAME = "itest-nuage"
 

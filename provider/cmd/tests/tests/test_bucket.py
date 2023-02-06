@@ -1,6 +1,6 @@
 import boto3
 import pytest
-from ..constants import BUCKET_NAME
+from ..constants import GLOBAL, BUCKET_NAME
 
 
 class TestBucket:
@@ -8,7 +8,7 @@ class TestBucket:
     # class: the fixture is destroyed during teardown of the last test in the class.
     @pytest.fixture(scope="class")
     def s3_client(self):
-        return boto3.resource("s3")
+        return boto3.Session(profile_name=GLOBAL["AWS_PROFILE"]).resource("s3")
 
     def test_s3_output_name(self, stack_outputs):
         # Test if bucket name setting is valid.
