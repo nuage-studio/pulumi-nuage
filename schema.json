@@ -52,7 +52,7 @@
                     "type": "string",
                     "description":"Dockerfile context path."
                 },
-                "ecrRepositoryName": {
+                "repositoryId": {
                     "type": "string",
                     "description":"Existing ECR repository name"
                 },

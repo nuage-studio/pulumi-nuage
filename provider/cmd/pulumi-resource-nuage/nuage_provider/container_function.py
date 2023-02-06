@@ -54,7 +54,7 @@ class ContainerFunctionArgs:
     description: Optional[pulumi.Input[str]]
     dockerfile: Optional[pulumi.Input[str]]
     context: Optional[pulumi.Input[str]]
-    ecr_repository_name: pulumi.Input[str]
+    repository_id: pulumi.Input[str]
     architecture: Optional[str]
     memory_size: Optional[pulumi.Input[int]]
     timeout: Optional[pulumi.Input[int]]
@@ -73,7 +73,7 @@ class ContainerFunctionArgs:
             description=inputs.get("description", None),
             dockerfile=inputs.get("dockerfile", None),
             context=inputs.get("context", None),
-            ecr_repository_name=inputs.get("ecrRepositoryName", None),
+            repository_id=inputs.get("repositoryId", None),
             architecture=inputs.get("architecture", "x86_64"),
             memory_size=inputs.get("memorySize", 512),
             timeout=inputs.get("timeout", 3),
@@ -92,7 +92,7 @@ class ContainerFunctionArgs:
         description: Optional[pulumi.Input[str]],
         dockerfile: Optional[pulumi.Input[Union[str, Path]]],
         context: Optional[pulumi.Input[Union[str, Path]]],
-        ecr_repository_name: Optional[pulumi.Input[str]],
+        repository_id: Optional[pulumi.Input[str]],
         memory_size: Optional[pulumi.Input[int]],
         timeout: Optional[pulumi.Input[int]],
         architecture: Optional[pulumi.Input[str]],
@@ -108,7 +108,7 @@ class ContainerFunctionArgs:
         self.description = description
         self.dockerfile = dockerfile
         self.context = context
-        self.ecr_repository_name = ecr_repository_name
+        self.repository_id = repository_id
         self.architecture = architecture
         self.memory_size = memory_size
         self.timeout = timeout
@@ -141,9 +141,9 @@ class ContainerFunction(pulumi.ComponentResource):
         else:
             name = pulumi.Output.from_input(args.name if args.name else resource_name)
 
-        if args.ecr_repository_name:
+        if args.repository_id:
             # Get existing repository using repository name.
-            repository = aws.ecr.get_repository_output(name=args.ecr_repository_name)
+            repository = aws.ecr.get_repository_output(name=args.repository_id)
         else:
             # If repository is not defined, create new ecr repository using `name`.
             repository = aws.ecr.Repository(
