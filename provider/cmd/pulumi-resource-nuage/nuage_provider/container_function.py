@@ -190,7 +190,7 @@ class ContainerFunction(pulumi.ComponentResource):
             )
             image_ignore_changes = []
         else:
-            tmp = tempfile.NamedTemporaryFile(dir="./")
+            tmp = tempfile.NamedTemporaryFile(dir="./", delete=True)
             # Use default aws lambda docker image.
             with open(tmp.name, "w") as f:
                 f.writelines(
