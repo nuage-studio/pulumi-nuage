@@ -230,13 +230,19 @@ class ContainerFunction(pulumi.ComponentResource):
             ),
         )
 
-        # FIXME: this command doesn't run after push and not working
-        untag_command = local.Command(
-            f"untag-{resource_name}-image",
-            create=pulumi.Output.all(repository.repository_url, resource_name).apply(
-                lambda args: f"docker rmi {args[0]}:{args[1]}"
-            ),
-            opts=pulumi.ResourceOptions(parent=image),
+        # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name} one.
+        image.image_name.apply(
+            lambda image_name: (
+                local.Command(
+                    f"untag-{resource_name}-image",
+                    create=pulumi.Output.all(
+                        repository.repository_url, resource_name
+                    ).apply(
+                        lambda args: f"docker rmi {args[0]}:{args[1]} && docker rmi {image_name}"
+                    ),
+                    opts=pulumi.ResourceOptions(parent=image),
+                )
+            )
         )
 
         # Define inline policies for role definition
