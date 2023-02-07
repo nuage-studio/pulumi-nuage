@@ -27,5 +27,6 @@ function = ContainerFunction(
 pulumi.export("lambda_arn", function.function.arn)
 pulumi.export("lambda_name", function.function.name)
 pulumi.export("lambda_role_arn", function.role.arn)
+pulumi.export("ecr_image_name", function.ecr_image_name)
 if function.function_url:
     pulumi.export("lambda_function_url", function.function_url)

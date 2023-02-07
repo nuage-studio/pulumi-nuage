@@ -179,13 +179,14 @@ class ContainerFunction(pulumi.ComponentResource):
         registry_id = repository.repository_url.apply(lambda x: x.split(".")[0])
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
 
+        self.ecr_image_name = pulumi.Output.all(
+            url=repository.repository_url, name=name
+        ).apply(lambda args: f"{args['url']}:{args['name']}")
         # Build and Push docker Image.
         image = docker.Image(
             name=f"{resource_name}-image",
             build=build,
-            image_name=pulumi.Output.all(
-                url=repository.repository_url, name=name
-            ).apply(lambda args: f"{args['url']}:{args['name']}"),
+            image_name=self.ecr_image_name,
             local_image_name=name.apply(
                 lambda name: f"{pulumi.get_organization()}:{name}"
             ),
@@ -199,15 +200,13 @@ class ContainerFunction(pulumi.ComponentResource):
             ),
         )
 
-        # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name} one.
+        # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name} one (ecr_image_name).
         image.image_name.apply(
-            lambda image_name: (
+            lambda generated_image_name: (
                 local.Command(
                     f"untag-{resource_name}-image",
-                    create=pulumi.Output.all(
-                        url=repository.repository_url, name=name
-                    ).apply(
-                        lambda args: f"docker rmi {args['url']}:{args['name']} && docker rmi {image_name}"
+                    create=self.ecr_image_name.apply(
+                        lambda ecr_image_name: f"docker rmi {ecr_image_name} && docker rmi {generated_image_name}"
                     ),
                     opts=pulumi.ResourceOptions(parent=image),
                 )
@@ -324,7 +323,11 @@ class ContainerFunction(pulumi.ComponentResource):
                 opts=pulumi.ResourceOptions(parent=rule),
             )
 
-        outputs = {"arn": self.function.arn, "name": self.function.name}
+        outputs = {
+            "arn": self.function.arn,
+            "name": self.function.name,
+            "ecr_image_name": self.ecr_image_name,
+        }
 
         if args.url:
             # Lambda URL
