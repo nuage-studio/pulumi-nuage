@@ -183,10 +183,12 @@ class ContainerFunction(pulumi.ComponentResource):
         image = docker.Image(
             name=f"{resource_name}-image",
             build=build,
-            image_name=repository.repository_url.apply(
-                lambda url: f"{url}:{resource_name}"
+            image_name=pulumi.Output.all(
+                url=repository.repository_url, name=name
+            ).apply(lambda args: f"{args['url']}:{args['name']}"),
+            local_image_name=name.apply(
+                lambda name: f"{pulumi.get_organization()}:{name}"
             ),
-            local_image_name=f"{pulumi.get_organization()}:{resource_name}",
             registry=docker.ImageRegistry(
                 server=auth.proxy_endpoint,
                 username=auth.user_name,
@@ -203,9 +205,9 @@ class ContainerFunction(pulumi.ComponentResource):
                 local.Command(
                     f"untag-{resource_name}-image",
                     create=pulumi.Output.all(
-                        repository.repository_url, resource_name
+                        url=repository.repository_url, name=name
                     ).apply(
-                        lambda args: f"docker rmi {args[0]}:{args[1]} && docker rmi {image_name}"
+                        lambda args: f"docker rmi {args['url']}:{args['name']} && docker rmi {image_name}"
                     ),
                     opts=pulumi.ResourceOptions(parent=image),
                 )
@@ -214,7 +216,7 @@ class ContainerFunction(pulumi.ComponentResource):
 
         # Define inline policies for role definition
         log_group = aws.cloudwatch.LogGroup(
-            f"{resource_name}-log-group",
+            resource_name,
             name=name.apply(lambda name: f"/aws/lambda/{name}"),
             retention_in_days=args.log_retention_in_days,
         )
@@ -257,7 +259,7 @@ class ContainerFunction(pulumi.ComponentResource):
             )
 
         self.role = aws.iam.Role(
-            resource_name=f"{resource_name}-lambda-role",
+            resource_name=resource_name,
             name=name.apply(lambda name: f"{name}-lambda-role"),
             description=name.apply(lambda name: f"Role used by {name}"),
             assume_role_policy=aws.iam.get_policy_document(
@@ -333,7 +335,7 @@ class ContainerFunction(pulumi.ComponentResource):
         if args.url:
             # Lambda URL
             self.function_url = aws.lambda_.FunctionUrl(
-                resource_name=f"{resource_name}-url",
+                resource_name=resource_name,
                 function_name=self.function.name,
                 authorization_type="NONE",
                 cors=None,  # args.cors_configuration,
