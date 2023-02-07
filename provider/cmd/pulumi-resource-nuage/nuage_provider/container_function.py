@@ -18,14 +18,14 @@ import string
 import tempfile
 from enum import IntEnum
 from pathlib import Path
+from dataclasses import dataclass
 from typing import Dict, Optional, Union
 
 import pulumi
 import pulumi_aws as aws
 import pulumi_awsx as awsx
 import pulumi_docker as docker
-import random
-
+import pulumi_random as random
 from pulumi_command import local
 
 
@@ -48,6 +48,7 @@ class Architecture(IntEnum):
         return mapping[self.value]
 
 
+@dataclass
 class ContainerFunctionArgs:
     name: Optional[pulumi.Input[str]]
     name_prefix: Optional[pulumi.Input[str]]
@@ -84,40 +85,6 @@ class ContainerFunctionArgs:
             log_retention_in_days=inputs.get("logRetentionInDays", 90)
             # cors_configuration = None,#inputs['corsConfiguration'],
         )
-
-    def __init__(
-        self,
-        name: Optional[pulumi.Input[str]],
-        name_prefix: Optional[pulumi.Input[str]],
-        description: Optional[pulumi.Input[str]],
-        dockerfile: Optional[pulumi.Input[Union[str, Path]]],
-        context: Optional[pulumi.Input[Union[str, Path]]],
-        repository_id: Optional[pulumi.Input[str]],
-        memory_size: Optional[pulumi.Input[int]],
-        timeout: Optional[pulumi.Input[int]],
-        architecture: Optional[pulumi.Input[str]],
-        environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]],
-        policy_document: Optional[pulumi.Input[str]],
-        keep_warm: pulumi.Input[bool],
-        url: pulumi.Input[bool],
-        log_retention_in_days: pulumi.Input[int]
-        # cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]] = None,
-    ) -> None:
-        self.name = name
-        self.name_prefix = name_prefix
-        self.description = description
-        self.dockerfile = dockerfile
-        self.context = context
-        self.repository_id = repository_id
-        self.architecture = architecture
-        self.memory_size = memory_size
-        self.timeout = timeout
-        self.environment = environment
-        self.policy_document = policy_document
-        self.keep_warm = keep_warm
-        self.url = url
-        self.log_retention_in_days = log_retention_in_days
-        # self.cors_configuration = cors_configuration
 
 
 class ContainerFunction(pulumi.ComponentResource):
