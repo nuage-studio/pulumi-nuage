@@ -19,7 +19,7 @@ import tempfile
 from enum import IntEnum
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Dict, Optional, Union
+from typing import List, Dict, Optional, Union
 
 import pulumi
 import pulumi_aws as aws
@@ -221,7 +221,7 @@ class ContainerFunction(pulumi.ComponentResource):
             retention_in_days=args.log_retention_in_days,
         )
 
-        policy_documents = [
+        policy_documents: List[str] = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(
                 name=name.apply(lambda name: f"{name}-logging-policy"),
@@ -235,18 +235,6 @@ class ContainerFunction(pulumi.ComponentResource):
                         ),
                     ],
                 ).json,
-            ),
-            aws.iam.RoleInlinePolicyArgs(
-                name=name.apply(
-                    lambda name: f"{name}-PolicyCloudWatchLambdaInsightsExecutionRolePolicy"
-                ),
-                policy=aws.iam.get_policy(
-                    name="CloudWatchLambdaInsightsExecutionRolePolicy"
-                ).policy,
-            ),
-            aws.iam.RoleInlinePolicyArgs(
-                name=name.apply(lambda name: f"{name}-PolicyAWSXRayDaemonWriteAccess"),
-                policy=aws.iam.get_policy(name="AWSXRayDaemonWriteAccess").policy,
             ),
         ]
         if args.policy_document:
@@ -277,6 +265,12 @@ class ContainerFunction(pulumi.ComponentResource):
                     ),
                 ],
             ).json,
+            managed_policy_arns=[
+                # FIXME: Right now, AWS_CLOUD_WATCH_LAMBDA_INSIGHTS_EXECUTION_ROLE_POLICY returns a wrong stirng with AWS prefix.
+                # See https://github.com/pulumi/pulumi-aws/issues/2269
+                "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy",
+                aws.iam.ManagedPolicy.AWSX_RAY_DAEMON_WRITE_ACCESS,
+            ],
             inline_policies=policy_documents,
             opts=pulumi.ResourceOptions(parent=self),
         )
