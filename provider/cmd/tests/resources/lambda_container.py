@@ -21,7 +21,7 @@ function = ContainerFunction(
         policy_document=None,
         keep_warm=True,
         url=False,
-        log_retention_in_days=None,
+        log_retention_in_days=90,
     ),
 )
 pulumi.export("lambda_arn", function.function.arn)

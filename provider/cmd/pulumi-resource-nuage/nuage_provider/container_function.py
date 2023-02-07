@@ -230,7 +230,7 @@ class ContainerFunction(pulumi.ComponentResource):
                     statements=[
                         aws.iam.GetPolicyDocumentStatementArgs(
                             actions=["logs:CreateLogStream", "logs:PutLogEvents"],
-                            resources=["arn:aws:logs:*:*:*"],
+                            resources=log_group.arn.apply(lambda arn: [f"{arn}:*"]),
                             effect="Allow",
                         ),
                     ],
