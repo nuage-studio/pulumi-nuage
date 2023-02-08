@@ -29,6 +29,49 @@
                 "bucket"
             ]
         },
+        "nuage:aws:EcrRepository": {
+            "isComponent": true,
+            "inputProperties": {
+                "name": {
+                    "type": "string",
+                    "description":"Name of the resource."
+                },
+                "namePrefix": {
+                    "type": "string",
+                    "description":"Name prefix as an alternative to name and adds random suffix at the end."
+                },
+                "expireInDays": {
+                    "type": "number",
+                    "description":"Number of days for expiring images using LifecyclePolicy."
+                }
+            },
+            "requiredInputs": [                
+            ],
+            "properties": {
+                "registry_id": {
+                    "type": "string"
+                },
+                "repository_arn": {
+                    "type": "string"
+                },
+                "repository_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "registry_id",
+                "repository_arn",
+                "repository_id",
+                "name",
+                "url"
+            ]
+        },
         "nuage:aws:ContainerFunction": {
             "isComponent": true,
             "inputProperties": {
