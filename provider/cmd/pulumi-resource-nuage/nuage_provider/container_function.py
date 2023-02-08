@@ -23,7 +23,6 @@ from typing import List, Dict, Optional, Union
 
 import pulumi
 import pulumi_aws as aws
-import pulumi_awsx as awsx
 import pulumi_docker as docker
 import pulumi_random as random
 from pulumi_command import local
@@ -55,7 +54,7 @@ class ContainerFunctionArgs:
     description: Optional[pulumi.Input[str]]
     dockerfile: Optional[pulumi.Input[str]]
     context: Optional[pulumi.Input[str]]
-    repository_id: pulumi.Input[str]
+    repository_url: pulumi.Input[str]
     architecture: Optional[str]
     memory_size: Optional[pulumi.Input[int]]
     timeout: Optional[pulumi.Input[int]]
@@ -74,7 +73,7 @@ class ContainerFunctionArgs:
             description=inputs.get("description", None),
             dockerfile=inputs.get("dockerfile", None),
             context=inputs.get("context", None),
-            repository_id=inputs.get("repositoryId", None),
+            repository_url=inputs.get("repositoryUrl"),
             architecture=inputs.get("architecture", "x86_64"),
             memory_size=inputs.get("memorySize", 512),
             timeout=inputs.get("timeout", 3),
@@ -107,39 +106,6 @@ class ContainerFunction(pulumi.ComponentResource):
             name: str = suffix.apply(lambda suffix: f"{args.name_prefix}-{suffix}")
         else:
             name = pulumi.Output.from_input(args.name if args.name else resource_name)
-
-        if args.repository_id:
-            # Get existing repository using repository name.
-            repository = aws.ecr.get_repository_output(name=args.repository_id)
-        else:
-            # If repository is not defined, create new ecr repository using `name`.
-            repository = aws.ecr.Repository(
-                f"{resource_name}-ecr-repository",
-                name=name.apply(lambda name: f"{name}-repo"),
-            )
-
-            repository_lifecycle = aws.ecr.LifecyclePolicy(
-                f"{resource_name}-ecr-lifecycle",
-                repository=repository.name,
-                policy=json.dumps(
-                    {
-                        "rules": [
-                            {
-                                "rulePriority": 1,
-                                "description": "Expire images older than 30 days",
-                                "selection": {
-                                    "tagStatus": "untagged",
-                                    "countType": "sinceImagePushed",
-                                    "countUnit": "days",
-                                    "countNumber": 30,
-                                },
-                                "action": {"type": "expire"},
-                            }
-                        ]
-                    }
-                ),
-                opts=pulumi.ResourceOptions(parent=repository),
-            )
 
         architecture = Architecture[args.architecture]
 
@@ -176,11 +142,11 @@ class ContainerFunction(pulumi.ComponentResource):
             image_ignore_changes = ["image_name"]
 
         # Authenticate with ECR and get cridentals.
-        registry_id = repository.repository_url.apply(lambda x: x.split(".")[0])
+        registry_id = args.repository_url.apply(lambda x: x.split(".")[0])
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
 
         self.ecr_image_name = pulumi.Output.all(
-            url=repository.repository_url, name=name
+            url=args.repository_url, name=name
         ).apply(lambda args: f"{args['url']}:{args['name']}")
         # Build and Push docker Image.
         image = docker.Image(

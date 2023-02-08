@@ -95,7 +95,7 @@
                     "type": "string",
                     "description":"Dockerfile context path."
                 },
-                "repositoryId": {
+                "repositoryUrl": {
                     "type": "string",
                     "description":"Existing ECR repository name"
                 },
@@ -132,7 +132,8 @@
                     "description":"Number of days for log retention to pass in cloudwatch log group.."
                 }
             },
-            "requiredInputs": [                
+            "requiredInputs": [     
+                "repositoryUrl"           
             ],
             "properties": {
                 "arn": {

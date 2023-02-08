@@ -2,6 +2,7 @@ import pulumi
 from constants import LAMBDA
 
 # Import pulumi provider methods.
+from .ecr import repository
 from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
 
 # Lambda Container
@@ -13,7 +14,7 @@ function = ContainerFunction(
         description="Integration Tests Lambda Function",
         dockerfile="./files/lambda/Dockerfile.lambda",
         context="./files/lambda/",
-        repository_id="test-ecr",
+        repository_url=repository.url,
         architecture=LAMBDA["ARCHITECTURE"],
         memory_size=LAMBDA["MEMORY"],
         timeout=LAMBDA["TIMEOUT"],
@@ -23,6 +24,7 @@ function = ContainerFunction(
         url=False,
         log_retention_in_days=90,
     ),
+    opts=pulumi.ResourceOptions(parent=repository),
 )
 pulumi.export("lambda_arn", function.function.arn)
 pulumi.export("lambda_name", function.function.name)

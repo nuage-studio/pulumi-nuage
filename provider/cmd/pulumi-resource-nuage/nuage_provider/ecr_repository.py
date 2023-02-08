@@ -67,8 +67,10 @@ class EcrRepository(pulumi.ComponentResource):
         else:
             name = args.name if args.name else resource_name
 
-        # Create repository
-        repository = aws.ecr.Repository(f"{resource_name}-ecr-repository", name=name)
+        # Create repository. Adding force_delete to allow deletion even if it contains images.
+        repository = aws.ecr.Repository(
+            f"{resource_name}-ecr-repository", name=name, force_delete=True
+        )
 
         # If expire days is greater than zero, define LifecyclePolicy.
         if args.expire_in_days > 0:
