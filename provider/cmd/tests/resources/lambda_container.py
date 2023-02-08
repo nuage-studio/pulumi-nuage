@@ -6,14 +6,14 @@ from nuage_provider.container_function import ContainerFunction, ContainerFuncti
 
 # Lambda Container
 function = ContainerFunction(
-    name=LAMBDA["NAME"],
+    LAMBDA["NAME"],
     args=ContainerFunctionArgs(
-        resource_name=None,
+        name=LAMBDA["NAME"],
+        name_prefix=None,
         description="Integration Tests Lambda Function",
         dockerfile="./files/lambda/Dockerfile.lambda",
         context="./files/lambda/",
-        repository=None,  # "test-ecr"
-        ecr_repository_name="itest-lambda-ecr",
+        repository_id="test-ecr",
         architecture=LAMBDA["ARCHITECTURE"],
         memory_size=LAMBDA["MEMORY"],
         timeout=LAMBDA["TIMEOUT"],
@@ -21,10 +21,12 @@ function = ContainerFunction(
         policy_document=None,
         keep_warm=True,
         url=False,
+        log_retention_in_days=90,
     ),
 )
 pulumi.export("lambda_arn", function.function.arn)
 pulumi.export("lambda_name", function.function.name)
 pulumi.export("lambda_role_arn", function.role.arn)
+pulumi.export("ecr_image_name", function.ecr_image_name)
 if function.function_url:
     pulumi.export("lambda_function_url", function.function_url)
