@@ -20,8 +20,9 @@ export class ContainerFunction extends pulumi.ComponentResource {
     }
 
     public /*out*/ readonly arn!: pulumi.Output<string>;
+    public /*out*/ readonly ecr_image_name!: pulumi.Output<string>;
     public /*out*/ readonly function_url!: pulumi.Output<string>;
-    public /*out*/ readonly name!: pulumi.Output<string>;
+    public readonly name!: pulumi.Output<string>;
 
     /**
      * Create a ContainerFunction resource with the given unique name, arguments, and options.
@@ -30,30 +31,30 @@ export class ContainerFunction extends pulumi.ComponentResource {
      * @param args The arguments to use to populate this resource's properties.
      * @param opts A bag of options that control this resource's behavior.
      */
-    constructor(name: string, args: ContainerFunctionArgs, opts?: pulumi.ComponentResourceOptions) {
+    constructor(name: string, args?: ContainerFunctionArgs, opts?: pulumi.ComponentResourceOptions) {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
-            if ((!args || args.ecrRepositoryName === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'ecrRepositoryName'");
-            }
             resourceInputs["architecture"] = args ? args.architecture : undefined;
             resourceInputs["context"] = args ? args.context : undefined;
             resourceInputs["description"] = args ? args.description : undefined;
             resourceInputs["dockerfile"] = args ? args.dockerfile : undefined;
-            resourceInputs["ecrRepositoryName"] = args ? args.ecrRepositoryName : undefined;
             resourceInputs["environment"] = args ? args.environment : undefined;
             resourceInputs["keepWarm"] = args ? args.keepWarm : undefined;
+            resourceInputs["logRetentionInDays"] = args ? args.logRetentionInDays : undefined;
             resourceInputs["memorySize"] = args ? args.memorySize : undefined;
+            resourceInputs["name"] = args ? args.name : undefined;
+            resourceInputs["namePrefix"] = args ? args.namePrefix : undefined;
             resourceInputs["policyDocument"] = args ? args.policyDocument : undefined;
-            resourceInputs["repository"] = args ? args.repository : undefined;
+            resourceInputs["repositoryId"] = args ? args.repositoryId : undefined;
             resourceInputs["timeout"] = args ? args.timeout : undefined;
             resourceInputs["url"] = args ? args.url : undefined;
             resourceInputs["arn"] = undefined /*out*/;
+            resourceInputs["ecr_image_name"] = undefined /*out*/;
             resourceInputs["function_url"] = undefined /*out*/;
-            resourceInputs["name"] = undefined /*out*/;
         } else {
             resourceInputs["arn"] = undefined /*out*/;
+            resourceInputs["ecr_image_name"] = undefined /*out*/;
             resourceInputs["function_url"] = undefined /*out*/;
             resourceInputs["name"] = undefined /*out*/;
         }
@@ -83,10 +84,6 @@ export interface ContainerFunctionArgs {
      */
     dockerfile?: pulumi.Input<string>;
     /**
-     * ECR repository name for new definition.
-     */
-    ecrRepositoryName: pulumi.Input<string>;
-    /**
      * Environment Variables
      */
     environment?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
@@ -95,9 +92,21 @@ export interface ContainerFunctionArgs {
      */
     keepWarm?: pulumi.Input<boolean>;
     /**
+     * Number of days for log retention to pass in cloudwatch log group..
+     */
+    logRetentionInDays?: pulumi.Input<number>;
+    /**
      * Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
      */
     memorySize?: pulumi.Input<number>;
+    /**
+     * Name of the resource.
+     */
+    name?: pulumi.Input<string>;
+    /**
+     * Name prefix as an alternative to name and adds random suffix at the end.
+     */
+    namePrefix?: pulumi.Input<string>;
     /**
      * Policy Document for lambda.
      */
@@ -105,7 +114,7 @@ export interface ContainerFunctionArgs {
     /**
      * Existing ECR repository name
      */
-    repository?: pulumi.Input<string>;
+    repositoryId?: pulumi.Input<string>;
     /**
      * Amount of time your Lambda Function has to run in seconds. Defaults to `3`
      */

@@ -15,6 +15,9 @@ namespace Pulumi.Nuage.Aws
         [Output("arn")]
         public Output<string> Arn { get; private set; } = null!;
 
+        [Output("ecr_image_name")]
+        public Output<string> Ecr_image_name { get; private set; } = null!;
+
         [Output("function_url")]
         public Output<string> Function_url { get; private set; } = null!;
 
@@ -29,7 +32,7 @@ namespace Pulumi.Nuage.Aws
         /// <param name="name">The unique name of the resource</param>
         /// <param name="args">The arguments used to populate this resource's properties</param>
         /// <param name="options">A bag of options that control this resource's behavior</param>
-        public ContainerFunction(string name, ContainerFunctionArgs args, ComponentResourceOptions? options = null)
+        public ContainerFunction(string name, ContainerFunctionArgs? args = null, ComponentResourceOptions? options = null)
             : base("nuage:aws:ContainerFunction", name, args ?? new ContainerFunctionArgs(), MakeResourceOptions(options, ""), remote: true)
         {
         }
@@ -73,12 +76,6 @@ namespace Pulumi.Nuage.Aws
         [Input("dockerfile")]
         public Input<string>? Dockerfile { get; set; }
 
-        /// <summary>
-        /// ECR repository name for new definition.
-        /// </summary>
-        [Input("ecrRepositoryName", required: true)]
-        public Input<string> EcrRepositoryName { get; set; } = null!;
-
         [Input("environment")]
         private InputMap<string>? _environment;
 
@@ -98,10 +95,28 @@ namespace Pulumi.Nuage.Aws
         public Input<bool>? KeepWarm { get; set; }
 
         /// <summary>
+        /// Number of days for log retention to pass in cloudwatch log group..
+        /// </summary>
+        [Input("logRetentionInDays")]
+        public Input<double>? LogRetentionInDays { get; set; }
+
+        /// <summary>
         /// Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         /// </summary>
         [Input("memorySize")]
         public Input<double>? MemorySize { get; set; }
+
+        /// <summary>
+        /// Name of the resource.
+        /// </summary>
+        [Input("name")]
+        public Input<string>? Name { get; set; }
+
+        /// <summary>
+        /// Name prefix as an alternative to name and adds random suffix at the end.
+        /// </summary>
+        [Input("namePrefix")]
+        public Input<string>? NamePrefix { get; set; }
 
         /// <summary>
         /// Policy Document for lambda.
@@ -112,8 +127,8 @@ namespace Pulumi.Nuage.Aws
         /// <summary>
         /// Existing ECR repository name
         /// </summary>
-        [Input("repository")]
-        public Input<string>? Repository { get; set; }
+        [Input("repositoryId")]
+        public Input<string>? RepositoryId { get; set; }
 
         /// <summary>
         /// Amount of time your Lambda Function has to run in seconds. Defaults to `3`

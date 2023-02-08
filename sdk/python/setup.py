@@ -56,6 +56,7 @@ setup(name='pulumi_nuage',
           'pulumi>=3.0.0,<4.0.0',
           'pulumi-aws>=5.0.0,<6.0.0',
           'pulumi-awsx>=1.0.0b11',
+          'pulumi-command>0.7.0',
           'pulumi-random>4.8.0',
           'pulumi_docker>=3.0.0,<4.0.0',
           'semver>=2.8.1'

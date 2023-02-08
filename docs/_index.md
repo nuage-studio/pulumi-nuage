@@ -16,8 +16,8 @@ import * as pulumi from "@pulumi/pulumi";
 import * as nuage from "@pulumi/nuage";
 
 const lambdaContainer = new nuage.aws.ContainerFunction("myfunction",{
-    ecrRepositoryName:"ecr-repo-name",
-    dockerfile:"./Dockerfile"    
+    name:"lambda-function",
+    dockerfile:"./Dockerfile",
 });
 ```
  
@@ -28,8 +28,8 @@ const lambdaContainer = new nuage.aws.ContainerFunction("myfunction",{
 import pulumi_nuage
 
 container_function = pulumi_nuage.aws.ContainerFunction("myfunction",
-    ecr_repository_name="ecr-repo-name",
-    dockerfile="./Dockerfile"
+    name="lambda-function",
+    dockerfile="./lambda/Dockerfile.lambda",
 )
 ```
 

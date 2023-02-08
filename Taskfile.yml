@@ -6,7 +6,7 @@ includes:
     taskfile: ./provider/cmd/tests/TestTasks.yml
 
 env:
-  versionNumber: 0.0.2
+  versionNumber: 0.0.3
 
 tasks:
   sdk:
