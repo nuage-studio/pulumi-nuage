@@ -23,6 +23,7 @@ _utilities.register(
   "fqn": "pulumi_nuage.aws",
   "classes": {
    "nuage:aws:ContainerFunction": "ContainerFunction",
+   "nuage:aws:Repository": "Repository",
    "nuage:aws:ServerlessDatabase": "ServerlessDatabase",
    "nuage:aws:bucket_nuage": "Bucket_nuage"
   }

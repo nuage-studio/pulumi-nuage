@@ -8,4 +8,5 @@ import typing
 from ._enums import *
 from .bucket_nuage import *
 from .container_function import *
+from .repository import *
 from .serverless_database import *

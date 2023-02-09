@@ -20,8 +20,8 @@ export class ContainerFunction extends pulumi.ComponentResource {
     }
 
     public /*out*/ readonly arn!: pulumi.Output<string>;
-    public /*out*/ readonly ecr_image_name!: pulumi.Output<string>;
     public /*out*/ readonly function_url!: pulumi.Output<string>;
+    public /*out*/ readonly image_uri!: pulumi.Output<string>;
     public readonly name!: pulumi.Output<string>;
 
     /**
@@ -31,10 +31,13 @@ export class ContainerFunction extends pulumi.ComponentResource {
      * @param args The arguments to use to populate this resource's properties.
      * @param opts A bag of options that control this resource's behavior.
      */
-    constructor(name: string, args?: ContainerFunctionArgs, opts?: pulumi.ComponentResourceOptions) {
+    constructor(name: string, args: ContainerFunctionArgs, opts?: pulumi.ComponentResourceOptions) {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
+            if ((!args || args.repositoryUrl === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'repositoryUrl'");
+            }
             resourceInputs["architecture"] = args ? args.architecture : undefined;
             resourceInputs["context"] = args ? args.context : undefined;
             resourceInputs["description"] = args ? args.description : undefined;
@@ -46,16 +49,16 @@ export class ContainerFunction extends pulumi.ComponentResource {
             resourceInputs["name"] = args ? args.name : undefined;
             resourceInputs["namePrefix"] = args ? args.namePrefix : undefined;
             resourceInputs["policyDocument"] = args ? args.policyDocument : undefined;
-            resourceInputs["repositoryId"] = args ? args.repositoryId : undefined;
+            resourceInputs["repositoryUrl"] = args ? args.repositoryUrl : undefined;
             resourceInputs["timeout"] = args ? args.timeout : undefined;
             resourceInputs["url"] = args ? args.url : undefined;
             resourceInputs["arn"] = undefined /*out*/;
-            resourceInputs["ecr_image_name"] = undefined /*out*/;
             resourceInputs["function_url"] = undefined /*out*/;
+            resourceInputs["image_uri"] = undefined /*out*/;
         } else {
             resourceInputs["arn"] = undefined /*out*/;
-            resourceInputs["ecr_image_name"] = undefined /*out*/;
             resourceInputs["function_url"] = undefined /*out*/;
+            resourceInputs["image_uri"] = undefined /*out*/;
             resourceInputs["name"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
@@ -114,7 +117,7 @@ export interface ContainerFunctionArgs {
     /**
      * Existing ECR repository name
      */
-    repositoryId?: pulumi.Input<string>;
+    repositoryUrl: pulumi.Input<string>;
     /**
      * Amount of time your Lambda Function has to run in seconds. Defaults to `3`
      */
