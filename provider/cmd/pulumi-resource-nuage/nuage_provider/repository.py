@@ -13,69 +13,57 @@
 # limitations under the License.
 
 import json
-from typing import Any, Dict, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 import pulumi
 import pulumi_aws as aws
-import pulumi_random as random
+
+from .base.PrefixedComponentResource import (
+    PrefixedComponentResource,
+    PrefixedComponentResourceArgs,
+)
 
 
 @dataclass
-class EcrRepositoryArgs:
-    name: Optional[pulumi.Input[str]]
-    name_prefix: Optional[pulumi.Input[str]]
+class RepositoryArgs(PrefixedComponentResourceArgs):
     expire_in_days: Optional[pulumi.Input[int]]
-    # cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
 
     @staticmethod
-    def from_inputs(inputs: pulumi.Inputs) -> "EcrRepositoryArgs":
-        return EcrRepositoryArgs(
+    def from_inputs(inputs: pulumi.Inputs) -> "RepositoryArgs":
+        return RepositoryArgs(
             name=inputs.get("name", None),
             name_prefix=inputs.get("namePrefix", None),
-            expire_in_days=inputs.get("expireInDays", 30)
-            # cors_configuration = None,#inputs['corsConfiguration'],
+            expire_in_days=inputs.get("expireInDays", 30),
         )
 
 
-class EcrRepository(pulumi.ComponentResource):
+class Repository(PrefixedComponentResource):
     registry_id: pulumi.Output[str]
     name: pulumi.Output[str]
     url: pulumi.Output[str]
-    repository_id: pulumi.Output[int]
-    repository_arn: pulumi.Output[int]
+    id: pulumi.Output[int]
+    arn: pulumi.Output[int]
 
     def __init__(
         self,
         resource_name: str,
-        args: EcrRepositoryArgs,
+        args: RepositoryArgs,
         props: Optional[dict] = None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ) -> None:
 
-        super().__init__("nuage:aws:EcrRepository", resource_name, props, opts)
-        # Use either name or name prefix.
-        if args.name_prefix and args.name:
-            raise Exception("name and name_prefix cannot be set at the same time.")
-
-        # Parse name_prefix or name
-        if args.name_prefix:
-            suffix = random.RandomString(
-                f"{args.name_prefix}-suffix", length=5, special=False
-            ).result
-            name: str = suffix.apply(lambda suffix: f"{args.name_prefix}-{suffix}")
-        else:
-            name = args.name if args.name else resource_name
+        super().__init__("nuage:aws:Repository", resource_name, args, props, opts)
 
         # Create repository. Adding force_delete to allow deletion even if it contains images.
         repository = aws.ecr.Repository(
-            f"{resource_name}-ecr-repository", name=name, force_delete=True
+            resource_name, name=self.name, force_delete=True
         )
 
         # If expire days is greater than zero, define LifecyclePolicy.
         if args.expire_in_days > 0:
             repository_lifecycle = aws.ecr.LifecyclePolicy(
-                f"{resource_name}-ecr-lifecycle",
+                resource_name,
                 repository=repository.name,
                 policy=json.dumps(
                     {
@@ -101,8 +89,8 @@ class EcrRepository(pulumi.ComponentResource):
             "registry_id": repository.registry_id,
             "name": repository.name,
             "url": repository.repository_url,
-            "repository_id": repository.id,
-            "repository_arn": repository.arn,
+            "id": repository.id,
+            "arn": repository.arn,
         }
 
         self.set_outputs(outputs)
