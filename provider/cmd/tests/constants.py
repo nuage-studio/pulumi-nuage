@@ -5,6 +5,8 @@ GLOBAL = {
 }
 BUCKET_NAME = "itest-nuage"
 
+ECR_NAME = "ecr-itest-nuage"
+
 LAMBDA = {
     "NAME": "itest-lambda-nuage",
     "TIMEOUT": 30,
