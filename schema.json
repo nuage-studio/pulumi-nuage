@@ -29,6 +29,49 @@
                 "bucket"
             ]
         },
+        "nuage:aws:Repository": {
+            "isComponent": true,
+            "inputProperties": {
+                "name": {
+                    "type": "string",
+                    "description":"Name of the resource."
+                },
+                "namePrefix": {
+                    "type": "string",
+                    "description":"Name prefix as an alternative to name and adds random suffix at the end."
+                },
+                "expireInDays": {
+                    "type": "number",
+                    "description":"Number of days for expiring images using LifecyclePolicy."
+                }
+            },
+            "requiredInputs": [                
+            ],
+            "properties": {
+                "registry_id": {
+                    "type": "string"
+                },
+                "repository_arn": {
+                    "type": "string"
+                },
+                "repository_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "registry_id",
+                "repository_arn",
+                "repository_id",
+                "name",
+                "url"
+            ]
+        },
         "nuage:aws:ContainerFunction": {
             "isComponent": true,
             "inputProperties": {
@@ -52,7 +95,7 @@
                     "type": "string",
                     "description":"Dockerfile context path."
                 },
-                "repositoryId": {
+                "repositoryUrl": {
                     "type": "string",
                     "description":"Existing ECR repository name"
                 },
@@ -89,7 +132,8 @@
                     "description":"Number of days for log retention to pass in cloudwatch log group.."
                 }
             },
-            "requiredInputs": [                
+            "requiredInputs": [     
+                "repositoryUrl"           
             ],
             "properties": {
                 "arn": {
@@ -101,7 +145,7 @@
                 "function_url": {
                     "type": "string"
                 },
-                "ecr_image_name": {
+                "image_uri": {
                     "type": "string"
                 }
             },
@@ -109,7 +153,7 @@
                 "arn",
                 "name",
                 "function_url",
-                "ecr_image_name"
+                "image_uri"
             ]
         },
         "nuage:aws:ServerlessDatabase": {
