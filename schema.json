@@ -29,7 +29,7 @@
                 "bucket"
             ]
         },
-        "nuage:aws:EcrRepository": {
+        "nuage:aws:Repository": {
             "isComponent": true,
             "inputProperties": {
                 "name": {
