@@ -18,6 +18,9 @@ namespace Pulumi.Nuage.Aws
         [Output("function_url")]
         public Output<string> Function_url { get; private set; } = null!;
 
+        [Output("image_uri")]
+        public Output<string> Image_uri { get; private set; } = null!;
+
         [Output("name")]
         public Output<string> Name { get; private set; } = null!;
 
@@ -73,12 +76,6 @@ namespace Pulumi.Nuage.Aws
         [Input("dockerfile")]
         public Input<string>? Dockerfile { get; set; }
 
-        /// <summary>
-        /// ECR repository name for new definition.
-        /// </summary>
-        [Input("ecrRepositoryName", required: true)]
-        public Input<string> EcrRepositoryName { get; set; } = null!;
-
         [Input("environment")]
         private InputMap<string>? _environment;
 
@@ -98,10 +95,28 @@ namespace Pulumi.Nuage.Aws
         public Input<bool>? KeepWarm { get; set; }
 
         /// <summary>
+        /// Number of days for log retention to pass in cloudwatch log group..
+        /// </summary>
+        [Input("logRetentionInDays")]
+        public Input<double>? LogRetentionInDays { get; set; }
+
+        /// <summary>
         /// Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         /// </summary>
         [Input("memorySize")]
         public Input<double>? MemorySize { get; set; }
+
+        /// <summary>
+        /// Name of the resource.
+        /// </summary>
+        [Input("name")]
+        public Input<string>? Name { get; set; }
+
+        /// <summary>
+        /// Name prefix as an alternative to name and adds random suffix at the end.
+        /// </summary>
+        [Input("namePrefix")]
+        public Input<string>? NamePrefix { get; set; }
 
         /// <summary>
         /// Policy Document for lambda.
@@ -112,8 +127,8 @@ namespace Pulumi.Nuage.Aws
         /// <summary>
         /// Existing ECR repository name
         /// </summary>
-        [Input("repository")]
-        public Input<string>? Repository { get; set; }
+        [Input("repositoryUrl", required: true)]
+        public Input<string> RepositoryUrl { get; set; } = null!;
 
         /// <summary>
         /// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
