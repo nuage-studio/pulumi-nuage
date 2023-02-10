@@ -10,10 +10,6 @@ With Pulumi Nuage, users have access to various components such as `ContainerFun
 
 ## Example
 
-### Repository
-
-The Repository component is a convenient tool for managing Amazon Elastic Container Registry (ECR) repositories. It offers the ability to create an ECR repository with a lifecycle policy on demand. The output of this repository can be easily utilized as an input for the ContainerFunction component, providing a seamless integration of these two components.
-
 ### ContainerFunction
 
 The ContainerFunction component is a powerful tool for managing and executing Serverless Lambda Functions on AWS. This component provides a comprehensive set of features to streamline the deployment process, including an optimized Lambda architecture with the capability to build Docker containers, function URLs, and CloudWatch keep-warm rules. The ContainerFunction component efficiently manages the build and deployment of Docker builds, untags automatically generated random image names during the build process and retaining only human-readable names for easy identification. Furthermore, this component creates a log group with a retention policy and the necessary policies to ensure secure and efficient operation.
@@ -24,9 +20,15 @@ Here are the summary of features:
 * Function URLs
 * CloudWatch keep-warm rules
 * Management of build and deployment of Docker builds
-* Removal of automatic generation of random image names during build with keeping only human-readable image names
+* Removal of docker build artifacts (randomly generated image names that pollute your local docker)
 * Creation of a log group with a retention policy
 * Creating Role to run Lambda and Write Logs
+* Automated X-Ray tracing
+
+### Repository
+
+The Repository component is a convenient tool for managing Amazon Elastic Container Registry (ECR) repositories. It offers the ability to create an ECR repository with a lifecycle policy on demand. The output of this repository can be easily utilized as an input for the ContainerFunction component, providing a seamless integration of these two components.
+
 
 {{< chooser language "typescript,python" >}}
 {{% choosable language typescript %}}
@@ -40,16 +42,14 @@ const repository = new nuage.aws.Repository("repository-resourcename",{
     expireInDays:30
 });
 
-const lambdaContainer = new nuage.aws.ContainerFunction("myfunction",{
+const lambdaContainer = new nuage.aws.ContainerFunction("foo",{
     name:"lambda-function",
     description:"Nuage AWS ContainerFunction resource.",
-    dockerfile:"./Dockerfile",
-    context:"./lambda/",    
     repositoryUrl:repository.url,
     architecture:"x86_64",
     memorySize:512,
     timeout:30,
-    environment:{DUMMY:"VARIABLE"},
+    environment:{bar:"baz"},
     keepWarm:true,
     url:true,
     logRetentionInDays:90
@@ -91,7 +91,7 @@ container_function = nuage.aws.ContainerFunction("myfunction",
 
 ### ServerlessDatabase
 
-The ServerlessDatabase component is an effective solution for creating serverless databases using Amazon Relational Database Service (RDS) Aurora databases. It streamlines the process by automatically creating the necessary components, including a subnet group, security group, security group rules, an RDS cluster and data API if requested.
+The ServerlessDatabase component is an effective solution for creating serverless databases using Amazon Relational Database Service (RDS) Aurora databases. It streamlines the process by automatically creating the necessary components, including a subnet group, security group, security group rules, and an RDS cluster. Additionally, this component generates a random password securely managed by Pulumi for the DB credentials.
 
 With the ServerlessDatabase component, you can create fully configured databases in either MySQL or PostgreSQL with ease. The end result is a comprehensive serverless database resource with all the necessary configurations in place, providing a convenient and efficient solution for your serverless database needs.
 
@@ -102,11 +102,11 @@ With the ServerlessDatabase component, you can create fully configured databases
 import * as pulumi from "@pulumi/pulumi";
 import * as nuage from "@pulumi/nuage";
 
-const db = new nuage.aws.Repository("database-resourcename",{
-    vpcId:"vpc_id",
-    vpcSubnets:[],
+const db = new nuage.aws.Repository("foo",{
+    vpcId:my_vpc.id,
+    vpcSubnets:my_vpc.private_subnet_ids,
     databaseType:"mysql",
-    databaseName:"db",
+    databaseName:"bar",
     masterUserName:"root",
     ipWhitelist:["0.0.0.0/0"],
     skipFinalSnapshot:true,

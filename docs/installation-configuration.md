@@ -16,7 +16,7 @@ To provision resources with the Pulumi Nuage provider,  you can set up the sdk o
 
 ## Credentials
 
-Pulumi Nuage components contains AWS Components from `pulumi-aws`and you can refer to corresponding docs for settting AWS credentials.  [correspnding docs](https://www.pulumi.com/registry/packages/aws/installation-configuration/)
+Pulumi Nuage components contains AWS Components from `pulumi-aws`and you can refer to corresponding docs for setting AWS credentials.  [correspnding docs](https://www.pulumi.com/registry/packages/aws/installation-configuration/)
 
 ## Setup Instructions for Python SDK
 
