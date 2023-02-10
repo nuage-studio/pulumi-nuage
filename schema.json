@@ -74,6 +74,7 @@
         },
         "nuage:aws:ContainerFunction": {
             "isComponent": true,
+            "description":"Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    repository_url=repository.url,    \r\n    architecture=\"x86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "name": {
                     "type": "string",
@@ -158,6 +159,7 @@
         },
         "nuage:aws:ServerlessDatabase": {
             "isComponent": true,
+            "description":"The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\ndb = nuage.aws.ServerlessDatabase(\r\n    \"foo\",\r\n    vpc_id=my_vpc.id,\r\n    vpc_subnets=my_vpc.private_subnet_ids,\r\n    database_type=\"mysql\",\r\n    database_name=\"bar\",\r\n    master_username=\"root\",\r\n    ip_whitelist=[\"0.0.0.0\/0\"],\r\n    skip_final_snapshot=True\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "resourceName": {
                     "type": "string",
