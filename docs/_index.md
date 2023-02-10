@@ -37,7 +37,7 @@ The Repository component is a convenient tool for managing Amazon Elastic Contai
 import * as pulumi from "@pulumi/pulumi";
 import * as nuage from "@pulumi/nuage";
 
-const repository = new nuage.aws.Repository("repository-resourcename",{
+const repository = new nuage.aws.Repository("foo",{
     name:"repository",
     expireInDays:30
 });
@@ -63,21 +63,19 @@ const lambdaContainer = new nuage.aws.ContainerFunction("foo",{
 import pulumi_nuage as nuage
 
 repository = nuage.aws.Repository(
-    "repository-resourcename",
+    "foo",
     name="repository",
     expire_in_days=30,
 )
 
-container_function = nuage.aws.ContainerFunction("myfunction",
+container_function = nuage.aws.ContainerFunction("foo",
     name="lambda-function",
     description="Nuage AWS ContainerFunction resource.",
-    dockerfile="./lambda/Dockerfile.lambda",
-    context="./lambda/",
     repository_url=repository.url,    
     architecture="x86_64",
     memory_size=512,
     timeout=30,
-    environment={"DUMMY":"VARIABLE"},
+    environment={"bar":"baz"},
     keep_warm=True,
     url=True,
     log_retention_in_days=90
@@ -109,8 +107,7 @@ const db = new nuage.aws.Repository("foo",{
     databaseName:"bar",
     masterUserName:"root",
     ipWhitelist:["0.0.0.0/0"],
-    skipFinalSnapshot:true,
-    dataApi:false
+    skipFinalSnapshot:true
 });
 ```
  
@@ -121,15 +118,14 @@ const db = new nuage.aws.Repository("foo",{
 import pulumi_nuage as nuage
 
 db = nuage.aws.ServerlessDatabase(
-    "database-resourcename",
-    vpc_id="vpc_id",
-    vpc_subnets=[],
+    "foo",
+    vpc_id=my_vpc.id,
+    vpc_subnets=my_vpc.private_subnet_ids,
     database_type="mysql",
-    database_name="db",
+    database_name="bar",
     master_username="root",
     ip_whitelist=["0.0.0.0/0"],
-    skip_final_snapshot=True,
-    data_api=False
+    skip_final_snapshot=True
 )
 ```
 
