@@ -42,7 +42,7 @@ func NewContainerFunction(ctx *pulumi.Context,
 }
 
 type containerFunctionArgs struct {
-	// Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
+	// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
 	Architecture *string `pulumi:"architecture"`
 	// Dockerfile context path.
 	Context *string `pulumi:"context"`
@@ -55,9 +55,9 @@ type containerFunctionArgs struct {
 	// Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
 	KeepWarm *bool `pulumi:"keepWarm"`
 	// Number of days for log retention to pass in cloudwatch log group..
-	LogRetentionInDays *float64 `pulumi:"logRetentionInDays"`
+	LogRetentionInDays *int `pulumi:"logRetentionInDays"`
 	// Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
-	MemorySize *float64 `pulumi:"memorySize"`
+	MemorySize *int `pulumi:"memorySize"`
 	// Name of the resource.
 	Name *string `pulumi:"name"`
 	// Name prefix as an alternative to name and adds random suffix at the end.
@@ -67,14 +67,14 @@ type containerFunctionArgs struct {
 	// Existing ECR repository name
 	RepositoryUrl string `pulumi:"repositoryUrl"`
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
-	Timeout *float64 `pulumi:"timeout"`
+	Timeout *int `pulumi:"timeout"`
 	// Use Lambda URL. Defaults to `false`
 	Url *bool `pulumi:"url"`
 }
 
 // The set of arguments for constructing a ContainerFunction resource.
 type ContainerFunctionArgs struct {
-	// Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
+	// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
 	Architecture pulumi.StringPtrInput
 	// Dockerfile context path.
 	Context pulumi.StringPtrInput
@@ -87,9 +87,9 @@ type ContainerFunctionArgs struct {
 	// Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
 	KeepWarm pulumi.BoolPtrInput
 	// Number of days for log retention to pass in cloudwatch log group..
-	LogRetentionInDays pulumi.Float64PtrInput
+	LogRetentionInDays pulumi.IntPtrInput
 	// Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
-	MemorySize pulumi.Float64PtrInput
+	MemorySize pulumi.IntPtrInput
 	// Name of the resource.
 	Name pulumi.StringPtrInput
 	// Name prefix as an alternative to name and adds random suffix at the end.
@@ -99,7 +99,7 @@ type ContainerFunctionArgs struct {
 	// Existing ECR repository name
 	RepositoryUrl pulumi.StringInput
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
-	Timeout pulumi.Float64PtrInput
+	Timeout pulumi.IntPtrInput
 	// Use Lambda URL. Defaults to `false`
 	Url pulumi.BoolPtrInput
 }

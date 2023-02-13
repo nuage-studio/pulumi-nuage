@@ -13,11 +13,11 @@ import (
 type Repository struct {
 	pulumi.ResourceState
 
-	Name           pulumi.StringOutput `pulumi:"name"`
-	Registry_id    pulumi.StringOutput `pulumi:"registry_id"`
-	Repository_arn pulumi.StringOutput `pulumi:"repository_arn"`
-	Repository_id  pulumi.StringOutput `pulumi:"repository_id"`
-	Url            pulumi.StringOutput `pulumi:"url"`
+	Arn         pulumi.StringOutput `pulumi:"arn"`
+	Id          pulumi.StringOutput `pulumi:"id"`
+	Name        pulumi.StringOutput `pulumi:"name"`
+	Registry_id pulumi.StringOutput `pulumi:"registry_id"`
+	Url         pulumi.StringOutput `pulumi:"url"`
 }
 
 // NewRepository registers a new resource with the given unique name, arguments, and options.
@@ -37,7 +37,7 @@ func NewRepository(ctx *pulumi.Context,
 
 type repositoryArgs struct {
 	// Number of days for expiring images using LifecyclePolicy.
-	ExpireInDays *float64 `pulumi:"expireInDays"`
+	ExpireInDays *int `pulumi:"expireInDays"`
 	// Name of the resource.
 	Name *string `pulumi:"name"`
 	// Name prefix as an alternative to name and adds random suffix at the end.
@@ -47,7 +47,7 @@ type repositoryArgs struct {
 // The set of arguments for constructing a Repository resource.
 type RepositoryArgs struct {
 	// Number of days for expiring images using LifecyclePolicy.
-	ExpireInDays pulumi.Float64PtrInput
+	ExpireInDays pulumi.IntPtrInput
 	// Name of the resource.
 	Name pulumi.StringPtrInput
 	// Name prefix as an alternative to name and adds random suffix at the end.

@@ -20,28 +20,28 @@ class ContainerFunctionArgs:
                  dockerfile: Optional[pulumi.Input[str]] = None,
                  environment: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
                  keep_warm: Optional[pulumi.Input[bool]] = None,
-                 log_retention_in_days: Optional[pulumi.Input[float]] = None,
-                 memory_size: Optional[pulumi.Input[float]] = None,
+                 log_retention_in_days: Optional[pulumi.Input[int]] = None,
+                 memory_size: Optional[pulumi.Input[int]] = None,
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
-                 timeout: Optional[pulumi.Input[float]] = None,
+                 timeout: Optional[pulumi.Input[int]] = None,
                  url: Optional[pulumi.Input[bool]] = None):
         """
         The set of arguments for constructing a ContainerFunction resource.
         :param pulumi.Input[str] repository_url: Existing ECR repository name
-        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
+        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
         :param pulumi.Input[str] context: Dockerfile context path.
         :param pulumi.Input[str] description: Description of the function.
         :param pulumi.Input[str] dockerfile: Dockerfile path. Defaults to `./Dockerfile`
         :param pulumi.Input[Mapping[str, pulumi.Input[str]]] environment: Environment Variables
         :param pulumi.Input[bool] keep_warm: Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
-        :param pulumi.Input[float] log_retention_in_days: Number of days for log retention to pass in cloudwatch log group..
-        :param pulumi.Input[float] memory_size: Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
+        :param pulumi.Input[int] log_retention_in_days: Number of days for log retention to pass in cloudwatch log group..
+        :param pulumi.Input[int] memory_size: Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         :param pulumi.Input[str] name: Name of the resource.
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
-        :param pulumi.Input[float] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
+        :param pulumi.Input[int] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
         :param pulumi.Input[bool] url: Use Lambda URL. Defaults to `false`
         """
         pulumi.set(__self__, "repository_url", repository_url)
@@ -88,7 +88,7 @@ class ContainerFunctionArgs:
     @pulumi.getter
     def architecture(self) -> Optional[pulumi.Input[str]]:
         """
-        Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
+        Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
         """
         return pulumi.get(self, "architecture")
 
@@ -158,26 +158,26 @@ class ContainerFunctionArgs:
 
     @property
     @pulumi.getter(name="logRetentionInDays")
-    def log_retention_in_days(self) -> Optional[pulumi.Input[float]]:
+    def log_retention_in_days(self) -> Optional[pulumi.Input[int]]:
         """
         Number of days for log retention to pass in cloudwatch log group..
         """
         return pulumi.get(self, "log_retention_in_days")
 
     @log_retention_in_days.setter
-    def log_retention_in_days(self, value: Optional[pulumi.Input[float]]):
+    def log_retention_in_days(self, value: Optional[pulumi.Input[int]]):
         pulumi.set(self, "log_retention_in_days", value)
 
     @property
     @pulumi.getter(name="memorySize")
-    def memory_size(self) -> Optional[pulumi.Input[float]]:
+    def memory_size(self) -> Optional[pulumi.Input[int]]:
         """
         Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         """
         return pulumi.get(self, "memory_size")
 
     @memory_size.setter
-    def memory_size(self, value: Optional[pulumi.Input[float]]):
+    def memory_size(self, value: Optional[pulumi.Input[int]]):
         pulumi.set(self, "memory_size", value)
 
     @property
@@ -218,14 +218,14 @@ class ContainerFunctionArgs:
 
     @property
     @pulumi.getter
-    def timeout(self) -> Optional[pulumi.Input[float]]:
+    def timeout(self) -> Optional[pulumi.Input[int]]:
         """
         Amount of time your Lambda Function has to run in seconds. Defaults to `3`
         """
         return pulumi.get(self, "timeout")
 
     @timeout.setter
-    def timeout(self, value: Optional[pulumi.Input[float]]):
+    def timeout(self, value: Optional[pulumi.Input[int]]):
         pulumi.set(self, "timeout", value)
 
     @property
@@ -252,13 +252,13 @@ class ContainerFunction(pulumi.ComponentResource):
                  dockerfile: Optional[pulumi.Input[str]] = None,
                  environment: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
                  keep_warm: Optional[pulumi.Input[bool]] = None,
-                 log_retention_in_days: Optional[pulumi.Input[float]] = None,
-                 memory_size: Optional[pulumi.Input[float]] = None,
+                 log_retention_in_days: Optional[pulumi.Input[int]] = None,
+                 memory_size: Optional[pulumi.Input[int]] = None,
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
                  repository_url: Optional[pulumi.Input[str]] = None,
-                 timeout: Optional[pulumi.Input[float]] = None,
+                 timeout: Optional[pulumi.Input[int]] = None,
                  url: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
         """
@@ -280,7 +280,7 @@ class ContainerFunction(pulumi.ComponentResource):
             name="lambda-function",
             description="Nuage AWS ContainerFunction resource.",
             repository_url=repository.url,    
-            architecture="x86_64",
+            architecture="X86_64",
             memory_size=512,
             timeout=30,
             environment={"bar":"baz"},
@@ -292,19 +292,19 @@ class ContainerFunction(pulumi.ComponentResource):
 
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
-        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
+        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
         :param pulumi.Input[str] context: Dockerfile context path.
         :param pulumi.Input[str] description: Description of the function.
         :param pulumi.Input[str] dockerfile: Dockerfile path. Defaults to `./Dockerfile`
         :param pulumi.Input[Mapping[str, pulumi.Input[str]]] environment: Environment Variables
         :param pulumi.Input[bool] keep_warm: Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
-        :param pulumi.Input[float] log_retention_in_days: Number of days for log retention to pass in cloudwatch log group..
-        :param pulumi.Input[float] memory_size: Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
+        :param pulumi.Input[int] log_retention_in_days: Number of days for log retention to pass in cloudwatch log group..
+        :param pulumi.Input[int] memory_size: Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         :param pulumi.Input[str] name: Name of the resource.
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
         :param pulumi.Input[str] repository_url: Existing ECR repository name
-        :param pulumi.Input[float] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
+        :param pulumi.Input[int] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
         :param pulumi.Input[bool] url: Use Lambda URL. Defaults to `false`
         """
         ...
@@ -332,7 +332,7 @@ class ContainerFunction(pulumi.ComponentResource):
             name="lambda-function",
             description="Nuage AWS ContainerFunction resource.",
             repository_url=repository.url,    
-            architecture="x86_64",
+            architecture="X86_64",
             memory_size=512,
             timeout=30,
             environment={"bar":"baz"},
@@ -363,13 +363,13 @@ class ContainerFunction(pulumi.ComponentResource):
                  dockerfile: Optional[pulumi.Input[str]] = None,
                  environment: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
                  keep_warm: Optional[pulumi.Input[bool]] = None,
-                 log_retention_in_days: Optional[pulumi.Input[float]] = None,
-                 memory_size: Optional[pulumi.Input[float]] = None,
+                 log_retention_in_days: Optional[pulumi.Input[int]] = None,
+                 memory_size: Optional[pulumi.Input[int]] = None,
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
                  repository_url: Optional[pulumi.Input[str]] = None,
-                 timeout: Optional[pulumi.Input[float]] = None,
+                 timeout: Optional[pulumi.Input[int]] = None,
                  url: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
         if opts is None:
