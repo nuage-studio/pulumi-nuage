@@ -42,7 +42,7 @@
                     "description":"Name prefix as an alternative to name and adds random suffix at the end."
                 },
                 "expireInDays": {
-                    "type": "number",
+                    "type": "integer",
                     "description":"Number of days for expiring images using LifecyclePolicy."
                 }
             },
@@ -52,10 +52,10 @@
                 "registry_id": {
                     "type": "string"
                 },
-                "repository_arn": {
+                "arn": {
                     "type": "string"
                 },
-                "repository_id": {
+                "id": {
                     "type": "string"
                 },
                 "name": {
@@ -66,16 +66,16 @@
                 }
             },
             "required": [
+                "id",
+                "arn",
                 "registry_id",
-                "repository_arn",
-                "repository_id",
                 "name",
                 "url"
             ]
         },
         "nuage:aws:ContainerFunction": {
             "isComponent": true,
-            "description":"Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    repository_url=repository.url,    \r\n    architecture=\"x86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90\r\n)\r\n```\r\n{{% \/example %}}",
+            "description":"Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    repository_url=repository.url,    \r\n    architecture=\"X86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "name": {
                     "type": "string",
@@ -102,15 +102,15 @@
                     "description":"Existing ECR repository name"
                 },
                 "architecture": {
-                    "description":"Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`",                    
+                    "description":"Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`",                    
                     "type":"string"
                 },
                 "memorySize": {
-                    "type": "number",
+                    "type": "integer",
                     "description":"Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`."
                 },
                 "timeout": {
-                    "type": "number",
+                    "type": "integer",
                     "description":"Amount of time your Lambda Function has to run in seconds. Defaults to `3`"
                 },            
                 "environment": {
@@ -130,7 +130,7 @@
                     "description":"Use Lambda URL. Defaults to `false`"
                 },
                 "logRetentionInDays": {
-                    "type": "number",
+                    "type": "integer",
                     "description":"Number of days for log retention to pass in cloudwatch log group.."
                 }
             },
@@ -255,8 +255,7 @@
                 "Pulumi.Awsx":"1.0.0-beta.*",
                 "Pulumi.Docker":"3.*",
                 "Pulumi.Command":"4.6.0-alpha.*"
-            },
-            "respectSchemaVersion": true
+            }
         },
         "go": {
             "generateResourceContainerTypes": true,

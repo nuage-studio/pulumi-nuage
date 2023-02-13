@@ -23,7 +23,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_docker as docker
 from pulumi_command import local
-from .base.PrefixedComponentResource import (
+from .PrefixedComponentResource import (
     PrefixedComponentResource,
     PrefixedComponentResourceArgs,
 )
@@ -73,14 +73,14 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             dockerfile=inputs.get("dockerfile", None),
             context=inputs.get("context", None),
             repository_url=inputs.get("repositoryUrl"),
-            architecture=inputs.get("architecture", "x86_64"),
-            memory_size=inputs.get("memorySize", 512),
-            timeout=inputs.get("timeout", 3),
+            architecture=inputs.get("architecture", "X86_64"),
+            memory_size=int(inputs.get("memorySize", 512)),
+            timeout=int(inputs.get("timeout", 3)),
             environment=inputs.get("environment", None),
             policy_document=inputs.get("policyDocument", None),
             keep_warm=inputs.get("keepWarm", False),
             url=inputs.get("url", False),
-            log_retention_in_days=inputs.get("logRetentionInDays", 90)
+            log_retention_in_days=int(inputs.get("logRetentionInDays", 90))
             # cors_configuration = None,#inputs['corsConfiguration'],
         )
 
@@ -151,9 +151,7 @@ class ContainerFunction(PrefixedComponentResource):
                 username=auth.user_name,
                 password=auth.password,
             ),
-            opts=pulumi.ResourceOptions(
-                parent=self, ignore_changes=image_ignore_changes
-            ),
+            opts=pulumi.ResourceOptions(ignore_changes=image_ignore_changes),
         )
 
         # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name}.
@@ -227,7 +225,6 @@ class ContainerFunction(PrefixedComponentResource):
                 aws.iam.ManagedPolicy.AWSX_RAY_DAEMON_WRITE_ACCESS,
             ],
             inline_policies=policy_documents,
-            opts=pulumi.ResourceOptions(parent=self),
         )
 
         # Lambda Function
@@ -247,7 +244,6 @@ class ContainerFunction(PrefixedComponentResource):
                 else None
             ),
             tracing_config=aws.lambda_.FunctionTracingConfigArgs(mode="Active"),
-            opts=pulumi.ResourceOptions(parent=self),
         )
 
         if args.keep_warm:

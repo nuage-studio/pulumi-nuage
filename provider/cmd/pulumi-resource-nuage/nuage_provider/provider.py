@@ -82,10 +82,11 @@ def _create_repository(
     return provider.ConstructResult(
         urn=created_repository.urn,
         state={
-            "arn": created_repository.repository_arn,
-            "repository_id": created_repository.repository_id,
-            "repository_name": created_repository.repository_name,
-            "repository_url": created_repository.repository_url,
+            "arn": created_repository.arn,
+            "id": created_repository.id,
+            "name": created_repository.name,
+            "url": created_repository.url,
+            "registry_id": created_repository.registry_id,
         },
     )
 
