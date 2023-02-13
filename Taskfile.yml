@@ -26,6 +26,7 @@ tasks:
     deps:
       - sdk
     cmds:
+      - echo $versionNumber > provider/cmd/pulumi-resource-nuage/nuage_provider/VERSION
       - make build
       # - make install
     sources:
