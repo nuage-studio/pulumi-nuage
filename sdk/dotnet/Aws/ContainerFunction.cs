@@ -9,6 +9,11 @@ using Pulumi.Serialization;
 
 namespace Pulumi.Nuage.Aws
 {
+    /// <summary>
+    /// Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
+    /// 
+    /// ## Example Usage
+    /// </summary>
     [NuageResourceType("nuage:aws:ContainerFunction")]
     public partial class ContainerFunction : Pulumi.ComponentResource
     {

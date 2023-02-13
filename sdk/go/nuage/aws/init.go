@@ -23,6 +23,8 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 	switch typ {
 	case "nuage:aws:ContainerFunction":
 		r = &ContainerFunction{}
+	case "nuage:aws:Repository":
+		r = &Repository{}
 	case "nuage:aws:ServerlessDatabase":
 		r = &ServerlessDatabase{}
 	case "nuage:aws:bucket_nuage":

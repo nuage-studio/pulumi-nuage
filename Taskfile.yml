@@ -6,7 +6,8 @@ includes:
     taskfile: ./provider/cmd/tests/TestTasks.yml
 
 env:
-  versionNumber: 0.0.3
+  versionNumber:
+    sh: cat schema.json | jq -r '.version'
 
 tasks:
   sdk:
