@@ -4,6 +4,11 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "../utilities";
 
+/**
+ * The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.
+ *
+ * ## Example Usage
+ */
 export class ServerlessDatabase extends pulumi.ComponentResource {
     /** @internal */
     public static readonly __pulumiType = 'nuage:aws:ServerlessDatabase';

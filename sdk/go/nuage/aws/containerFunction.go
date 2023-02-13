@@ -7,25 +7,32 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/pkg/errors"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
+// Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
+//
+// ## Example Usage
 type ContainerFunction struct {
 	pulumi.ResourceState
 
-	Arn            pulumi.StringOutput `pulumi:"arn"`
-	Ecr_image_name pulumi.StringOutput `pulumi:"ecr_image_name"`
-	Function_url   pulumi.StringOutput `pulumi:"function_url"`
-	Name           pulumi.StringOutput `pulumi:"name"`
+	Arn          pulumi.StringOutput `pulumi:"arn"`
+	Function_url pulumi.StringOutput `pulumi:"function_url"`
+	Image_uri    pulumi.StringOutput `pulumi:"image_uri"`
+	Name         pulumi.StringOutput `pulumi:"name"`
 }
 
 // NewContainerFunction registers a new resource with the given unique name, arguments, and options.
 func NewContainerFunction(ctx *pulumi.Context,
 	name string, args *ContainerFunctionArgs, opts ...pulumi.ResourceOption) (*ContainerFunction, error) {
 	if args == nil {
-		args = &ContainerFunctionArgs{}
+		return nil, errors.New("missing one or more required arguments")
 	}
 
+	if args.RepositoryUrl == nil {
+		return nil, errors.New("invalid value for required argument 'RepositoryUrl'")
+	}
 	var resource ContainerFunction
 	err := ctx.RegisterRemoteComponentResource("nuage:aws:ContainerFunction", name, args, &resource, opts...)
 	if err != nil {
@@ -58,7 +65,7 @@ type containerFunctionArgs struct {
 	// Policy Document for lambda.
 	PolicyDocument *string `pulumi:"policyDocument"`
 	// Existing ECR repository name
-	RepositoryId *string `pulumi:"repositoryId"`
+	RepositoryUrl string `pulumi:"repositoryUrl"`
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout *float64 `pulumi:"timeout"`
 	// Use Lambda URL. Defaults to `false`
@@ -90,7 +97,7 @@ type ContainerFunctionArgs struct {
 	// Policy Document for lambda.
 	PolicyDocument pulumi.StringPtrInput
 	// Existing ECR repository name
-	RepositoryId pulumi.StringPtrInput
+	RepositoryUrl pulumi.StringInput
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout pulumi.Float64PtrInput
 	// Use Lambda URL. Defaults to `false`

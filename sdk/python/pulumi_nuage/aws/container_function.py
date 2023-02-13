@@ -262,7 +262,34 @@ class ContainerFunction(pulumi.ComponentResource):
                  url: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
         """
-        Create a ContainerFunction resource with the given unique name, props, and options.
+        Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
+
+        ## Example Usage
+        ### Basic Example
+
+        ```python
+        import pulumi_nuage as nuage
+        
+        repository = nuage.aws.Repository(
+            "foo",
+            name="repository",
+            expire_in_days=30,
+        )
+        
+        container_function = nuage.aws.ContainerFunction("foo",
+            name="lambda-function",
+            description="Nuage AWS ContainerFunction resource.",
+            repository_url=repository.url,    
+            architecture="x86_64",
+            memory_size=512,
+            timeout=30,
+            environment={"bar":"baz"},
+            keep_warm=True,
+            url=True,
+            log_retention_in_days=90
+        )
+        ```
+
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
@@ -287,7 +314,34 @@ class ContainerFunction(pulumi.ComponentResource):
                  args: ContainerFunctionArgs,
                  opts: Optional[pulumi.ResourceOptions] = None):
         """
-        Create a ContainerFunction resource with the given unique name, props, and options.
+        Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
+
+        ## Example Usage
+        ### Basic Example
+
+        ```python
+        import pulumi_nuage as nuage
+        
+        repository = nuage.aws.Repository(
+            "foo",
+            name="repository",
+            expire_in_days=30,
+        )
+        
+        container_function = nuage.aws.ContainerFunction("foo",
+            name="lambda-function",
+            description="Nuage AWS ContainerFunction resource.",
+            repository_url=repository.url,    
+            architecture="x86_64",
+            memory_size=512,
+            timeout=30,
+            environment={"bar":"baz"},
+            keep_warm=True,
+            url=True,
+            log_retention_in_days=90
+        )
+        ```
+
         :param str resource_name: The name of the resource.
         :param ContainerFunctionArgs args: The arguments to use to populate this resource's properties.
         :param pulumi.ResourceOptions opts: Options for the resource.
