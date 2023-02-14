@@ -23,7 +23,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_docker as docker
 from pulumi_command import local
-from .PrefixedComponentResource import (
+from .prefixed_component_resource import (
     PrefixedComponentResource,
     PrefixedComponentResourceArgs,
 )
@@ -151,7 +151,9 @@ class ContainerFunction(PrefixedComponentResource):
                 username=auth.user_name,
                 password=auth.password,
             ),
-            opts=pulumi.ResourceOptions(ignore_changes=image_ignore_changes),
+            opts=pulumi.ResourceOptions(
+                parent=self, ignore_changes=image_ignore_changes
+            ),
         )
 
         # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name}.
@@ -225,6 +227,7 @@ class ContainerFunction(PrefixedComponentResource):
                 aws.iam.ManagedPolicy.AWSX_RAY_DAEMON_WRITE_ACCESS,
             ],
             inline_policies=policy_documents,
+            opts=pulumi.ResourceOptions(parent=self),
         )
 
         # Lambda Function
@@ -244,6 +247,7 @@ class ContainerFunction(PrefixedComponentResource):
                 else None
             ),
             tracing_config=aws.lambda_.FunctionTracingConfigArgs(mode="Active"),
+            opts=pulumi.ResourceOptions(parent=self, depends_on=[self.role, image]),
         )
 
         if args.keep_warm:

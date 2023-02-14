@@ -19,7 +19,7 @@ from typing import Any, Dict, Optional
 import pulumi
 import pulumi_aws as aws
 
-from .PrefixedComponentResource import (
+from .prefixed_component_resource import (
     PrefixedComponentResource,
     PrefixedComponentResourceArgs,
 )
