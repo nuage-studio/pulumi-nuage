@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - v*.*.*
-      - '!v*.*.*-**'
+      - "!v*.*.*-**"
 env:
   PROVIDER: "nuage"
   # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
@@ -34,7 +34,7 @@ jobs:
     name: publish
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repo
+      - name: Checkout Repo
         uses: actions/checkout@v2
       - name: Unshallow clone for tags
         run: git fetch --prune --unshallow --tags
