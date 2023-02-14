@@ -133,10 +133,10 @@ jobs:
         goversion:
           - 1.17.x
         language:
-          - nodejs
-          - python
-          - dotnet
-          - go
+          - python        
+        #  - nodejs
+        #  - dotnet
+        #  - go
         nodeversion:
           - 14.x
         pythonversion:
