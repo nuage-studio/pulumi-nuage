@@ -25,6 +25,7 @@ func NewBucket_nuage(ctx *pulumi.Context,
 		args = &Bucket_nuageArgs{}
 	}
 
+	opts = pkgResourceDefaultOpts(opts)
 	var resource Bucket_nuage
 	err := ctx.RegisterRemoteComponentResource("nuage:aws:bucket_nuage", name, args, &resource, opts...)
 	if err != nil {

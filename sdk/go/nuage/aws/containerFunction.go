@@ -33,6 +33,7 @@ func NewContainerFunction(ctx *pulumi.Context,
 	if args.RepositoryUrl == nil {
 		return nil, errors.New("invalid value for required argument 'RepositoryUrl'")
 	}
+	opts = pkgResourceDefaultOpts(opts)
 	var resource ContainerFunction
 	err := ctx.RegisterRemoteComponentResource("nuage:aws:ContainerFunction", name, args, &resource, opts...)
 	if err != nil {
