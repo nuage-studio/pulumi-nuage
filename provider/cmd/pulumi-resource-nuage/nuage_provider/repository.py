@@ -19,7 +19,7 @@ from typing import Any, Dict, Optional
 import pulumi
 import pulumi_aws as aws
 
-from .base.PrefixedComponentResource import (
+from .prefixed_component_resource import (
     PrefixedComponentResource,
     PrefixedComponentResourceArgs,
 )
@@ -34,7 +34,7 @@ class RepositoryArgs(PrefixedComponentResourceArgs):
         return RepositoryArgs(
             name=inputs.get("name", None),
             name_prefix=inputs.get("namePrefix", None),
-            expire_in_days=inputs.get("expireInDays", 30),
+            expire_in_days=int(inputs.get("expireInDays", 30)),
         )
 
 

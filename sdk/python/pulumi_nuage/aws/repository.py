@@ -13,12 +13,12 @@ __all__ = ['RepositoryArgs', 'Repository']
 @pulumi.input_type
 class RepositoryArgs:
     def __init__(__self__, *,
-                 expire_in_days: Optional[pulumi.Input[float]] = None,
+                 expire_in_days: Optional[pulumi.Input[int]] = None,
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None):
         """
         The set of arguments for constructing a Repository resource.
-        :param pulumi.Input[float] expire_in_days: Number of days for expiring images using LifecyclePolicy.
+        :param pulumi.Input[int] expire_in_days: Number of days for expiring images using LifecyclePolicy.
         :param pulumi.Input[str] name: Name of the resource.
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         """
@@ -31,14 +31,14 @@ class RepositoryArgs:
 
     @property
     @pulumi.getter(name="expireInDays")
-    def expire_in_days(self) -> Optional[pulumi.Input[float]]:
+    def expire_in_days(self) -> Optional[pulumi.Input[int]]:
         """
         Number of days for expiring images using LifecyclePolicy.
         """
         return pulumi.get(self, "expire_in_days")
 
     @expire_in_days.setter
-    def expire_in_days(self, value: Optional[pulumi.Input[float]]):
+    def expire_in_days(self, value: Optional[pulumi.Input[int]]):
         pulumi.set(self, "expire_in_days", value)
 
     @property
@@ -71,7 +71,7 @@ class Repository(pulumi.ComponentResource):
     def __init__(__self__,
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
-                 expire_in_days: Optional[pulumi.Input[float]] = None,
+                 expire_in_days: Optional[pulumi.Input[int]] = None,
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  __props__=None):
@@ -79,7 +79,7 @@ class Repository(pulumi.ComponentResource):
         Create a Repository resource with the given unique name, props, and options.
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
-        :param pulumi.Input[float] expire_in_days: Number of days for expiring images using LifecyclePolicy.
+        :param pulumi.Input[int] expire_in_days: Number of days for expiring images using LifecyclePolicy.
         :param pulumi.Input[str] name: Name of the resource.
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         """
@@ -106,7 +106,7 @@ class Repository(pulumi.ComponentResource):
     def _internal_init(__self__,
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
-                 expire_in_days: Optional[pulumi.Input[float]] = None,
+                 expire_in_days: Optional[pulumi.Input[int]] = None,
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  __props__=None):
@@ -126,9 +126,9 @@ class Repository(pulumi.ComponentResource):
             __props__.__dict__["expire_in_days"] = expire_in_days
             __props__.__dict__["name"] = name
             __props__.__dict__["name_prefix"] = name_prefix
+            __props__.__dict__["arn"] = None
+            __props__.__dict__["id"] = None
             __props__.__dict__["registry_id"] = None
-            __props__.__dict__["repository_arn"] = None
-            __props__.__dict__["repository_id"] = None
             __props__.__dict__["url"] = None
         super(Repository, __self__).__init__(
             'nuage:aws:Repository',
@@ -139,6 +139,16 @@ class Repository(pulumi.ComponentResource):
 
     @property
     @pulumi.getter
+    def arn(self) -> pulumi.Output[str]:
+        return pulumi.get(self, "arn")
+
+    @property
+    @pulumi.getter
+    def id(self) -> pulumi.Output[str]:
+        return pulumi.get(self, "id")
+
+    @property
+    @pulumi.getter
     def name(self) -> pulumi.Output[str]:
         return pulumi.get(self, "name")
 
@@ -146,16 +156,6 @@ class Repository(pulumi.ComponentResource):
     @pulumi.getter
     def registry_id(self) -> pulumi.Output[str]:
         return pulumi.get(self, "registry_id")
-
-    @property
-    @pulumi.getter
-    def repository_arn(self) -> pulumi.Output[str]:
-        return pulumi.get(self, "repository_arn")
-
-    @property
-    @pulumi.getter
-    def repository_id(self) -> pulumi.Output[str]:
-        return pulumi.get(self, "repository_id")
 
     @property
     @pulumi.getter

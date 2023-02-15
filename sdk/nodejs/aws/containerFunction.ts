@@ -76,7 +76,7 @@ export class ContainerFunction extends pulumi.ComponentResource {
  */
 export interface ContainerFunctionArgs {
     /**
-     * Architecture, either `X86_64` or `ARM64`. Defaults to `x86_64`
+     * Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
      */
     architecture?: pulumi.Input<string>;
     /**

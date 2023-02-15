@@ -12,10 +12,10 @@ SCHEMA_PATH     := ${WORKING_DIR}/schema.json
 
 SRC             := provider/cmd/pulumi-resource-${PACK}
 
-generate:: gen_go_sdk gen_dotnet_sdk gen_nodejs_sdk gen_python_sdk
+generate:: gen_go_sdk gen_nodejs_sdk gen_python_sdk # gen_dotnet_sdk
 
-build:: build_provider build_dotnet_sdk build_nodejs_sdk build_python_sdk
-install:: install_dotnet_sdk install_nodejs_sdk
+build:: build_provider build_nodejs_sdk build_python_sdk # build_dotnet_sdk
+install:: install_nodejs_sdk # install_dotnet_sdk 
 
 
 # Provider

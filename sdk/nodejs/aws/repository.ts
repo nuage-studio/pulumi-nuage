@@ -19,10 +19,10 @@ export class Repository extends pulumi.ComponentResource {
         return obj['__pulumiType'] === Repository.__pulumiType;
     }
 
+    public /*out*/ readonly arn!: pulumi.Output<string>;
+    public /*out*/ readonly id!: pulumi.Output<string>;
     public readonly name!: pulumi.Output<string>;
     public /*out*/ readonly registry_id!: pulumi.Output<string>;
-    public /*out*/ readonly repository_arn!: pulumi.Output<string>;
-    public /*out*/ readonly repository_id!: pulumi.Output<string>;
     public /*out*/ readonly url!: pulumi.Output<string>;
 
     /**
@@ -39,15 +39,15 @@ export class Repository extends pulumi.ComponentResource {
             resourceInputs["expireInDays"] = args ? args.expireInDays : undefined;
             resourceInputs["name"] = args ? args.name : undefined;
             resourceInputs["namePrefix"] = args ? args.namePrefix : undefined;
+            resourceInputs["arn"] = undefined /*out*/;
+            resourceInputs["id"] = undefined /*out*/;
             resourceInputs["registry_id"] = undefined /*out*/;
-            resourceInputs["repository_arn"] = undefined /*out*/;
-            resourceInputs["repository_id"] = undefined /*out*/;
             resourceInputs["url"] = undefined /*out*/;
         } else {
+            resourceInputs["arn"] = undefined /*out*/;
+            resourceInputs["id"] = undefined /*out*/;
             resourceInputs["name"] = undefined /*out*/;
             resourceInputs["registry_id"] = undefined /*out*/;
-            resourceInputs["repository_arn"] = undefined /*out*/;
-            resourceInputs["repository_id"] = undefined /*out*/;
             resourceInputs["url"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
