@@ -142,12 +142,9 @@
                     "type": "boolean",
                     "description":"Enable data api. Defaults to `false`"
                 },
-                "bastionSubnets": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "description":"List of public subnet ip addresses for the bastion host."
+                "bastionSubnet": {
+                    "type": "string",
+                    "description":"Public subnet ip address for the bastion host."
                 },
                 "bastionEnabled": {
                     "type": "boolean",
@@ -207,12 +204,9 @@
                     "type": "string",
                     "description":"Vpc id."
                 },
-                "vpcSubnets": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "description":"List of subnet ip addresses of Vpc."
+                "vpcSubnetId": {
+                    "type": "string",
+                    "description":"Subnet ip address of Vpc."
                 },
                 "sshPort": {
                     "type": "number",
@@ -221,7 +215,7 @@
             },
             "requiredInputs": [
                 "vpcId",
-                "vpcSubnets"
+                "vpcSubnetId"
             ],
             "properties": {
                 "public_ip": {

@@ -25,14 +25,14 @@ import pulumi_aws as aws
 @dataclass
 class BastionArgs:
     vpc_id: pulumi.Input[str]
-    vpc_subnets: pulumi.Input[List[str]]
+    vpc_subnet_id: pulumi.Input[str]
     ssh_port: pulumi.Input[int]
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "BastionArgs":
         return BastionArgs(
             vpc_id=inputs["vpcId"],
-            vpc_subnets=inputs["vpcSubnets"],
+            vpc_subnet_id=inputs["vpcSubnetId"],
             ssh_port=inputs.get("sshPort", 22),
         )
 
@@ -97,7 +97,9 @@ class Bastion(pulumi.ComponentResource):
                     values=["hvm"],
                 ),
             ],
-            owners=["099720109477"],
+            owners=[
+                "099720109477"
+            ],  # Official Ubuntu Image https://ubuntu.com/server/docs/cloud-images/amazon-ec2
         )
         bastion = aws.ec2.Instance(
             f"{name}-instance",
@@ -106,7 +108,7 @@ class Bastion(pulumi.ComponentResource):
             key_name=key_pair.key_name,
             tags={"Name": f"{name} bastion instance"},
             vpc_security_group_ids=[security_group.id],
-            subnet_id=args.vpc_subnets[0],
+            subnet_id=args.vpc_subnet_id,
             associate_public_ip_address=True,
             opts=pulumi.ResourceOptions(parent=self),
         )

@@ -25,7 +25,7 @@ database = ServerlessDatabase(
         skip_final_snapshot=True,
         data_api=False,
         bastion_enabled=False,
-        bastion_subnets=[],
+        bastion_subnet=None,
     ),
 )
 pulumi.export("database_mysql_user", database.user)
@@ -49,7 +49,7 @@ database = ServerlessDatabase(
         skip_final_snapshot=True,
         data_api=False,
         bastion_enabled=True,
-        bastion_subnets=vpc.public_subnet_ids,
+        bastion_subnet=vpc.public_subnet_ids[0],
     ),
 )
 

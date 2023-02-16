@@ -22,7 +22,7 @@ class ServerlessDatabaseArgs:
     skip_final_snapshot: Optional[pulumi.Input[bool]]
     data_api: Optional[pulumi.Input[bool]]  # Aurora SLS v2 does not support Data API
 
-    bastion_subnets: Optional[pulumi.Input[List[str]]]
+    bastion_subnet: Optional[pulumi.Input[str]]
     bastion_enabled: Optional[pulumi.Input[bool]]
 
     @staticmethod
@@ -36,7 +36,7 @@ class ServerlessDatabaseArgs:
             ip_whitelist=inputs.get("ipWhitelist", None),
             skip_final_snapshot=inputs.get("skipFinalSnapshot", False),
             data_api=inputs.get("dataApi", False),
-            bastion_subnets=inputs.get("bastionSubnets", []),
+            bastion_subnet=inputs.get("bastionSubnet", None),
             bastion_enabled=inputs.get("bastionEnabled", False),
         )
 
@@ -260,7 +260,7 @@ class ServerlessDatabase(pulumi.ComponentResource):
             bastion = Bastion(
                 f"{name}/bastion",
                 args=BastionArgs(
-                    vpc_id=args.vpc_id, vpc_subnets=args.bastion_subnets, ssh_port=22
+                    vpc_id=args.vpc_id, vpc_subnet_id=args.bastion_subnet, ssh_port=22
                 ),
                 opts=pulumi.ResourceOptions(parent=self),
             )
