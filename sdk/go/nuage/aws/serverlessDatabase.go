@@ -11,6 +11,9 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
+// The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.
+//
+// ## Example Usage
 type ServerlessDatabase struct {
 	pulumi.ResourceState
 
@@ -65,6 +68,11 @@ type serverlessDatabaseArgs struct {
 	IpWhitelist []string `pulumi:"ipWhitelist"`
 	// Master user name of the db.
 	MasterUserName *string `pulumi:"masterUserName"`
+<<<<<<< HEAD
+=======
+	// Resource name.
+	ResourceName string `pulumi:"resourceName"`
+>>>>>>> master
 	// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
 	SkipFinalSnapshot *bool `pulumi:"skipFinalSnapshot"`
 	// Vpc id.
@@ -89,6 +97,11 @@ type ServerlessDatabaseArgs struct {
 	IpWhitelist pulumi.StringArrayInput
 	// Master user name of the db.
 	MasterUserName pulumi.StringPtrInput
+<<<<<<< HEAD
+=======
+	// Resource name.
+	ResourceName pulumi.StringInput
+>>>>>>> master
 	// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
 	SkipFinalSnapshot pulumi.BoolPtrInput
 	// Vpc id.

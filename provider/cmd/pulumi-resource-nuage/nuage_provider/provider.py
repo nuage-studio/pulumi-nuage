@@ -22,6 +22,7 @@ from pulumi.provider import ConstructResult
 import nuage_provider
 from nuage_provider.bucket_nuage import bucket_nuage
 from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
+from nuage_provider.repository import Repository, RepositoryArgs
 from nuage_provider.serverless_database import (
     ServerlessDatabase,
     ServerlessDatabaseArgs,
@@ -45,6 +46,8 @@ class Provider(provider.Provider):
             return _create_bucket(name, inputs, options)
         elif resource_type == "nuage:aws:ContainerFunction":
             return _create_container(name, inputs, options)
+        elif resource_type == "nuage:aws:Repository":
+            return _create_repository(name, inputs, options)
         elif resource_type == "nuage:aws:ServerlessDatabase":
             return _create_database(name, inputs, options)
         elif resource_type == "nuage:aws:Bastion":
@@ -85,6 +88,25 @@ def _create_database(
             "uri": created_resource.uri,
             "bastion_ip": created_resource.bastion_ip,
             "bastion_private_key": created_resource.bastion_private_key,
+        },
+    )
+
+
+def _create_repository(
+    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
+) -> ConstructResult:
+    created_repository = Repository(
+        name, RepositoryArgs.from_inputs(inputs), dict(inputs), options
+    )
+
+    return provider.ConstructResult(
+        urn=created_repository.urn,
+        state={
+            "arn": created_repository.arn,
+            "id": created_repository.id,
+            "name": created_repository.name,
+            "url": created_repository.url,
+            "registry_id": created_repository.registry_id,
         },
     )
 

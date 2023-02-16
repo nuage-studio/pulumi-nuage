@@ -1,14 +1,16 @@
 import json
 import boto3
 import pytest
-from ..constants import LAMBDA
+from ..constants import GLOBAL, LAMBDA
 
 
 class TestLambda:
     # class: the fixture is destroyed during teardown of the last test in the class.
     @pytest.fixture(scope="class")
     def lambda_client(self):
-        return boto3.client("lambda")
+        return boto3.Session(profile_name=GLOBAL["AWS_PROFILE"]).client(
+            "lambda", region_name=GLOBAL["REGION_NAME"]
+        )
 
     def test_lambda_output_name(self, stack_outputs):
         # Test if lambda name setting is valid.

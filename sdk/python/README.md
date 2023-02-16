@@ -2,34 +2,6 @@
 
 Pulumi components carefully crafted by Nuage
 
-## Install the Pulumi Plugin
-
-To use this resource, you need to install Pulumi plugin first (independent from the development language).
-
-1. Download the latest release from <https://github.com/nuage-studio/pulumi-nuage/releases/>
-2. Install the .tar.gz package using Pulumi
-
-```bash
-pulumi plugin install resource nuage 0.0.1 --file pulumi-resource-nuage-v0.0.1-darwin-amd64.tar.gz
-```
-
-You may also automate this process via Taskfile. Here is an example:
-
-```yaml
-version: "3"
-
-tasks:
-  pulumi_install:
-    desc: Downloads binary
-    vars:
-      VERSION: 0.0.1
-      FILE_NAME: "pulumi-resource-nuage-v0.0.1-darwin-amd64.tar.gz"
-    cmds:
-      - curl -L -o {{.FILE_NAME}} https://github.com/nuage-studio/pulumi-nuage/releases/download/{{.VERSION}}/{{.FILE_NAME}}
-      - pulumi plugin install resource nuage {{.VERSION}} --file {{.FILE_NAME}}
-      - rm {{.FILE_NAME}}
-```
-
 ## Setup Instructions for Python SDK
 
 You can use the following command to add python library via Poetry:

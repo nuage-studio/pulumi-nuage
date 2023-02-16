@@ -8,6 +8,7 @@ import * as utilities from "../utilities";
 export * from "./bastion";
 export * from "./bucket_nuage";
 export * from "./containerFunction";
+export * from "./repository";
 export * from "./serverlessDatabase";
 
 // Export enums:
@@ -16,6 +17,7 @@ export * from "../types/enums/aws";
 // Import resources to register:
 import { Bastion } from "./bastion";
 import { ContainerFunction } from "./containerFunction";
+import { Repository } from "./repository";
 import { ServerlessDatabase } from "./serverlessDatabase";
 import { Bucket_nuage } from "./bucket_nuage";
 
@@ -27,6 +29,8 @@ const _module = {
                 return new Bastion(name, <any>undefined, { urn })
             case "nuage:aws:ContainerFunction":
                 return new ContainerFunction(name, <any>undefined, { urn })
+            case "nuage:aws:Repository":
+                return new Repository(name, <any>undefined, { urn })
             case "nuage:aws:ServerlessDatabase":
                 return new ServerlessDatabase(name, <any>undefined, { urn })
             case "nuage:aws:bucket_nuage":

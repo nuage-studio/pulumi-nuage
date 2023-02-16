@@ -17,6 +17,7 @@
         "aws/bucket_nuage.ts",
         "aws/containerFunction.ts",
         "aws/index.ts",
+        "aws/repository.ts",
         "aws/serverlessDatabase.ts",
         "index.ts",
         "provider.ts",

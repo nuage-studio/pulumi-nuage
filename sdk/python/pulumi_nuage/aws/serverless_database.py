@@ -192,7 +192,26 @@ class ServerlessDatabase(pulumi.ComponentResource):
                  vpc_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  __props__=None):
         """
-        Create a ServerlessDatabase resource with the given unique name, props, and options.
+        The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.
+
+        ## Example Usage
+        ### Basic Example
+
+        ```python
+        import pulumi_nuage as nuage
+        
+        db = nuage.aws.ServerlessDatabase(
+            "foo",
+            vpc_id=my_vpc.id,
+            vpc_subnets=my_vpc.private_subnet_ids,
+            database_type="mysql",
+            database_name="bar",
+            master_username="root",
+            ip_whitelist=["0.0.0.0/0"],
+            skip_final_snapshot=True
+        )
+        ```
+
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[bool] bastion_enabled: Enable data api. Defaults to `false`
@@ -213,7 +232,26 @@ class ServerlessDatabase(pulumi.ComponentResource):
                  args: ServerlessDatabaseArgs,
                  opts: Optional[pulumi.ResourceOptions] = None):
         """
-        Create a ServerlessDatabase resource with the given unique name, props, and options.
+        The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.
+
+        ## Example Usage
+        ### Basic Example
+
+        ```python
+        import pulumi_nuage as nuage
+        
+        db = nuage.aws.ServerlessDatabase(
+            "foo",
+            vpc_id=my_vpc.id,
+            vpc_subnets=my_vpc.private_subnet_ids,
+            database_type="mysql",
+            database_name="bar",
+            master_username="root",
+            ip_whitelist=["0.0.0.0/0"],
+            skip_final_snapshot=True
+        )
+        ```
+
         :param str resource_name: The name of the resource.
         :param ServerlessDatabaseArgs args: The arguments to use to populate this resource's properties.
         :param pulumi.ResourceOptions opts: Options for the resource.
