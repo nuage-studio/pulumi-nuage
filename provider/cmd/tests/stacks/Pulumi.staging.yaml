@@ -1,3 +1,0 @@
-config:
-  aws:profile: nuage-dev
-  aws:region: eu-west-1
