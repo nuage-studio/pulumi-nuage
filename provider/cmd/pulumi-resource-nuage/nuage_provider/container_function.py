@@ -293,8 +293,8 @@ class ContainerFunction(PrefixedComponentResource):
                 authorization_type="NONE",
                 cors=None,  # args.cors_configuration,
                 opts=pulumi.ResourceOptions(parent=self.function),
-            )
-            outputs["function_url"] = self.function_url.function_url
+            ).function_url
+            outputs["function_url"] = self.function_url
         else:
             self.function_url = None
 
