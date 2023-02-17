@@ -14,8 +14,10 @@ from nuage_provider.serverless_database import (
 
 # MySQL DATABASE
 database = ServerlessDatabase(
-    name=DB["MYSQL_NAME"],
+    DB["MYSQL_NAME"],
     args=ServerlessDatabaseArgs(
+        name=DB["MYSQL_NAME"],
+        name_prefix=None,
         vpc_id=vpc.vpc_id,
         vpc_subnets=vpc.public_subnet_ids,
         database_type="mysql",
@@ -25,12 +27,12 @@ database = ServerlessDatabase(
         skip_final_snapshot=True,
         data_api=False,
         bastion_enabled=False,
-        bastion_subnet=None,
+        bastion_subnet_id=None,
     ),
 )
 pulumi.export("database_mysql_user", database.user)
 pulumi.export("database_mysql_password", database.password)
-pulumi.export("database_mysql_name", database.name)
+pulumi.export("database_mysql_name", database.database_name)
 pulumi.export("database_mysql_port", database.port)
 pulumi.export("database_mysql_host", database.host)
 pulumi.export("database_mysql_uri", database.uri)
@@ -38,8 +40,10 @@ pulumi.export("database_mysql_cluster_arn", database.cluster_arn)
 
 # PostgreSQL DATABASE
 database = ServerlessDatabase(
-    name=DB["POSTGRESQL_NAME"],
+    DB["POSTGRESQL_NAME"],
     args=ServerlessDatabaseArgs(
+        name=DB["POSTGRESQL_NAME"],
+        name_prefix=None,
         vpc_id=vpc.vpc_id,
         vpc_subnets=vpc.private_subnet_ids,
         database_type="postgresql",
@@ -49,13 +53,13 @@ database = ServerlessDatabase(
         skip_final_snapshot=True,
         data_api=False,
         bastion_enabled=True,
-        bastion_subnet=vpc.public_subnet_ids[0],
+        bastion_subnet_id=vpc.public_subnet_ids[0],
     ),
 )
 
 pulumi.export("database_postgresql_user", database.user)
 pulumi.export("database_postgresql_password", database.password)
-pulumi.export("database_postgresql_name", database.name)
+pulumi.export("database_postgresql_name", database.database_name)
 pulumi.export("database_postgresql_port", database.port)
 pulumi.export("database_postgresql_host", database.host)
 pulumi.export("database_postgresql_uri", database.uri)

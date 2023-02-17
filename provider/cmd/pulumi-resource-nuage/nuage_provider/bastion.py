@@ -26,7 +26,7 @@ import pulumi_aws as aws
 class BastionArgs:
     vpc_id: pulumi.Input[str]
     vpc_subnet_id: pulumi.Input[str]
-    ssh_port: pulumi.Input[int]
+    ssh_port: pulumi.Input[int] = 22
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "BastionArgs":

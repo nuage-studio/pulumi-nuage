@@ -200,7 +200,7 @@
                     "type": "boolean",
                     "description":"Enable data api. Defaults to `false`"
                 },
-                "bastionSubnet": {
+                "bastionSubnetId": {
                     "type": "string",
                     "description":"Public subnet ip address for the bastion host."
                 },
@@ -227,7 +227,7 @@
                 "port": {
                     "type": "number"
                 },
-                "name": {
+                "database_name": {
                     "type": "string"
                 },
                 "cluster_arn": {
@@ -250,7 +250,7 @@
                 "user",
                 "host",
                 "port",
-                "name",
+                "database_name",
                 "cluster_arn",
                 "uri"
             ]

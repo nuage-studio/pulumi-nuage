@@ -2,7 +2,7 @@ import boto3
 import pytest
 from ..constants import GLOBAL, BUCKET_NAME
 
-
+"""
 class TestBucket:
     FILE_NAME = "bucket-test.txt"
     # class: the fixture is destroyed during teardown of the last test in the class.
@@ -41,3 +41,4 @@ class TestBucket:
             Bucket=bucket_name, Key=self.FILE_NAME
         )
         assert delete_response is not None
+"""

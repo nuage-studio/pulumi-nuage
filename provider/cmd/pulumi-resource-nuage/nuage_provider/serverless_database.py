@@ -10,8 +10,14 @@ from .bastion import Bastion, BastionArgs
 from .postgres_extension import PgExtension
 
 
+from .prefixed_component_resource import (
+    PrefixedComponentResource,
+    PrefixedComponentResourceArgs,
+)
+
+
 @dataclass
-class ServerlessDatabaseArgs:
+class ServerlessDatabaseArgs(PrefixedComponentResourceArgs):
     vpc_id: pulumi.Input[str]
     vpc_subnets: pulumi.Input[List[str]]
     database_type: pulumi.Input[str]
@@ -22,7 +28,7 @@ class ServerlessDatabaseArgs:
     skip_final_snapshot: Optional[pulumi.Input[bool]]
     data_api: Optional[pulumi.Input[bool]]  # Aurora SLS v2 does not support Data API
 
-    bastion_subnet: Optional[pulumi.Input[str]]
+    bastion_subnet_id: Optional[pulumi.Input[str]]
     bastion_enabled: Optional[pulumi.Input[bool]]
 
     @staticmethod
@@ -36,17 +42,17 @@ class ServerlessDatabaseArgs:
             ip_whitelist=inputs.get("ipWhitelist", None),
             skip_final_snapshot=inputs.get("skipFinalSnapshot", False),
             data_api=inputs.get("dataApi", False),
-            bastion_subnet=inputs.get("bastionSubnet", None),
+            bastion_subnet_id=inputs.get("bastionSubnetId", None),
             bastion_enabled=inputs.get("bastionEnabled", False),
         )
 
 
-class ServerlessDatabase(pulumi.ComponentResource):
+class ServerlessDatabase(PrefixedComponentResource):
     user: pulumi.Output[str]
     password: pulumi.Output[str]
     host: pulumi.Output[str]
     port: pulumi.Output[int]
-    name: pulumi.Output[str]
+    database_name: pulumi.Output[str]
     cluster_arn: pulumi.Output[str]
     uri: pulumi.Output[str]
 
@@ -55,26 +61,28 @@ class ServerlessDatabase(pulumi.ComponentResource):
 
     def __init__(
         self,
-        name: str,
+        resource_name: str,
         args: ServerlessDatabaseArgs,
         props: Optional[dict] = None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ) -> None:
-        super().__init__("nuage:aws:ServerlessDatabase", name, props, opts)
+        super().__init__(
+            "nuage:aws:ServerlessDatabase", resource_name, args, props, opts
+        )
 
         # RDS subnet group
         subnet_group = aws.rds.SubnetGroup(
-            resource_name=f"{name}-subnet-group",
-            name_prefix=f"{name}-",
-            description=f"{name}",
+            resource_name=resource_name,
+            name_prefix=self.name.apply(lambda name: f"{name}-"),
+            description=self.name.apply(lambda name: f"{name} subnet group"),
             subnet_ids=args.vpc_subnets,
-            tags={"Name": f"{name} subnet group"},
+            tags={"Name": self.name.apply(lambda name: f"{name} subnet group")},
             opts=pulumi.ResourceOptions(parent=self, replace_on_changes=["subnet_ids"]),
         )
 
         # Cluster master password
         aurora_master_password = pulumi_random.RandomPassword(
-            resource_name=f"{name}-master-password",
+            resource_name=resource_name,
             length=30,
             special=True,
             # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints
@@ -83,8 +91,8 @@ class ServerlessDatabase(pulumi.ComponentResource):
         )
 
         security_group = aws.ec2.SecurityGroup(
-            resource_name=f"{name}/security-group",
-            name_prefix=f"{name}-database-sg",
+            resource_name=resource_name,
+            name_prefix=self.name.apply(lambda name: f"{name}-database-sg"),
             vpc_id=args.vpc_id,
             opts=pulumi.ResourceOptions(parent=self),
         )
@@ -93,7 +101,7 @@ class ServerlessDatabase(pulumi.ComponentResource):
         port = 3306 if args.database_type == "mysql" else 5432
 
         aws.ec2.SecurityGroupRule(
-            resource_name=f"{name}/security-group/ingress-rule",
+            resource_name=resource_name,
             security_group_id=security_group.id,
             type="ingress",
             protocol=aws.ec2.ProtocolType.TCP,
@@ -105,10 +113,10 @@ class ServerlessDatabase(pulumi.ComponentResource):
         )
 
         cluster = aws.rds.Cluster(
-            resource_name=f"{name}-cluster",
-            cluster_identifier_prefix=f"{name}-cluster-",
-            database_name=args.database_name or name,
-            master_username=args.master_username or name,
+            resource_name=resource_name,
+            cluster_identifier_prefix=self.name.apply(lambda name: f"{name}-cluster-"),
+            database_name=args.database_name or self.name,
+            master_username=args.master_username or self.name,
             master_password=aurora_master_password.result,
             # Aurora Serverless v2 does not currently support the Data API
             enable_http_endpoint=False,
@@ -142,8 +150,8 @@ class ServerlessDatabase(pulumi.ComponentResource):
         # Create a cluster instance
 
         aws.rds.ClusterInstance(
-            resource_name=f"{name}-cluster-instance",
-            identifier_prefix=f"{name}-instance-",
+            resource_name=resource_name,
+            identifier_prefix=self.name.apply(lambda name: f"{name}-instance-"),
             cluster_identifier=cluster.id,
             engine=cluster.engine,
             db_subnet_group_name=cluster.db_subnet_group_name,
@@ -160,7 +168,7 @@ class ServerlessDatabase(pulumi.ComponentResource):
             "password": cluster.master_password,
             "host": cluster.endpoint,
             "port": cluster.port,
-            "name": cluster.database_name,
+            "database_name": cluster.database_name,
             "cluster_arn": cluster.arn,
         }
 
@@ -181,7 +189,7 @@ class ServerlessDatabase(pulumi.ComponentResource):
         if args.data_api:
             # Secret containing DB credentials
             secret = aws.secretsmanager.Secret(
-                resource_name=f"{name}-secret",
+                resource_name=resource_name,
                 name=pulumi.Output.all(
                     cluster_identifier=cluster.cluster_identifier,
                     database_name=cluster.database_name,
@@ -224,7 +232,7 @@ class ServerlessDatabase(pulumi.ComponentResource):
             )
 
             aws.secretsmanager.SecretVersion(
-                resource_name=f"{name}-secret-version",
+                resource_name=resource_name,
                 secret_id=secret.id,
                 secret_string=credentials,
                 opts=pulumi.ResourceOptions(parent=secret),
@@ -256,11 +264,11 @@ class ServerlessDatabase(pulumi.ComponentResource):
 
             outputs["policy_document"] = data_api_policy_document.json
 
-        if args.bastion_enabled:
+        if args.bastion_enabled and args.bastion_subnet_id:
             bastion = Bastion(
-                f"{name}/bastion",
+                f"{resource_name}/bastion",
                 args=BastionArgs(
-                    vpc_id=args.vpc_id, vpc_subnet_id=args.bastion_subnet, ssh_port=22
+                    vpc_id=args.vpc_id, vpc_subnet_id=args.bastion_subnet_id
                 ),
                 opts=pulumi.ResourceOptions(parent=self),
             )
