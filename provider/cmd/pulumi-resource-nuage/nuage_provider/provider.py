@@ -84,7 +84,6 @@ def _create_repository(
         state={
             "arn": created_repository.arn,
             "id": created_repository.id,
-            "name": created_repository.name,
             "url": created_repository.url,
             "registry_id": created_repository.registry_id,
         },
@@ -101,8 +100,10 @@ def _create_container(
     return provider.ConstructResult(
         urn=created_container.urn,
         state={
-            "arn": created_container.function.arn,
-            "name": created_container.function.name,
+            "arn": created_container.arn,
+            "name": created_container.name,
+            "image_uri": created_container.image_uri,
+            "function_url": created_container.function_url,
         },
     )
 

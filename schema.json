@@ -58,9 +58,6 @@
                 "id": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
-                },
                 "url": {
                     "type": "string"
                 }
@@ -69,7 +66,6 @@
                 "id",
                 "arn",
                 "registry_id",
-                "name",
                 "url"
             ]
         },
@@ -154,7 +150,6 @@
             "required": [
                 "arn",
                 "name",
-                "function_url",
                 "image_uri"
             ]
         },
