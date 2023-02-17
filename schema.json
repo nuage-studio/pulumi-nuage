@@ -264,7 +264,7 @@
                 },
                 "vpcSubnetId": {
                     "type": "string",
-                    "description":"Subnet id of the Vpc."
+                    "description":"Public subnet id of the Vpc."
                 },
                 "sshPort": {
                     "type": "number",
