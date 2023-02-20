@@ -27,11 +27,11 @@ class PrefixedComponentResource(pulumi.ComponentResource):
             suffix = random.RandomString(
                 f"{args.name_prefix}-suffix", length=5, special=False
             ).result
-            self.full_name: str = suffix.apply(
+            self._name: str = suffix.apply(
                 lambda suffix: f"{args.name_prefix}-{suffix}"
             )
         else:
-            self.full_name = pulumi.Output.from_input(
+            self._name = pulumi.Output.from_input(
                 args.name if args.name else resource_name
             )
 

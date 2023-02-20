@@ -141,14 +141,14 @@ class ContainerFunction(PrefixedComponentResource):
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
 
         self.image_uri = pulumi.Output.all(
-            url=args.repository_url, name=self.full_name
+            url=args.repository_url, name=self._name
         ).apply(lambda args: f"{args['url']}:{args['name']}")
         # Build and Push docker Image.
         image = docker.Image(
             name=f"{resource_name}-image",
             build=build,
             image_name=self.image_uri,
-            local_image_name=self.full_name.apply(
+            local_image_name=self._name.apply(
                 lambda name: f"{pulumi.get_organization()}:{name}"
             ),
             registry=docker.ImageRegistry(
@@ -177,14 +177,14 @@ class ContainerFunction(PrefixedComponentResource):
         # Define inline policies for role definition
         log_group = aws.cloudwatch.LogGroup(
             resource_name,
-            name=self.full_name.apply(lambda name: f"/aws/lambda/{name}"),
+            name=self._name.apply(lambda name: f"/aws/lambda/{name}"),
             retention_in_days=args.log_retention_in_days,
         )
 
         policy_documents: List[str] = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(
-                name=self.full_name.apply(lambda name: f"{name}-logging-policy"),
+                name=self._name.apply(lambda name: f"{name}-logging-policy"),
                 policy=aws.iam.get_policy_document(
                     version="2012-10-17",
                     statements=[
@@ -201,15 +201,15 @@ class ContainerFunction(PrefixedComponentResource):
             # If we have a custom policy document, add it to the list
             policy_documents.append(
                 aws.iam.RoleInlinePolicyArgs(
-                    name=self.full_name.apply(lambda name: f"{name}-PolicyCustom"),
+                    name=self._name.apply(lambda name: f"{name}-PolicyCustom"),
                     policy=args.policy_document,
                 )
             )
 
         self.role = aws.iam.Role(
             resource_name=resource_name,
-            name=self.full_name.apply(lambda name: f"{name}-lambda-role"),
-            description=self.full_name.apply(lambda name: f"Role used by {name}"),
+            name=self._name.apply(lambda name: f"{name}-lambda-role"),
+            description=self._name.apply(lambda name: f"Role used by {name}"),
             assume_role_policy=aws.iam.get_policy_document(
                 version="2012-10-17",
                 statements=[
@@ -238,7 +238,7 @@ class ContainerFunction(PrefixedComponentResource):
         # Lambda Function
         self.function = aws.lambda_.Function(
             resource_name=f"{resource_name}-function",
-            name=self.full_name,
+            name=self._name,
             description=args.description,
             package_type="Image",
             image_uri=image.image_name,
@@ -259,8 +259,8 @@ class ContainerFunction(PrefixedComponentResource):
             # Keep warm by refreshing the lambda function every 5 minutes
             rule = aws.cloudwatch.EventRule(
                 resource_name=f"{resource_name}-keep-warm-rule",
-                name=self.full_name.apply(lambda name: f"{name}-keep-warm"),
-                description=self.full_name.apply(
+                name=self._name.apply(lambda name: f"{name}-keep-warm"),
+                description=self._name.apply(
                     lambda name: f"Refreshes {name} regularly to keep the container warm"
                 ),
                 is_enabled=True,
