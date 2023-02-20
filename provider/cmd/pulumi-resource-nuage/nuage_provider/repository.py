@@ -40,7 +40,6 @@ class RepositoryArgs(PrefixedComponentResourceArgs):
 
 class Repository(PrefixedComponentResource):
     registry_id: pulumi.Output[str]
-    name: pulumi.Output[str]
     url: pulumi.Output[str]
     id: pulumi.Output[int]
     arn: pulumi.Output[int]
@@ -56,15 +55,18 @@ class Repository(PrefixedComponentResource):
         super().__init__("nuage:aws:Repository", resource_name, args, props, opts)
 
         # Create repository. Adding force_delete to allow deletion even if it contains images.
-        repository = aws.ecr.Repository(
-            resource_name, name=self.name, force_delete=True
+        self.repository = aws.ecr.Repository(
+            resource_name,
+            name=self.name_,
+            force_delete=True,
+            opts=pulumi.ResourceOptions(parent=self),
         )
 
         # If expire days is greater than zero, define LifecyclePolicy.
         if args.expire_in_days > 0:
             repository_lifecycle = aws.ecr.LifecyclePolicy(
                 resource_name,
-                repository=repository.name,
+                repository=self.repository.name,
                 policy=json.dumps(
                     {
                         "rules": [
@@ -82,15 +84,15 @@ class Repository(PrefixedComponentResource):
                         ]
                     }
                 ),
-                opts=pulumi.ResourceOptions(parent=repository),
+                opts=pulumi.ResourceOptions(parent=self, depends_on=[self.repository]),
             )
 
         outputs = {
-            "registry_id": repository.registry_id,
-            "name": repository.name,
-            "url": repository.repository_url,
-            "id": repository.id,
-            "arn": repository.arn,
+            "name": self.repository.name,
+            "registry_id": self.repository.registry_id,
+            "url": self.repository.repository_url,
+            "id": self.repository.id,
+            "arn": self.repository.arn,
         }
 
         self.set_outputs(outputs)

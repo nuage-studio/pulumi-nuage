@@ -21,7 +21,7 @@ function = ContainerFunction(
         environment={"ENV_TEST_VAL": LAMBDA["ENV_TEST_VAL"]},
         policy_document=None,
         keep_warm=True,
-        url=False,
+        url_enabled=False,
         log_retention_in_days=90,
     ),
     opts=pulumi.ResourceOptions(parent=repository),
@@ -30,5 +30,5 @@ pulumi.export("lambda_arn", function.function.arn)
 pulumi.export("lambda_name", function.function.name)
 pulumi.export("lambda_role_arn", function.role.arn)
 pulumi.export("image_uri", function.image_uri)
-if function.function_url:
-    pulumi.export("lambda_function_url", function.function_url)
+if function.url:
+    pulumi.export("lambda_function_url", function.url)

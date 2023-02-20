@@ -17,7 +17,7 @@ import json
 import tempfile
 from enum import IntEnum
 from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import Any, List, Dict, Optional
 
 import pulumi
 import pulumi_aws as aws
@@ -60,7 +60,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]]
     policy_document: Optional[pulumi.Input[str]]
     keep_warm: pulumi.Input[bool]
-    url: pulumi.Input[bool]
+    url_enabled: pulumi.Input[bool]
     log_retention_in_days: pulumi.Input[int]
     # cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
 
@@ -79,13 +79,18 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             environment=inputs.get("environment", None),
             policy_document=inputs.get("policyDocument", None),
             keep_warm=inputs.get("keepWarm", False),
-            url=inputs.get("url", False),
+            url_enabled=inputs.get("urlEnabled", False),
             log_retention_in_days=int(inputs.get("logRetentionInDays", 90))
             # cors_configuration = None,#inputs['corsConfiguration'],
         )
 
 
 class ContainerFunction(PrefixedComponentResource):
+    arn: pulumi.Output[str]
+    name: pulumi.Output[str]
+    image_uri: pulumi.Output[str]
+    url: Optional[pulumi.Output[str]]
+
     def __init__(
         self,
         resource_name: str,
@@ -136,14 +141,14 @@ class ContainerFunction(PrefixedComponentResource):
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
 
         self.image_uri = pulumi.Output.all(
-            url=args.repository_url, name=self.name
+            url=args.repository_url, name=self.name_
         ).apply(lambda args: f"{args['url']}:{args['name']}")
         # Build and Push docker Image.
         image = docker.Image(
             name=f"{resource_name}-image",
             build=build,
             image_name=self.image_uri,
-            local_image_name=self.name.apply(
+            local_image_name=self.name_.apply(
                 lambda name: f"{pulumi.get_organization()}:{name}"
             ),
             registry=docker.ImageRegistry(
@@ -172,14 +177,15 @@ class ContainerFunction(PrefixedComponentResource):
         # Define inline policies for role definition
         log_group = aws.cloudwatch.LogGroup(
             resource_name,
-            name=self.name.apply(lambda name: f"/aws/lambda/{name}"),
+            name=self.name_.apply(lambda name: f"/aws/lambda/{name}"),
             retention_in_days=args.log_retention_in_days,
+            opts=pulumi.ResourceOptions(parent=self),
         )
 
         policy_documents: List[str] = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(
-                name=self.name.apply(lambda name: f"{name}-logging-policy"),
+                name=self.name_.apply(lambda name: f"{name}-logging-policy"),
                 policy=aws.iam.get_policy_document(
                     version="2012-10-17",
                     statements=[
@@ -196,15 +202,15 @@ class ContainerFunction(PrefixedComponentResource):
             # If we have a custom policy document, add it to the list
             policy_documents.append(
                 aws.iam.RoleInlinePolicyArgs(
-                    name=self.name.apply(lambda name: f"{name}-PolicyCustom"),
+                    name=self.name_.apply(lambda name: f"{name}-PolicyCustom"),
                     policy=args.policy_document,
                 )
             )
 
         self.role = aws.iam.Role(
             resource_name=resource_name,
-            name=self.name.apply(lambda name: f"{name}-lambda-role"),
-            description=self.name.apply(lambda name: f"Role used by {name}"),
+            name=self.name_.apply(lambda name: f"{name}-lambda-role"),
+            description=self.name_.apply(lambda name: f"Role used by {name}"),
             assume_role_policy=aws.iam.get_policy_document(
                 version="2012-10-17",
                 statements=[
@@ -233,7 +239,7 @@ class ContainerFunction(PrefixedComponentResource):
         # Lambda Function
         self.function = aws.lambda_.Function(
             resource_name=f"{resource_name}-function",
-            name=self.name,
+            name=self.name_,
             description=args.description,
             package_type="Image",
             image_uri=image.image_name,
@@ -254,8 +260,8 @@ class ContainerFunction(PrefixedComponentResource):
             # Keep warm by refreshing the lambda function every 5 minutes
             rule = aws.cloudwatch.EventRule(
                 resource_name=f"{resource_name}-keep-warm-rule",
-                name=self.name.apply(lambda name: f"{name}-keep-warm"),
-                description=self.name.apply(
+                name=self.name_.apply(lambda name: f"{name}-keep-warm"),
+                description=self.name_.apply(
                     lambda name: f"Refreshes {name} regularly to keep the container warm"
                 ),
                 is_enabled=True,
@@ -285,7 +291,7 @@ class ContainerFunction(PrefixedComponentResource):
             "image_uri": self.image_uri,
         }
 
-        if args.url:
+        if args.url_enabled:
             # Lambda URL
             self.function_url = aws.lambda_.FunctionUrl(
                 resource_name=resource_name,
@@ -293,9 +299,19 @@ class ContainerFunction(PrefixedComponentResource):
                 authorization_type="NONE",
                 cors=None,  # args.cors_configuration,
                 opts=pulumi.ResourceOptions(parent=self.function),
-            ).function_url
-            outputs["function_url"] = self.function_url
+            )
+            outputs["url"] = self.function_url.function_url
         else:
-            self.function_url = None
+            outputs["url"] = None
+
+        self.set_outputs(outputs)
+
+    def set_outputs(self, outputs: Dict[str, Any]):
+        """
+        Adds the Pulumi outputs as attributes on the current object so they can be
+        used as outputs by the caller, as well as registering them.
+        """
+        for output_name in outputs.keys():
+            setattr(self, output_name, outputs[output_name])
 
         self.register_outputs(outputs)
