@@ -58,10 +58,10 @@
                 "id": {
                     "type": "string"
                 },
-                "name": {
+                "url": {
                     "type": "string"
                 },
-                "url": {
+                "name": {
                     "type": "string"
                 }
             },
@@ -69,8 +69,8 @@
                 "id",
                 "arn",
                 "registry_id",
-                "name",
-                "url"
+                "url",
+                "name"
             ]
         },
         "nuage:aws:ContainerFunction": {
@@ -125,7 +125,7 @@
                     "type": "boolean",
                     "description":"Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`"
                 },
-                "url": {
+                "urlEnabled": {
                     "type": "boolean",
                     "description":"Use Lambda URL. Defaults to `false`"
                 },
@@ -144,7 +144,7 @@
                 "name": {
                     "type": "string"
                 },
-                "function_url": {
+                "url": {
                     "type": "string"
                 },
                 "image_uri": {
@@ -154,7 +154,6 @@
             "required": [
                 "arn",
                 "name",
-                "function_url",
                 "image_uri"
             ]
         },
