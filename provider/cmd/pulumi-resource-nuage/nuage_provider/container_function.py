@@ -179,6 +179,7 @@ class ContainerFunction(PrefixedComponentResource):
             resource_name,
             name=self.name_.apply(lambda name: f"/aws/lambda/{name}"),
             retention_in_days=args.log_retention_in_days,
+            opts=pulumi.ResourceOptions(parent=self),
         )
 
         policy_documents: List[str] = [
