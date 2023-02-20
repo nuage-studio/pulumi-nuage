@@ -57,7 +57,7 @@ class Repository(PrefixedComponentResource):
         # Create repository. Adding force_delete to allow deletion even if it contains images.
         self.repository = aws.ecr.Repository(
             resource_name,
-            name=self._name,
+            name=self.name_,
             force_delete=True,
             opts=pulumi.ResourceOptions(parent=self),
         )
@@ -88,6 +88,7 @@ class Repository(PrefixedComponentResource):
             )
 
         outputs = {
+            "name": self.repository.name,
             "registry_id": self.repository.registry_id,
             "url": self.repository.repository_url,
             "id": self.repository.id,

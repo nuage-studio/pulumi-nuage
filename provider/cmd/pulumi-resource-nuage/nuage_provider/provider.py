@@ -103,7 +103,7 @@ def _create_container(
             "arn": created_container.arn,
             "name": created_container.name,
             "image_uri": created_container.image_uri,
-            "function_url": created_container.function_url,
+            "url": created_container.url,
         },
     )
 

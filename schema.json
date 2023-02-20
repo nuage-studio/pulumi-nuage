@@ -121,7 +121,7 @@
                     "type": "boolean",
                     "description":"Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`"
                 },
-                "url": {
+                "useUrl": {
                     "type": "boolean",
                     "description":"Use Lambda URL. Defaults to `false`"
                 },
@@ -140,7 +140,7 @@
                 "name": {
                     "type": "string"
                 },
-                "function_url": {
+                "url": {
                     "type": "string"
                 },
                 "image_uri": {
