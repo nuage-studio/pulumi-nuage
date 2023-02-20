@@ -3,7 +3,7 @@ import boto3
 import pytest
 from ..constants import GLOBAL, LAMBDA
 
-"""
+
 class TestLambda:
     # class: the fixture is destroyed during teardown of the last test in the class.
     @pytest.fixture(scope="class")
@@ -103,4 +103,3 @@ class TestLambda:
             "body"
         ]
         assert LAMBDA["ENV_TEST_VAL"] in response_payload
-"""
