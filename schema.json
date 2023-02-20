@@ -60,13 +60,17 @@
                 },
                 "url": {
                     "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             },
             "required": [
                 "id",
                 "arn",
                 "registry_id",
-                "url"
+                "url",
+                "name"
             ]
         },
         "nuage:aws:ContainerFunction": {
@@ -121,7 +125,7 @@
                     "type": "boolean",
                     "description":"Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`"
                 },
-                "useUrl": {
+                "urlEnabled": {
                     "type": "boolean",
                     "description":"Use Lambda URL. Defaults to `false`"
                 },

@@ -21,7 +21,7 @@ function = ContainerFunction(
         environment={"ENV_TEST_VAL": LAMBDA["ENV_TEST_VAL"]},
         policy_document=None,
         keep_warm=True,
-        use_url=False,
+        url_enabled=False,
         log_retention_in_days=90,
     ),
     opts=pulumi.ResourceOptions(parent=repository),

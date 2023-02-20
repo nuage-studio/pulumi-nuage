@@ -60,7 +60,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]]
     policy_document: Optional[pulumi.Input[str]]
     keep_warm: pulumi.Input[bool]
-    use_url: pulumi.Input[bool]
+    url_enabled: pulumi.Input[bool]
     log_retention_in_days: pulumi.Input[int]
     # cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
 
@@ -79,7 +79,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             environment=inputs.get("environment", None),
             policy_document=inputs.get("policyDocument", None),
             keep_warm=inputs.get("keepWarm", False),
-            use_url=inputs.get("useUrl", False),
+            url_enabled=inputs.get("urlEnabled", False),
             log_retention_in_days=int(inputs.get("logRetentionInDays", 90))
             # cors_configuration = None,#inputs['corsConfiguration'],
         )
@@ -290,7 +290,7 @@ class ContainerFunction(PrefixedComponentResource):
             "image_uri": self.image_uri,
         }
 
-        if args.use_url:
+        if args.url_enabled:
             # Lambda URL
             self.function_url = aws.lambda_.FunctionUrl(
                 resource_name=resource_name,
