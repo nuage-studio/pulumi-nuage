@@ -19,7 +19,7 @@ from .prefixed_component_resource import (
 @dataclass
 class ServerlessDatabaseArgs(PrefixedComponentResourceArgs):
     vpc_id: pulumi.Input[str]
-    vpc_subnets: pulumi.Input[List[str]]
+    subnet_ids: pulumi.Input[List[str]]
     database_type: pulumi.Input[str]
 
     database_name: Optional[pulumi.Input[str]]
@@ -35,7 +35,7 @@ class ServerlessDatabaseArgs(PrefixedComponentResourceArgs):
     def from_inputs(inputs: pulumi.Inputs) -> "ServerlessDatabaseArgs":
         return ServerlessDatabaseArgs(
             vpc_id=inputs["vpcId"],
-            vpc_subnets=inputs["vpcSubnets"],
+            subnet_ids=inputs["subnetIds"],
             database_type=inputs["databaseType"],
             database_name=inputs.get("databaseName", None),
             master_username=inputs.get("masterUserName", None),
@@ -75,7 +75,7 @@ class ServerlessDatabase(PrefixedComponentResource):
             resource_name=resource_name,
             name_prefix=self.name.apply(lambda name: f"{name}-"),
             description=self.name.apply(lambda name: f"{name} subnet group"),
-            subnet_ids=args.vpc_subnets,
+            subnet_ids=args.subnet_ids,
             tags={"Name": self.name.apply(lambda name: f"{name} subnet group")},
             opts=pulumi.ResourceOptions(parent=self, replace_on_changes=["subnet_ids"]),
         )
@@ -267,9 +267,7 @@ class ServerlessDatabase(PrefixedComponentResource):
         if args.bastion_enabled and args.bastion_subnet_id:
             bastion = Bastion(
                 f"{resource_name}/bastion",
-                args=BastionArgs(
-                    vpc_id=args.vpc_id, vpc_subnet_id=args.bastion_subnet_id
-                ),
+                args=BastionArgs(vpc_id=args.vpc_id, subnet_id=args.bastion_subnet_id),
                 opts=pulumi.ResourceOptions(parent=self),
             )
             outputs["bastion_ip"] = bastion.public_ip
