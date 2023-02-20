@@ -21,51 +21,59 @@ import pulumi_tls as tls
 
 import pulumi_aws as aws
 
+from .prefixed_component_resource import (
+    PrefixedComponentResource,
+    PrefixedComponentResourceArgs,
+)
+
 
 @dataclass
-class BastionArgs:
+class BastionArgs(PrefixedComponentResourceArgs):
     vpc_id: pulumi.Input[str]
-    vpc_subnet_id: pulumi.Input[str]
+    subnet_id: pulumi.Input[str]
     ssh_port: pulumi.Input[int] = 22
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "BastionArgs":
         return BastionArgs(
+            name=inputs.get("name", None),
+            name_prefix=inputs.get("namePrefix", None),
             vpc_id=inputs["vpcId"],
-            vpc_subnet_id=inputs["vpcSubnetId"],
+            subnet_id=inputs["subnetId"],
             ssh_port=inputs.get("sshPort", 22),
         )
 
 
-class Bastion(pulumi.ComponentResource):
+class Bastion(PrefixedComponentResource):
     public_ip: pulumi.Output[str]
     private_key_pem: pulumi.Output[str]
 
     def __init__(
         self,
-        name: str,
+        resource_name: str,
         args: BastionArgs,
         props: Optional[dict] = None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ) -> None:
-        super().__init__("nuage:aws:Bastion", name, props, opts)
+        super().__init__("nuage:aws:Bastion", resource_name, props, opts)
 
         private_key = tls.PrivateKey(
-            f"{name}-private-key",
+            resource_name,
             algorithm="RSA",
             rsa_bits=4096,
             opts=pulumi.ResourceOptions(parent=self),
         )
         key_pair = aws.ec2.KeyPair(
-            f"{name}-keypair",
+            resource_name,
             public_key=private_key.public_key_openssh,
             opts=pulumi.ResourceOptions(parent=private_key),
         )
 
         security_group = aws.ec2.SecurityGroup(
-            f"{name}/security-group",
+            resource_name,
+            name=self.name_.apply(lambda name: f"{name}-security-group"),
             vpc_id=args.vpc_id,
-            tags={"Name": f"Security group for ssh {name}"},
+            tags={"Name": f"Security group for ssh {resource_name}"},
             ingress=[
                 aws.ec2.SecurityGroupIngressArgs(
                     from_port=args.ssh_port,
@@ -102,13 +110,13 @@ class Bastion(pulumi.ComponentResource):
             ],  # Official Ubuntu Image https://ubuntu.com/server/docs/cloud-images/amazon-ec2
         )
         bastion = aws.ec2.Instance(
-            f"{name}-instance",
+            resource_name,
             instance_type="t4g.nano",
             ami=bastion_ami.id,
             key_name=key_pair.key_name,
-            tags={"Name": f"{name} bastion instance"},
+            tags={"Name": f"{resource_name} bastion instance"},
             vpc_security_group_ids=[security_group.id],
-            subnet_id=args.vpc_subnet_id,
+            subnet_id=args.subnet_id,
             associate_public_ip_address=True,
             opts=pulumi.ResourceOptions(parent=self),
         )
