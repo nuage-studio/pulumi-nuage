@@ -169,7 +169,7 @@
                     "type": "string",
                     "description":"Vpc id."
                 },
-                "vpcSubnets": {
+                "subnetIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -210,7 +210,7 @@
             },
             "requiredInputs": [
                 "vpcId",
-                "vpcSubnets",
+                "subnetIds",
                 "databaseType"
             ],
             "properties": {
@@ -233,9 +233,6 @@
                     "type": "string"
                 },
                 "uri": {
-                    "type": "string"
-                },
-                "policy_document": {
                     "type": "string"
                 },
                 "bastion_ip": {
@@ -261,7 +258,7 @@
                     "type": "string",
                     "description":"Vpc id."
                 },
-                "vpcSubnetId": {
+                "subnetId": {
                     "type": "string",
                     "description":"Public subnet id of the Vpc."
                 },
@@ -272,7 +269,7 @@
             },
             "requiredInputs": [
                 "vpcId",
-                "vpcSubnetId"
+                "subnetId"
             ],
             "properties": {
                 "public_ip": {

@@ -26,7 +26,6 @@ class ServerlessDatabaseArgs(PrefixedComponentResourceArgs):
     master_username: Optional[pulumi.Input[str]]
     ip_whitelist: Optional[pulumi.Input[List[str]]]
     skip_final_snapshot: Optional[pulumi.Input[bool]]
-    data_api: Optional[pulumi.Input[bool]]  # Aurora SLS v2 does not support Data API
 
     bastion_subnet_id: Optional[pulumi.Input[str]]
     bastion_enabled: Optional[pulumi.Input[bool]]
@@ -41,7 +40,6 @@ class ServerlessDatabaseArgs(PrefixedComponentResourceArgs):
             master_username=inputs.get("masterUserName", None),
             ip_whitelist=inputs.get("ipWhitelist", None),
             skip_final_snapshot=inputs.get("skipFinalSnapshot", False),
-            data_api=inputs.get("dataApi", False),
             bastion_subnet_id=inputs.get("bastionSubnetId", None),
             bastion_enabled=inputs.get("bastionEnabled", False),
         )
@@ -185,84 +183,6 @@ class ServerlessDatabase(PrefixedComponentResource):
                 **kwargs
             )
         )
-
-        if args.data_api:
-            # Secret containing DB credentials
-            secret = aws.secretsmanager.Secret(
-                resource_name=resource_name,
-                name=pulumi.Output.all(
-                    cluster_identifier=cluster.cluster_identifier,
-                    database_name=cluster.database_name,
-                ).apply(
-                    lambda args: "/".join(
-                        [
-                            "rds-db-credentials",
-                            args["cluster_identifier"],
-                            args["database_name"],
-                        ]
-                    )
-                ),
-                description="Database credentials to be used in a Lambda Function or in the AWS Console Query Editor",
-                recovery_window_in_days=0,
-                opts=pulumi.ResourceOptions(parent=self),
-            )
-
-            credentials = pulumi.Output.all(
-                engine=cluster.engine,
-                host=cluster.endpoint,
-                port=cluster.port,
-                username=cluster.master_username,
-                password=cluster.master_password,
-                # NB: these two aren't necessary but we're just mimicking what RDS does
-                # when you create credentials via the Query Editor in the AWS Console
-                dbInstanceIdentifier=cluster.cluster_identifier,
-                resourceId=cluster.id,
-            ).apply(
-                lambda args: json.dumps(
-                    {
-                        "engine": args["engine"],
-                        "host": args["host"],
-                        "port": args["port"],
-                        "username": args["username"],
-                        "password": args["password"],
-                        "dbInstanceIdentifier": args["dbInstanceIdentifier"],
-                        "resourceId": args["resourceId"],
-                    }
-                )
-            )
-
-            aws.secretsmanager.SecretVersion(
-                resource_name=resource_name,
-                secret_id=secret.id,
-                secret_string=credentials,
-                opts=pulumi.ResourceOptions(parent=secret),
-            )
-
-            # Policy document
-            data_api_policy_document = aws.iam.get_policy_document(
-                statements=[
-                    aws.iam.GetPolicyDocumentStatementArgs(
-                        sid="RDSDataServiceAccess",
-                        effect="Allow",
-                        actions=[
-                            "rds-data:BatchExecuteStatement",
-                            "rds-data:BeginTransaction",
-                            "rds-data:CommitTransaction",
-                            "rds-data:ExecuteStatement",
-                            "rds-data:RollbackTransaction",
-                        ],
-                        resources=[cluster.arn],
-                    ),
-                    aws.iam.GetPolicyDocumentStatementArgs(
-                        sid="SecretsManagerDbCredentialsAccess",
-                        effect="Allow",
-                        actions=["secretsmanager:GetSecretValue"],
-                        resources=[secret.arn],
-                    ),
-                ]
-            )
-
-            outputs["policy_document"] = data_api_policy_document.json
 
         if args.bastion_enabled and args.bastion_subnet_id:
             bastion = Bastion(
