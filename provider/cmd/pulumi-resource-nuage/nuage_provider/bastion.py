@@ -55,7 +55,7 @@ class Bastion(PrefixedComponentResource):
         props: Optional[dict] = None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ) -> None:
-        super().__init__("nuage:aws:Bastion", resource_name, props, opts)
+        super().__init__("nuage:aws:Bastion", resource_name, args, props, opts)
 
         private_key = tls.PrivateKey(
             resource_name,

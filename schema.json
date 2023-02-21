@@ -195,10 +195,6 @@
                     "type": "boolean",
                     "description":"Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`"
                 },
-                "dataApi": {
-                    "type": "boolean",
-                    "description":"Enable data api. Defaults to `false`"
-                },
                 "bastionSubnetId": {
                     "type": "string",
                     "description":"Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`"
