@@ -249,6 +249,7 @@
         },
         "nuage:aws:Bastion": {
             "isComponent": true,
+            "description":"Pulumi Nuage's Bastion resource enables the creation of a bastion host through the submission of provided VPC information. The resource creates a private key, security group, and an AWS EC2 `t4g.nano` instance that can serve as the bastion host. This allows secure connectivity to sensitive resources within the VPC, while maintaining isolation from the public internet. You can leverage the outputted private key to establish a connection to the bastion host.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\nimport pulumi_awsx as awsx\r\n\r\nvpc = awsx.ec2.Vpc(\r\n    resource_name=f\"foo\",\r\n    enable_dns_hostnames=True,\r\n    number_of_availability_zones=2,\r\n    nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(\r\n        strategy=awsx.ec2.NatGatewayStrategy.NONE\r\n    ),\r\n    subnet_specs=[\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PUBLIC,\r\n        ),\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PRIVATE,\r\n        ),\r\n    ],\r\n)\r\n\r\n\r\ndb = nuage.aws.Bastion(\r\n    \"foo\",\r\n    name=\"bastion-host\",\r\n    vpc_id=my_vpc.id,\r\n    subnet_id=vpc.public_subnet_ids[0]\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "vpcId": {
                     "type": "string",
