@@ -186,9 +186,9 @@ class ServerlessDatabase(PrefixedComponentResource):
 
         if args.bastion_enabled and args.bastion_subnet_id:
             bastion = Bastion(
-                f"{resource_name}/bastion",
+                resource_name,
                 args=BastionArgs(
-                    name=self.name_.apply(lambda name: f"{name}-bastion"),
+                    name=self.name_.apply(lambda name: f"bastion-{name}"),
                     name_prefix=None,
                     vpc_id=args.vpc_id,
                     subnet_id=args.bastion_subnet_id,
