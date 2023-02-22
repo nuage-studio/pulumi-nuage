@@ -208,7 +208,8 @@
                 "vpcId",
                 "subnetIds",
                 "databaseType",
-                "masterUserName"
+                "masterUserName",
+                "databaseName"
             ],
             "properties": {
                 "user": {

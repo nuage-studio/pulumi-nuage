@@ -112,8 +112,8 @@ class ServerlessDatabase(PrefixedComponentResource):
 
         cluster = aws.rds.Cluster(
             resource_name=resource_name,
-            cluster_identifier=self.get_suffixed_name("cluster"),
-            database_name=args.database_name or self.name_prefix,
+            cluster_identifier=self.name_,
+            database_name=args.database_name,
             master_username=args.master_username,
             master_password=aurora_master_password.result,
             # Aurora Serverless v2 does not currently support the Data API
@@ -149,7 +149,7 @@ class ServerlessDatabase(PrefixedComponentResource):
 
         aws.rds.ClusterInstance(
             resource_name=resource_name,
-            identifier=self.get_suffixed_name("instance"),
+            identifier=self.name_,
             cluster_identifier=cluster.id,
             engine=cluster.engine,
             db_subnet_group_name=cluster.db_subnet_group_name,
