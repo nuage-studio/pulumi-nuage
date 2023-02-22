@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 from dataclasses import dataclass
 
 import pulumi
@@ -33,14 +33,31 @@ class PrefixedComponentResource(pulumi.ComponentResource):
             raise Exception("name and name_prefix cannot be set at the same time.")
 
         if args.name_prefix:
-            suffix = random.RandomString(
+            self.suffix = random.RandomString(
                 f"{args.name_prefix}-suffix", length=5, special=False
             ).result
-            self.name_: str = suffix.apply(
+            self.name_prefix = pulumi.Output.from_input(args.name_prefix)
+            self.name_: str = self.suffix.apply(
                 lambda suffix: f"{args.name_prefix}-{suffix}"
             )
         else:
+            # Set empty suffix if explicit `name` is given.
+            self.suffix = None
             self.name_ = pulumi.Output.from_input(
                 args.name if args.name else resource_name
             )
+            self.name_prefix = self.name_
         super().__init__(resource_type, resource_name, props, opts)
+
+    def get_suffixed_name(self, resource_name):
+        """
+        Add name prefix and random suffix to the resource name for child resources.
+        """
+        if self.suffix:
+            return pulumi.Output.all(
+                name_prefix=self.name_prefix, suffix=self.suffix
+            ).apply(
+                lambda args: f"{args['name_prefix']}-{resource_name}-{args['suffix']}"
+            )
+        else:
+            return self.name_.apply(lambda name: f"{name}-{resource_name}")

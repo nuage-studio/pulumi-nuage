@@ -71,7 +71,7 @@ class ServerlessDatabase(PrefixedComponentResource):
         # RDS subnet group
         subnet_group = aws.rds.SubnetGroup(
             resource_name=resource_name,
-            name_prefix=self.name_.apply(lambda name: f"{name}-"),
+            name=self.name_,
             description=self.name_.apply(lambda name: f"{name} subnet group"),
             subnet_ids=args.subnet_ids,
             tags={"Name": self.name_.apply(lambda name: f"{name} subnet group")},
@@ -90,7 +90,7 @@ class ServerlessDatabase(PrefixedComponentResource):
 
         security_group = aws.ec2.SecurityGroup(
             resource_name=resource_name,
-            name_prefix=self.name_.apply(lambda name: f"{name}-database-sg"),
+            name=self.get_suffixed_name("database-sg"),
             vpc_id=args.vpc_id,
             opts=pulumi.ResourceOptions(parent=self),
         )
@@ -112,9 +112,9 @@ class ServerlessDatabase(PrefixedComponentResource):
 
         cluster = aws.rds.Cluster(
             resource_name=resource_name,
-            cluster_identifier_prefix=self.name_.apply(lambda name: f"{name}-cluster-"),
-            database_name=args.database_name or self.name_,
-            master_username=args.master_username or self.name_,
+            cluster_identifier=self.get_suffixed_name("cluster"),
+            database_name=args.database_name or self.name_prefix,
+            master_username=args.master_username,
             master_password=aurora_master_password.result,
             # Aurora Serverless v2 does not currently support the Data API
             enable_http_endpoint=False,
@@ -149,7 +149,7 @@ class ServerlessDatabase(PrefixedComponentResource):
 
         aws.rds.ClusterInstance(
             resource_name=resource_name,
-            identifier_prefix=self.name_.apply(lambda name: f"{name}-instance-"),
+            identifier=self.get_suffixed_name("instance"),
             cluster_identifier=cluster.id,
             engine=cluster.engine,
             db_subnet_group_name=cluster.db_subnet_group_name,
@@ -188,7 +188,7 @@ class ServerlessDatabase(PrefixedComponentResource):
             bastion = Bastion(
                 resource_name,
                 args=BastionArgs(
-                    name=self.name_.apply(lambda name: f"bastion-{name}"),
+                    name=self.get_suffixed_name("bastion"),
                     name_prefix=None,
                     vpc_id=args.vpc_id,
                     subnet_id=args.bastion_subnet_id,

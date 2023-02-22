@@ -71,9 +71,11 @@ class Bastion(PrefixedComponentResource):
 
         security_group = aws.ec2.SecurityGroup(
             resource_name,
-            name=self.name_.apply(lambda name: f"{name}-security-group"),
+            name=self.get_suffixed_name("security-group"),
             vpc_id=args.vpc_id,
-            tags={"Name": f"Security group for ssh {resource_name}"},
+            tags={
+                "Name": self.name_.apply(lambda name: f"Security group for ssh {name}")
+            },
             ingress=[
                 aws.ec2.SecurityGroupIngressArgs(
                     from_port=args.ssh_port,
@@ -114,7 +116,7 @@ class Bastion(PrefixedComponentResource):
             instance_type="t4g.nano",
             ami=bastion_ami.id,
             key_name=key_pair.key_name,
-            tags={"Name": f"{resource_name} bastion instance"},
+            tags={"Name": self.name_.apply(lambda name: f"{name} bastion instance")},
             vpc_security_group_ids=[security_group.id],
             subnet_id=args.subnet_id,
             associate_public_ip_address=True,

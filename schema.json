@@ -207,7 +207,8 @@
             "requiredInputs": [
                 "vpcId",
                 "subnetIds",
-                "databaseType"
+                "databaseType",
+                "masterUserName"
             ],
             "properties": {
                 "user": {
