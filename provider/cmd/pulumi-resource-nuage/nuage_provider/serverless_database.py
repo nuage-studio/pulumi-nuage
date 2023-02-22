@@ -90,7 +90,7 @@ class ServerlessDatabase(PrefixedComponentResource):
 
         security_group = aws.ec2.SecurityGroup(
             resource_name=resource_name,
-            name=self.get_suffixed_name("database-sg"),
+            name=self.name_,
             vpc_id=args.vpc_id,
             opts=pulumi.ResourceOptions(parent=self),
         )

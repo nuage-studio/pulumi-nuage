@@ -71,7 +71,7 @@ class Bastion(PrefixedComponentResource):
 
         security_group = aws.ec2.SecurityGroup(
             resource_name,
-            name=self.get_suffixed_name("security-group"),
+            name=self.name_,
             vpc_id=args.vpc_id,
             tags={
                 "Name": self.name_.apply(lambda name: f"Security group for ssh {name}")

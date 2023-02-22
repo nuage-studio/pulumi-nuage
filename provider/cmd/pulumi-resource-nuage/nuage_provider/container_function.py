@@ -145,7 +145,7 @@ class ContainerFunction(PrefixedComponentResource):
         ).apply(lambda args: f"{args['url']}:{args['name']}")
         # Build and Push docker Image.
         image = docker.Image(
-            name=f"{resource_name}-image",
+            resource_name,
             build=build,
             image_name=self.image_uri,
             local_image_name=self.name_.apply(
@@ -165,7 +165,7 @@ class ContainerFunction(PrefixedComponentResource):
         image.image_name.apply(
             lambda generated_image_name: (
                 local.Command(
-                    f"untag-{resource_name}-image",
+                    resource_name,
                     create=self.image_uri.apply(
                         lambda image_uri: f"docker rmi {image_uri} && docker rmi {generated_image_name}"
                     ),
@@ -208,8 +208,8 @@ class ContainerFunction(PrefixedComponentResource):
             )
 
         self.role = aws.iam.Role(
-            resource_name=resource_name,
-            name=self.get_suffixed_name("lambda-role"),
+            resource_name,
+            name=self.name_,
             description=self.name_.apply(lambda name: f"Role used by {name}"),
             assume_role_policy=aws.iam.get_policy_document(
                 version="2012-10-17",
@@ -238,7 +238,7 @@ class ContainerFunction(PrefixedComponentResource):
 
         # Lambda Function
         self.function = aws.lambda_.Function(
-            resource_name=f"{resource_name}-function",
+            resource_name,
             name=self.name_,
             description=args.description,
             package_type="Image",
@@ -259,7 +259,7 @@ class ContainerFunction(PrefixedComponentResource):
         if args.keep_warm:
             # Keep warm by refreshing the lambda function every 5 minutes
             rule = aws.cloudwatch.EventRule(
-                resource_name=f"{resource_name}-keep-warm-rule",
+                f"{resource_name}-keep-warm-rule",
                 name=self.get_suffixed_name("keep-warm"),
                 description=self.name_.apply(
                     lambda name: f"Refreshes {name} regularly to keep the container warm"
@@ -270,7 +270,7 @@ class ContainerFunction(PrefixedComponentResource):
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
             aws.lambda_.Permission(
-                resource_name=f"{resource_name}-cloudwatch-invoke-permission",
+                f"{resource_name}-cloudwatch-invoke-permission",
                 action="lambda:InvokeFunction",
                 function=self.function.arn,
                 principal="events.amazonaws.com",
@@ -278,7 +278,7 @@ class ContainerFunction(PrefixedComponentResource):
                 opts=pulumi.ResourceOptions(parent=rule),
             )
             aws.cloudwatch.EventTarget(
-                resource_name=f"{resource_name}-keep-warm-target",
+                f"{resource_name}-keep-warm-target",
                 arn=self.function.arn,
                 input=json.dumps({"keep-warm": True}),
                 rule=rule.id,
@@ -294,7 +294,7 @@ class ContainerFunction(PrefixedComponentResource):
         if args.url_enabled:
             # Lambda URL
             self.function_url = aws.lambda_.FunctionUrl(
-                resource_name=resource_name,
+                resource_name,
                 function_name=self.function.name,
                 authorization_type="NONE",
                 cors=None,  # args.cors_configuration,
