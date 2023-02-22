@@ -185,7 +185,7 @@ class ContainerFunction(PrefixedComponentResource):
         policy_documents: List[str] = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(
-                name=self.name_.apply(lambda name: f"{name}-logging-policy"),
+                name=self.get_suffixed_name("logging-policy"),
                 policy=aws.iam.get_policy_document(
                     version="2012-10-17",
                     statements=[
@@ -202,14 +202,14 @@ class ContainerFunction(PrefixedComponentResource):
             # If we have a custom policy document, add it to the list
             policy_documents.append(
                 aws.iam.RoleInlinePolicyArgs(
-                    name=self.name_.apply(lambda name: f"{name}-PolicyCustom"),
+                    name=self.get_suffixed_name("custom-policy"),
                     policy=args.policy_document,
                 )
             )
 
         self.role = aws.iam.Role(
             resource_name=resource_name,
-            name=self.name_.apply(lambda name: f"{name}-lambda-role"),
+            name=self.get_suffixed_name("lambda-role"),
             description=self.name_.apply(lambda name: f"Role used by {name}"),
             assume_role_policy=aws.iam.get_policy_document(
                 version="2012-10-17",
@@ -260,7 +260,7 @@ class ContainerFunction(PrefixedComponentResource):
             # Keep warm by refreshing the lambda function every 5 minutes
             rule = aws.cloudwatch.EventRule(
                 resource_name=f"{resource_name}-keep-warm-rule",
-                name=self.name_.apply(lambda name: f"{name}-keep-warm"),
+                name=self.get_suffixed_name("keep-warm"),
                 description=self.name_.apply(
                     lambda name: f"Refreshes {name} regularly to keep the container warm"
                 ),

@@ -21,6 +21,8 @@ func (m *module) Version() semver.Version {
 
 func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi.Resource, err error) {
 	switch typ {
+	case "nuage:aws:Bastion":
+		r = &Bastion{}
 	case "nuage:aws:ContainerFunction":
 		r = &ContainerFunction{}
 	case "nuage:aws:Repository":

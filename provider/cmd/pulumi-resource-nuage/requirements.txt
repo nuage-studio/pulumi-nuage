@@ -1,7 +1,8 @@
 boto3>=1.26.64
 pulumi>=3.0.0
 pulumi_aws>=5.0.0
-pulumi_awsx>=1.0.0b11
+pulumi_awsx>=1.0.2
+pulumi_tls>=4.6.1
 pulumi_random>=4.10.0
 pulumi_docker>=3.0.0,<4.0.0
 pulumi_command>=0.7.0

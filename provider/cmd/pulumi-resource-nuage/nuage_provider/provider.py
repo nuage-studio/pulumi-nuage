@@ -27,6 +27,7 @@ from nuage_provider.serverless_database import (
     ServerlessDatabase,
     ServerlessDatabaseArgs,
 )
+from nuage_provider.bastion import Bastion, BastionArgs
 
 
 class Provider(provider.Provider):
@@ -49,8 +50,25 @@ class Provider(provider.Provider):
             return _create_repository(name, inputs, options)
         elif resource_type == "nuage:aws:ServerlessDatabase":
             return _create_database(name, inputs, options)
+        elif resource_type == "nuage:aws:Bastion":
+            return _create_bastion(name, inputs, options)
 
         raise Exception(f"Unknown resource type {resource_type}")
+
+
+def _create_bastion(
+    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
+):
+    created_resource = Bastion(
+        name, BastionArgs.from_inputs(inputs), dict(inputs), options
+    )
+    return provider.ConstructResult(
+        urn=created_resource.urn,
+        state={
+            "private_key_pem": created_resource.private_key_pem,
+            "public_ip": created_resource.public_ip,
+        },
+    )
 
 
 def _create_database(
@@ -68,6 +86,8 @@ def _create_database(
             "name": created_resource.name,
             "cluster_arn": created_resource.cluster_arn,
             "uri": created_resource.uri,
+            "bastion_ip": created_resource.bastion_ip,
+            "bastion_private_key": created_resource.bastion_private_key,
         },
     )
 

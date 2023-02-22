@@ -5,6 +5,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "../utilities";
 
 // Export members:
+export * from "./bastion";
 export * from "./bucket_nuage";
 export * from "./containerFunction";
 export * from "./repository";
@@ -14,6 +15,7 @@ export * from "./serverlessDatabase";
 export * from "../types/enums/aws";
 
 // Import resources to register:
+import { Bastion } from "./bastion";
 import { ContainerFunction } from "./containerFunction";
 import { Repository } from "./repository";
 import { ServerlessDatabase } from "./serverlessDatabase";
@@ -23,6 +25,8 @@ const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {
         switch (type) {
+            case "nuage:aws:Bastion":
+                return new Bastion(name, <any>undefined, { urn })
             case "nuage:aws:ContainerFunction":
                 return new ContainerFunction(name, <any>undefined, { urn })
             case "nuage:aws:Repository":

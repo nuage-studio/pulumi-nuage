@@ -6,6 +6,7 @@ from .. import _utilities
 import typing
 # Export this package's modules as members:
 from ._enums import *
+from .bastion import *
 from .bucket_nuage import *
 from .container_function import *
 from .repository import *
