@@ -27,6 +27,7 @@ func NewRepository(ctx *pulumi.Context,
 		args = &RepositoryArgs{}
 	}
 
+	opts = pkgResourceDefaultOpts(opts)
 	var resource Repository
 	err := ctx.RegisterRemoteComponentResource("nuage:aws:Repository", name, args, &resource, opts...)
 	if err != nil {

@@ -45,6 +45,7 @@ func NewServerlessDatabase(ctx *pulumi.Context,
 	if args.VpcSubnets == nil {
 		return nil, errors.New("invalid value for required argument 'VpcSubnets'")
 	}
+	opts = pkgResourceDefaultOpts(opts)
 	var resource ServerlessDatabase
 	err := ctx.RegisterRemoteComponentResource("nuage:aws:ServerlessDatabase", name, args, &resource, opts...)
 	if err != nil {
