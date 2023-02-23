@@ -2,7 +2,6 @@ version: "3.8"
 
 services:
   devcontainer:
-    env_file: devcontainer.env
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
