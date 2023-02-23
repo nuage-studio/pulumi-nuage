@@ -22,6 +22,8 @@ function = ContainerFunction(
         policy_document=None,
         keep_warm=True,
         url_enabled=False,
+        schedule_expression=None,
+        schedule_input=None,
         log_retention_in_days=90,
     ),
     opts=pulumi.ResourceOptions(parent=repository),

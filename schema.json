@@ -133,6 +133,14 @@
                 "logRetentionInDays": {
                     "type": "integer",
                     "description":"Number of days for log retention to pass in cloudwatch log group.."
+                },
+                "scheduleExpression": {
+                    "type": "string",
+                    "description":"Expression for creating a cloudwatch event rule."
+                },                      
+                "scheduleInput": {
+                    "type": "object",
+                    "description":"Input for cloudwatch event target."
                 }
             },
             "requiredInputs": [     
