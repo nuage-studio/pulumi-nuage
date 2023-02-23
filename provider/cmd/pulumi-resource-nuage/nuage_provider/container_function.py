@@ -264,7 +264,7 @@ class ContainerFunction(PrefixedComponentResource):
         if args.keep_warm:
             # Keep warm by refreshing the lambda function every 5 minutes
             rule = aws.cloudwatch.EventRule(
-                f"{resource_name}-keep-warm-rule",
+                f"{resource_name}-keep-warm",
                 name=self.get_suffixed_name("keep-warm"),
                 description=self.name_.apply(
                     lambda name: f"Refreshes {name} regularly to keep the container warm"
@@ -275,7 +275,7 @@ class ContainerFunction(PrefixedComponentResource):
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
             aws.lambda_.Permission(
-                f"{resource_name}-cloudwatch-invoke-permission",
+                f"{resource_name}-keep warm",
                 action="lambda:InvokeFunction",
                 function=self.function.arn,
                 principal="events.amazonaws.com",
@@ -283,7 +283,7 @@ class ContainerFunction(PrefixedComponentResource):
                 opts=pulumi.ResourceOptions(parent=rule),
             )
             aws.cloudwatch.EventTarget(
-                f"{resource_name}-keep-warm-target",
+                f"{resource_name}-keep-warm",
                 arn=self.function.arn,
                 input=json.dumps({"keep-warm": True}),
                 rule=rule.id,
