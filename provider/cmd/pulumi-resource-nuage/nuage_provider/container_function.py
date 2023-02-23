@@ -62,6 +62,9 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     keep_warm: pulumi.Input[bool]
     url_enabled: pulumi.Input[bool]
     log_retention_in_days: pulumi.Input[int]
+    # Schedule
+    schedule_expression: Optional[pulumi.Input[str]]
+    schedule_input: Optional[pulumi.Input[Dict[str, pulumi.Input[Any]]]]
     # cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
 
     @staticmethod
@@ -80,7 +83,9 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             policy_document=inputs.get("policyDocument", None),
             keep_warm=inputs.get("keepWarm", False),
             url_enabled=inputs.get("urlEnabled", False),
-            log_retention_in_days=int(inputs.get("logRetentionInDays", 90))
+            log_retention_in_days=int(inputs.get("logRetentionInDays", 90)),
+            schedule_expression=inputs.get("scheduleExpression", None),
+            schedule_input=inputs.get("scheduleInput", None),
             # cors_configuration = None,#inputs['corsConfiguration'],
         )
 
@@ -283,6 +288,32 @@ class ContainerFunction(PrefixedComponentResource):
                 input=json.dumps({"keep-warm": True}),
                 rule=rule.id,
                 opts=pulumi.ResourceOptions(parent=rule),
+            )
+
+        if args.schedule_expression:
+            schedule_rule = aws.cloudwatch.EventRule(
+                resource_name=f"{resource_name}-schedule",
+                name=self.get_suffixed_name("schedule"),
+                schedule_expression=args.schedule_expression,
+                description=args.description,
+                opts=pulumi.ResourceOptions(parent=self),
+            )
+
+            aws.cloudwatch.EventTarget(
+                resource_name=f"{resource_name}-schedule",
+                arn=self.function.arn,
+                rule=schedule_rule.id,
+                input=json.dumps(args.schedule_input or {}),
+                opts=pulumi.ResourceOptions(parent=schedule_rule),
+            )
+
+            aws.lambda_.Permission(
+                resource_name=f"{resource_name}-schedule",
+                function=self.function.arn,
+                action="lambda:InvokeFunction",
+                principal="events.amazonaws.com",
+                source_arn=schedule_rule.arn,
+                opts=pulumi.ResourceOptions(parent=schedule_rule),
             )
 
         outputs = {
