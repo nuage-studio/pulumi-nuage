@@ -13,19 +13,31 @@ __all__ = ['BastionArgs', 'Bastion']
 @pulumi.input_type
 class BastionArgs:
     def __init__(__self__, *,
+                 subnet_id: pulumi.Input[str],
                  vpc_id: pulumi.Input[str],
-                 vpc_subnets: pulumi.Input[Sequence[pulumi.Input[str]]],
                  ssh_port: Optional[pulumi.Input[float]] = None):
         """
         The set of arguments for constructing a Bastion resource.
+        :param pulumi.Input[str] subnet_id: Public subnet id of the Vpc.
         :param pulumi.Input[str] vpc_id: Vpc id.
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] vpc_subnets: List of subnet ip addresses of Vpc.
         :param pulumi.Input[float] ssh_port: Ssh port for bastion host. Defaults to 22
         """
+        pulumi.set(__self__, "subnet_id", subnet_id)
         pulumi.set(__self__, "vpc_id", vpc_id)
-        pulumi.set(__self__, "vpc_subnets", vpc_subnets)
         if ssh_port is not None:
             pulumi.set(__self__, "ssh_port", ssh_port)
+
+    @property
+    @pulumi.getter(name="subnetId")
+    def subnet_id(self) -> pulumi.Input[str]:
+        """
+        Public subnet id of the Vpc.
+        """
+        return pulumi.get(self, "subnet_id")
+
+    @subnet_id.setter
+    def subnet_id(self, value: pulumi.Input[str]):
+        pulumi.set(self, "subnet_id", value)
 
     @property
     @pulumi.getter(name="vpcId")
@@ -38,18 +50,6 @@ class BastionArgs:
     @vpc_id.setter
     def vpc_id(self, value: pulumi.Input[str]):
         pulumi.set(self, "vpc_id", value)
-
-    @property
-    @pulumi.getter(name="vpcSubnets")
-    def vpc_subnets(self) -> pulumi.Input[Sequence[pulumi.Input[str]]]:
-        """
-        List of subnet ip addresses of Vpc.
-        """
-        return pulumi.get(self, "vpc_subnets")
-
-    @vpc_subnets.setter
-    def vpc_subnets(self, value: pulumi.Input[Sequence[pulumi.Input[str]]]):
-        pulumi.set(self, "vpc_subnets", value)
 
     @property
     @pulumi.getter(name="sshPort")
@@ -70,16 +70,52 @@ class Bastion(pulumi.ComponentResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  ssh_port: Optional[pulumi.Input[float]] = None,
+                 subnet_id: Optional[pulumi.Input[str]] = None,
                  vpc_id: Optional[pulumi.Input[str]] = None,
-                 vpc_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  __props__=None):
         """
-        Create a Bastion resource with the given unique name, props, and options.
+        Pulumi Nuage's Bastion resource enables the creation of a bastion host through the submission of provided VPC information. The resource creates a private key, security group, and an AWS EC2 `t4g.nano` instance that can serve as the bastion host. This allows secure connectivity to sensitive resources within the VPC, while maintaining isolation from the public internet. You can leverage the outputted private key to establish a connection to the bastion host.
+
+        ## Example Usage
+        ### Basic Example
+
+        ```python
+        import pulumi_nuage as nuage
+        import pulumi_awsx as awsx
+        
+        vpc = awsx.ec2.Vpc(
+            resource_name=f"foo",
+            enable_dns_hostnames=True,
+            number_of_availability_zones=2,
+            nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(
+                strategy=awsx.ec2.NatGatewayStrategy.NONE
+            ),
+            subnet_specs=[
+                awsx.ec2.SubnetSpecArgs(
+                    cidr_mask=24,
+                    type=awsx.ec2.SubnetType.PUBLIC,
+                ),
+                awsx.ec2.SubnetSpecArgs(
+                    cidr_mask=24,
+                    type=awsx.ec2.SubnetType.PRIVATE,
+                ),
+            ],
+        )
+        
+        
+        db = nuage.aws.Bastion(
+            "foo",
+            name="bastion-host",
+            vpc_id=my_vpc.id,
+            subnet_id=vpc.public_subnet_ids[0]
+        )
+        ```
+
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[float] ssh_port: Ssh port for bastion host. Defaults to 22
+        :param pulumi.Input[str] subnet_id: Public subnet id of the Vpc.
         :param pulumi.Input[str] vpc_id: Vpc id.
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] vpc_subnets: List of subnet ip addresses of Vpc.
         """
         ...
     @overload
@@ -88,7 +124,43 @@ class Bastion(pulumi.ComponentResource):
                  args: BastionArgs,
                  opts: Optional[pulumi.ResourceOptions] = None):
         """
-        Create a Bastion resource with the given unique name, props, and options.
+        Pulumi Nuage's Bastion resource enables the creation of a bastion host through the submission of provided VPC information. The resource creates a private key, security group, and an AWS EC2 `t4g.nano` instance that can serve as the bastion host. This allows secure connectivity to sensitive resources within the VPC, while maintaining isolation from the public internet. You can leverage the outputted private key to establish a connection to the bastion host.
+
+        ## Example Usage
+        ### Basic Example
+
+        ```python
+        import pulumi_nuage as nuage
+        import pulumi_awsx as awsx
+        
+        vpc = awsx.ec2.Vpc(
+            resource_name=f"foo",
+            enable_dns_hostnames=True,
+            number_of_availability_zones=2,
+            nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(
+                strategy=awsx.ec2.NatGatewayStrategy.NONE
+            ),
+            subnet_specs=[
+                awsx.ec2.SubnetSpecArgs(
+                    cidr_mask=24,
+                    type=awsx.ec2.SubnetType.PUBLIC,
+                ),
+                awsx.ec2.SubnetSpecArgs(
+                    cidr_mask=24,
+                    type=awsx.ec2.SubnetType.PRIVATE,
+                ),
+            ],
+        )
+        
+        
+        db = nuage.aws.Bastion(
+            "foo",
+            name="bastion-host",
+            vpc_id=my_vpc.id,
+            subnet_id=vpc.public_subnet_ids[0]
+        )
+        ```
+
         :param str resource_name: The name of the resource.
         :param BastionArgs args: The arguments to use to populate this resource's properties.
         :param pulumi.ResourceOptions opts: Options for the resource.
@@ -105,8 +177,8 @@ class Bastion(pulumi.ComponentResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  ssh_port: Optional[pulumi.Input[float]] = None,
+                 subnet_id: Optional[pulumi.Input[str]] = None,
                  vpc_id: Optional[pulumi.Input[str]] = None,
-                 vpc_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  __props__=None):
         if opts is None:
             opts = pulumi.ResourceOptions()
@@ -114,6 +186,8 @@ class Bastion(pulumi.ComponentResource):
             raise TypeError('Expected resource options to be a ResourceOptions instance')
         if opts.version is None:
             opts.version = _utilities.get_version()
+        if opts.plugin_download_url is None:
+            opts.plugin_download_url = _utilities.get_plugin_download_url()
         if opts.id is not None:
             raise ValueError('ComponentResource classes do not support opts.id')
         else:
@@ -122,12 +196,12 @@ class Bastion(pulumi.ComponentResource):
             __props__ = BastionArgs.__new__(BastionArgs)
 
             __props__.__dict__["ssh_port"] = ssh_port
+            if subnet_id is None and not opts.urn:
+                raise TypeError("Missing required property 'subnet_id'")
+            __props__.__dict__["subnet_id"] = subnet_id
             if vpc_id is None and not opts.urn:
                 raise TypeError("Missing required property 'vpc_id'")
             __props__.__dict__["vpc_id"] = vpc_id
-            if vpc_subnets is None and not opts.urn:
-                raise TypeError("Missing required property 'vpc_subnets'")
-            __props__.__dict__["vpc_subnets"] = vpc_subnets
             __props__.__dict__["private_key_pem"] = None
             __props__.__dict__["public_ip"] = None
         super(Bastion, __self__).__init__(

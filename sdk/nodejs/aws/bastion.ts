@@ -4,6 +4,11 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "../utilities";
 
+/**
+ * Pulumi Nuage's Bastion resource enables the creation of a bastion host through the submission of provided VPC information. The resource creates a private key, security group, and an AWS EC2 `t4g.nano` instance that can serve as the bastion host. This allows secure connectivity to sensitive resources within the VPC, while maintaining isolation from the public internet. You can leverage the outputted private key to establish a connection to the bastion host.
+ *
+ * ## Example Usage
+ */
 export class Bastion extends pulumi.ComponentResource {
     /** @internal */
     public static readonly __pulumiType = 'nuage:aws:Bastion';
@@ -33,15 +38,15 @@ export class Bastion extends pulumi.ComponentResource {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
+            if ((!args || args.subnetId === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'subnetId'");
+            }
             if ((!args || args.vpcId === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'vpcId'");
             }
-            if ((!args || args.vpcSubnets === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'vpcSubnets'");
-            }
             resourceInputs["sshPort"] = args ? args.sshPort : undefined;
+            resourceInputs["subnetId"] = args ? args.subnetId : undefined;
             resourceInputs["vpcId"] = args ? args.vpcId : undefined;
-            resourceInputs["vpcSubnets"] = args ? args.vpcSubnets : undefined;
             resourceInputs["private_key_pem"] = undefined /*out*/;
             resourceInputs["public_ip"] = undefined /*out*/;
         } else {
@@ -62,11 +67,11 @@ export interface BastionArgs {
      */
     sshPort?: pulumi.Input<number>;
     /**
+     * Public subnet id of the Vpc.
+     */
+    subnetId: pulumi.Input<string>;
+    /**
      * Vpc id.
      */
     vpcId: pulumi.Input<string>;
-    /**
-     * List of subnet ip addresses of Vpc.
-     */
-    vpcSubnets: pulumi.Input<pulumi.Input<string>[]>;
 }

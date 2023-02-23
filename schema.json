@@ -1,6 +1,6 @@
 {
     "name": "nuage",
-    "version":"0.0.7",
+    "version":"0.0.8",
     "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
     "types": {
         "nuage:aws:ArchitectureType": {

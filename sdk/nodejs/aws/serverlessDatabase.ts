@@ -27,10 +27,9 @@ export class ServerlessDatabase extends pulumi.ComponentResource {
     public /*out*/ readonly bastion_ip!: pulumi.Output<string | undefined>;
     public /*out*/ readonly bastion_private_key!: pulumi.Output<string | undefined>;
     public /*out*/ readonly cluster_arn!: pulumi.Output<string>;
+    public /*out*/ readonly database_name!: pulumi.Output<string>;
     public /*out*/ readonly host!: pulumi.Output<string>;
-    public /*out*/ readonly name!: pulumi.Output<string>;
     public /*out*/ readonly password!: pulumi.Output<string | undefined>;
-    public /*out*/ readonly policy_document!: pulumi.Output<string | undefined>;
     public /*out*/ readonly port!: pulumi.Output<number>;
     public /*out*/ readonly uri!: pulumi.Output<string>;
     public /*out*/ readonly user!: pulumi.Output<string>;
@@ -46,32 +45,36 @@ export class ServerlessDatabase extends pulumi.ComponentResource {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
+            if ((!args || args.databaseName === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'databaseName'");
+            }
             if ((!args || args.databaseType === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'databaseType'");
+            }
+            if ((!args || args.masterUserName === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'masterUserName'");
+            }
+            if ((!args || args.subnetIds === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'subnetIds'");
             }
             if ((!args || args.vpcId === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'vpcId'");
             }
-            if ((!args || args.vpcSubnets === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'vpcSubnets'");
-            }
             resourceInputs["bastionEnabled"] = args ? args.bastionEnabled : undefined;
-            resourceInputs["bastionSubnets"] = args ? args.bastionSubnets : undefined;
-            resourceInputs["dataApi"] = args ? args.dataApi : undefined;
+            resourceInputs["bastionSubnetId"] = args ? args.bastionSubnetId : undefined;
             resourceInputs["databaseName"] = args ? args.databaseName : undefined;
             resourceInputs["databaseType"] = args ? args.databaseType : undefined;
             resourceInputs["ipWhitelist"] = args ? args.ipWhitelist : undefined;
             resourceInputs["masterUserName"] = args ? args.masterUserName : undefined;
             resourceInputs["skipFinalSnapshot"] = args ? args.skipFinalSnapshot : undefined;
+            resourceInputs["subnetIds"] = args ? args.subnetIds : undefined;
             resourceInputs["vpcId"] = args ? args.vpcId : undefined;
-            resourceInputs["vpcSubnets"] = args ? args.vpcSubnets : undefined;
             resourceInputs["bastion_ip"] = undefined /*out*/;
             resourceInputs["bastion_private_key"] = undefined /*out*/;
             resourceInputs["cluster_arn"] = undefined /*out*/;
+            resourceInputs["database_name"] = undefined /*out*/;
             resourceInputs["host"] = undefined /*out*/;
-            resourceInputs["name"] = undefined /*out*/;
             resourceInputs["password"] = undefined /*out*/;
-            resourceInputs["policy_document"] = undefined /*out*/;
             resourceInputs["port"] = undefined /*out*/;
             resourceInputs["uri"] = undefined /*out*/;
             resourceInputs["user"] = undefined /*out*/;
@@ -79,10 +82,9 @@ export class ServerlessDatabase extends pulumi.ComponentResource {
             resourceInputs["bastion_ip"] = undefined /*out*/;
             resourceInputs["bastion_private_key"] = undefined /*out*/;
             resourceInputs["cluster_arn"] = undefined /*out*/;
+            resourceInputs["database_name"] = undefined /*out*/;
             resourceInputs["host"] = undefined /*out*/;
-            resourceInputs["name"] = undefined /*out*/;
             resourceInputs["password"] = undefined /*out*/;
-            resourceInputs["policy_document"] = undefined /*out*/;
             resourceInputs["port"] = undefined /*out*/;
             resourceInputs["uri"] = undefined /*out*/;
             resourceInputs["user"] = undefined /*out*/;
@@ -101,17 +103,13 @@ export interface ServerlessDatabaseArgs {
      */
     bastionEnabled?: pulumi.Input<boolean>;
     /**
-     * List of public subnet ip addresses for the bastion host.
+     * Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
      */
-    bastionSubnets?: pulumi.Input<pulumi.Input<string>[]>;
-    /**
-     * Enable data api. Defaults to `false`
-     */
-    dataApi?: pulumi.Input<boolean>;
+    bastionSubnetId?: pulumi.Input<string>;
     /**
      * Name of the database.
      */
-    databaseName?: pulumi.Input<string>;
+    databaseName: pulumi.Input<string>;
     /**
      * Database type. `mysql` or `postgresql`
      */
@@ -123,17 +121,17 @@ export interface ServerlessDatabaseArgs {
     /**
      * Master user name of the db.
      */
-    masterUserName?: pulumi.Input<string>;
+    masterUserName: pulumi.Input<string>;
     /**
      * Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
      */
     skipFinalSnapshot?: pulumi.Input<boolean>;
     /**
+     * List of subnet ip addresses. If you want your database will be accessible from the internet, it should be public (`vpc.public_subnet_ids`). Otherwise, you can use private subnets (`vpc.private_subnet_ids`).
+     */
+    subnetIds: pulumi.Input<pulumi.Input<string>[]>;
+    /**
      * Vpc id.
      */
     vpcId: pulumi.Input<string>;
-    /**
-     * List of subnet ip addresses.
-     */
-    vpcSubnets: pulumi.Input<pulumi.Input<string>[]>;
 }

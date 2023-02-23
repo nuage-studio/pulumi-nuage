@@ -121,9 +121,9 @@
   integrity sha512-oPQdbFDmZvjXk5ZDoBGXG8B4tSB/qW5vQunJWQMFUBp7Xe8O1ByPANueJ+Jzg58esEBegyyxZ7LRmfJr7kFcFg==
 
 "@pulumi/aws@^5.0.0":
-  version "5.29.1"
-  resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-5.29.1.tgz#387f5a6517362b632051def719c3b95a97a73a0f"
-  integrity sha512-IHMSCrdkssoqN1u3SUMOCUOJos0BjVpJ8tkbby6yqASe5p3LCRpkQXwVPoSPRpS7TEoCvJpLw0f8ue+MEcCRdQ==
+  version "5.30.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-5.30.0.tgz#a2c9db50d1a43e0472bff6125852131d8c977c4b"
+  integrity sha512-75MsXKJgQZZa34ugt3hAC6uXmh6CLJSUEH3d6lOT92+L8eIfwoqNd9QLuiiRMPZ5/X+vLPNfVk7hdjqtj3Pd0Q==
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
     aws-sdk "^2.0.0"
@@ -142,9 +142,9 @@
     mime "^2.0.0"
 
 "@pulumi/command@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/command/-/command-0.7.0.tgz#a759340336770f1d89885e306422947c9b909f9a"
-  integrity sha512-DvI/YjAVm9bbmI26OSA/54t59S+RUJPOCMeBvkRIt2iH1rLPO5Ke1FuXp7HMACCCHJBEP+rA8Xr82wHuyTERtQ==
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@pulumi/command/-/command-0.7.1.tgz#a8baabd053a40eef38221c66c29b484dfce26d27"
+  integrity sha512-glPRnkR+jKK/av1CsarIxRuyRSaDiV8Ht4OV5qsTXHRFu8jGbbJrTXT8K1rq1ZImQioS4L/NL9BjhzNjZcKEfA==
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
 
@@ -196,9 +196,9 @@
   integrity sha512-Vsyi9ogDAY3REZDjYnXMRJJa62SDvxHXxJI5nGDQdZW058dDE+av/anynN2rLKbCKXDRNw3D/sQmqxVflZFi4A==
 
 "@types/node@>=12.12.47":
-  version "18.13.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.13.0.tgz#0400d1e6ce87e9d3032c19eb6c58205b0d3f7850"
-  integrity sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==
+  version "18.14.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.14.0.tgz#94c47b9217bbac49d4a67a967fdcdeed89ebb7d0"
+  integrity sha512-5EWrvLmglK+imbCJY0+INViFWUHg1AHel1sq4ZVSfdcNqGy9Edv3UB9IIzzg+xPaUcAgZYcfVs2fBcwDeZzU0A==
 
 "@types/node@^17.0.21":
   version "17.0.45"
@@ -239,9 +239,9 @@ available-typed-arrays@^1.0.5:
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
 aws-sdk@^2.0.0:
-  version "2.1315.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1315.0.tgz#24e485c21ea443b0bbc02c219601737ec2e5e1bb"
-  integrity sha512-fDlK3iqA0bpXW6azVBAB8RTKhJ5YUjfe6sqKQF1lKT2cYT5qU4rtH5qUlMixlWkb8oKeSMA2voW3wZZtSpBFKQ==
+  version "2.1321.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1321.0.tgz#8284143facf5e7ac1b4f23f86f3594c939d7ea5a"
+  integrity sha512-VBNsTl13/JWYpvo7H9BgAUMZam4BxKNhlt7GlsuVdK30MdirIEsB0ZeqGeAO9KXRBLCv/FUnF/nV73+97qLKWw==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"

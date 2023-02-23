@@ -25,9 +25,9 @@ export class ContainerFunction extends pulumi.ComponentResource {
     }
 
     public /*out*/ readonly arn!: pulumi.Output<string>;
-    public /*out*/ readonly function_url!: pulumi.Output<string>;
     public /*out*/ readonly image_uri!: pulumi.Output<string>;
     public readonly name!: pulumi.Output<string>;
+    public /*out*/ readonly url!: pulumi.Output<string | undefined>;
 
     /**
      * Create a ContainerFunction resource with the given unique name, arguments, and options.
@@ -56,15 +56,15 @@ export class ContainerFunction extends pulumi.ComponentResource {
             resourceInputs["policyDocument"] = args ? args.policyDocument : undefined;
             resourceInputs["repositoryUrl"] = args ? args.repositoryUrl : undefined;
             resourceInputs["timeout"] = args ? args.timeout : undefined;
-            resourceInputs["url"] = args ? args.url : undefined;
+            resourceInputs["urlEnabled"] = args ? args.urlEnabled : undefined;
             resourceInputs["arn"] = undefined /*out*/;
-            resourceInputs["function_url"] = undefined /*out*/;
             resourceInputs["image_uri"] = undefined /*out*/;
+            resourceInputs["url"] = undefined /*out*/;
         } else {
             resourceInputs["arn"] = undefined /*out*/;
-            resourceInputs["function_url"] = undefined /*out*/;
             resourceInputs["image_uri"] = undefined /*out*/;
             resourceInputs["name"] = undefined /*out*/;
+            resourceInputs["url"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(ContainerFunction.__pulumiType, name, resourceInputs, opts, true /*remote*/);
@@ -130,5 +130,5 @@ export interface ContainerFunctionArgs {
     /**
      * Use Lambda URL. Defaults to `false`
      */
-    url?: pulumi.Input<boolean>;
+    urlEnabled?: pulumi.Input<boolean>;
 }

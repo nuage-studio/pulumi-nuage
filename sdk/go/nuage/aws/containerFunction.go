@@ -17,10 +17,10 @@ import (
 type ContainerFunction struct {
 	pulumi.ResourceState
 
-	Arn          pulumi.StringOutput `pulumi:"arn"`
-	Function_url pulumi.StringOutput `pulumi:"function_url"`
-	Image_uri    pulumi.StringOutput `pulumi:"image_uri"`
-	Name         pulumi.StringOutput `pulumi:"name"`
+	Arn       pulumi.StringOutput    `pulumi:"arn"`
+	Image_uri pulumi.StringOutput    `pulumi:"image_uri"`
+	Name      pulumi.StringOutput    `pulumi:"name"`
+	Url       pulumi.StringPtrOutput `pulumi:"url"`
 }
 
 // NewContainerFunction registers a new resource with the given unique name, arguments, and options.
@@ -70,7 +70,7 @@ type containerFunctionArgs struct {
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout *int `pulumi:"timeout"`
 	// Use Lambda URL. Defaults to `false`
-	Url *bool `pulumi:"url"`
+	UrlEnabled *bool `pulumi:"urlEnabled"`
 }
 
 // The set of arguments for constructing a ContainerFunction resource.
@@ -102,7 +102,7 @@ type ContainerFunctionArgs struct {
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout pulumi.IntPtrInput
 	// Use Lambda URL. Defaults to `false`
-	Url pulumi.BoolPtrInput
+	UrlEnabled pulumi.BoolPtrInput
 }
 
 func (ContainerFunctionArgs) ElementType() reflect.Type {
