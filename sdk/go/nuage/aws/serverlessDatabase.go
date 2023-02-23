@@ -20,10 +20,9 @@ type ServerlessDatabase struct {
 	Bastion_ip          pulumi.StringPtrOutput `pulumi:"bastion_ip"`
 	Bastion_private_key pulumi.StringPtrOutput `pulumi:"bastion_private_key"`
 	Cluster_arn         pulumi.StringOutput    `pulumi:"cluster_arn"`
+	Database_name       pulumi.StringOutput    `pulumi:"database_name"`
 	Host                pulumi.StringOutput    `pulumi:"host"`
-	Name                pulumi.StringOutput    `pulumi:"name"`
 	Password            pulumi.StringPtrOutput `pulumi:"password"`
-	Policy_document     pulumi.StringPtrOutput `pulumi:"policy_document"`
 	Port                pulumi.Float64Output   `pulumi:"port"`
 	Uri                 pulumi.StringOutput    `pulumi:"uri"`
 	User                pulumi.StringOutput    `pulumi:"user"`
@@ -36,14 +35,20 @@ func NewServerlessDatabase(ctx *pulumi.Context,
 		return nil, errors.New("missing one or more required arguments")
 	}
 
+	if args.DatabaseName == nil {
+		return nil, errors.New("invalid value for required argument 'DatabaseName'")
+	}
 	if args.DatabaseType == nil {
 		return nil, errors.New("invalid value for required argument 'DatabaseType'")
 	}
+	if args.MasterUserName == nil {
+		return nil, errors.New("invalid value for required argument 'MasterUserName'")
+	}
+	if args.SubnetIds == nil {
+		return nil, errors.New("invalid value for required argument 'SubnetIds'")
+	}
 	if args.VpcId == nil {
 		return nil, errors.New("invalid value for required argument 'VpcId'")
-	}
-	if args.VpcSubnets == nil {
-		return nil, errors.New("invalid value for required argument 'VpcSubnets'")
 	}
 	opts = pkgResourceDefaultOpts(opts)
 	var resource ServerlessDatabase
@@ -57,58 +62,44 @@ func NewServerlessDatabase(ctx *pulumi.Context,
 type serverlessDatabaseArgs struct {
 	// Enable data api. Defaults to `false`
 	BastionEnabled *bool `pulumi:"bastionEnabled"`
-	// List of public subnet ip addresses for the bastion host.
-	BastionSubnets []string `pulumi:"bastionSubnets"`
-	// Enable data api. Defaults to `false`
-	DataApi *bool `pulumi:"dataApi"`
+	// Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
+	BastionSubnetId *string `pulumi:"bastionSubnetId"`
 	// Name of the database.
-	DatabaseName *string `pulumi:"databaseName"`
+	DatabaseName string `pulumi:"databaseName"`
 	// Database type. `mysql` or `postgresql`
 	DatabaseType string `pulumi:"databaseType"`
 	// List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0
 	IpWhitelist []string `pulumi:"ipWhitelist"`
 	// Master user name of the db.
-	MasterUserName *string `pulumi:"masterUserName"`
-<<<<<<< HEAD
-=======
-	// Resource name.
-	ResourceName string `pulumi:"resourceName"`
->>>>>>> master
+	MasterUserName string `pulumi:"masterUserName"`
 	// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
 	SkipFinalSnapshot *bool `pulumi:"skipFinalSnapshot"`
+	// List of subnet ip addresses. If you want your database will be accessible from the internet, it should be public (`vpc.public_subnet_ids`). Otherwise, you can use private subnets (`vpc.private_subnet_ids`).
+	SubnetIds []string `pulumi:"subnetIds"`
 	// Vpc id.
 	VpcId string `pulumi:"vpcId"`
-	// List of subnet ip addresses.
-	VpcSubnets []string `pulumi:"vpcSubnets"`
 }
 
 // The set of arguments for constructing a ServerlessDatabase resource.
 type ServerlessDatabaseArgs struct {
 	// Enable data api. Defaults to `false`
 	BastionEnabled pulumi.BoolPtrInput
-	// List of public subnet ip addresses for the bastion host.
-	BastionSubnets pulumi.StringArrayInput
-	// Enable data api. Defaults to `false`
-	DataApi pulumi.BoolPtrInput
+	// Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
+	BastionSubnetId pulumi.StringPtrInput
 	// Name of the database.
-	DatabaseName pulumi.StringPtrInput
+	DatabaseName pulumi.StringInput
 	// Database type. `mysql` or `postgresql`
 	DatabaseType pulumi.StringInput
 	// List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0
 	IpWhitelist pulumi.StringArrayInput
 	// Master user name of the db.
-	MasterUserName pulumi.StringPtrInput
-<<<<<<< HEAD
-=======
-	// Resource name.
-	ResourceName pulumi.StringInput
->>>>>>> master
+	MasterUserName pulumi.StringInput
 	// Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
 	SkipFinalSnapshot pulumi.BoolPtrInput
+	// List of subnet ip addresses. If you want your database will be accessible from the internet, it should be public (`vpc.public_subnet_ids`). Otherwise, you can use private subnets (`vpc.private_subnet_ids`).
+	SubnetIds pulumi.StringArrayInput
 	// Vpc id.
 	VpcId pulumi.StringInput
-	// List of subnet ip addresses.
-	VpcSubnets pulumi.StringArrayInput
 }
 
 func (ServerlessDatabaseArgs) ElementType() reflect.Type {

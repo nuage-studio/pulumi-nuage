@@ -11,6 +11,9 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
+// Pulumi Nuage's Bastion resource enables the creation of a bastion host through the submission of provided VPC information. The resource creates a private key, security group, and an AWS EC2 `t4g.nano` instance that can serve as the bastion host. This allows secure connectivity to sensitive resources within the VPC, while maintaining isolation from the public internet. You can leverage the outputted private key to establish a connection to the bastion host.
+//
+// ## Example Usage
 type Bastion struct {
 	pulumi.ResourceState
 
@@ -25,12 +28,13 @@ func NewBastion(ctx *pulumi.Context,
 		return nil, errors.New("missing one or more required arguments")
 	}
 
+	if args.SubnetId == nil {
+		return nil, errors.New("invalid value for required argument 'SubnetId'")
+	}
 	if args.VpcId == nil {
 		return nil, errors.New("invalid value for required argument 'VpcId'")
 	}
-	if args.VpcSubnets == nil {
-		return nil, errors.New("invalid value for required argument 'VpcSubnets'")
-	}
+	opts = pkgResourceDefaultOpts(opts)
 	var resource Bastion
 	err := ctx.RegisterRemoteComponentResource("nuage:aws:Bastion", name, args, &resource, opts...)
 	if err != nil {
@@ -42,20 +46,20 @@ func NewBastion(ctx *pulumi.Context,
 type bastionArgs struct {
 	// Ssh port for bastion host. Defaults to 22
 	SshPort *float64 `pulumi:"sshPort"`
+	// Public subnet id of the Vpc.
+	SubnetId string `pulumi:"subnetId"`
 	// Vpc id.
 	VpcId string `pulumi:"vpcId"`
-	// List of subnet ip addresses of Vpc.
-	VpcSubnets []string `pulumi:"vpcSubnets"`
 }
 
 // The set of arguments for constructing a Bastion resource.
 type BastionArgs struct {
 	// Ssh port for bastion host. Defaults to 22
 	SshPort pulumi.Float64PtrInput
+	// Public subnet id of the Vpc.
+	SubnetId pulumi.StringInput
 	// Vpc id.
 	VpcId pulumi.StringInput
-	// List of subnet ip addresses of Vpc.
-	VpcSubnets pulumi.StringArrayInput
 }
 
 func (BastionArgs) ElementType() reflect.Type {

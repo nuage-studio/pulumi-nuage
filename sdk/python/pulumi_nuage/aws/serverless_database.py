@@ -13,46 +13,52 @@ __all__ = ['ServerlessDatabaseArgs', 'ServerlessDatabase']
 @pulumi.input_type
 class ServerlessDatabaseArgs:
     def __init__(__self__, *,
+                 database_name: pulumi.Input[str],
                  database_type: pulumi.Input[str],
+                 master_user_name: pulumi.Input[str],
+                 subnet_ids: pulumi.Input[Sequence[pulumi.Input[str]]],
                  vpc_id: pulumi.Input[str],
-                 vpc_subnets: pulumi.Input[Sequence[pulumi.Input[str]]],
                  bastion_enabled: Optional[pulumi.Input[bool]] = None,
-                 bastion_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 data_api: Optional[pulumi.Input[bool]] = None,
-                 database_name: Optional[pulumi.Input[str]] = None,
+                 bastion_subnet_id: Optional[pulumi.Input[str]] = None,
                  ip_whitelist: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 master_user_name: Optional[pulumi.Input[str]] = None,
                  skip_final_snapshot: Optional[pulumi.Input[bool]] = None):
         """
         The set of arguments for constructing a ServerlessDatabase resource.
-        :param pulumi.Input[str] database_type: Database type. `mysql` or `postgresql`
-        :param pulumi.Input[str] vpc_id: Vpc id.
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] vpc_subnets: List of subnet ip addresses.
-        :param pulumi.Input[bool] bastion_enabled: Enable data api. Defaults to `false`
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] bastion_subnets: List of public subnet ip addresses for the bastion host.
-        :param pulumi.Input[bool] data_api: Enable data api. Defaults to `false`
         :param pulumi.Input[str] database_name: Name of the database.
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] ip_whitelist: List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0
+        :param pulumi.Input[str] database_type: Database type. `mysql` or `postgresql`
         :param pulumi.Input[str] master_user_name: Master user name of the db.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subnet_ids: List of subnet ip addresses. If you want your database will be accessible from the internet, it should be public (`vpc.public_subnet_ids`). Otherwise, you can use private subnets (`vpc.private_subnet_ids`).
+        :param pulumi.Input[str] vpc_id: Vpc id.
+        :param pulumi.Input[bool] bastion_enabled: Enable data api. Defaults to `false`
+        :param pulumi.Input[str] bastion_subnet_id: Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] ip_whitelist: List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0
         :param pulumi.Input[bool] skip_final_snapshot: Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
         """
+        pulumi.set(__self__, "database_name", database_name)
         pulumi.set(__self__, "database_type", database_type)
+        pulumi.set(__self__, "master_user_name", master_user_name)
+        pulumi.set(__self__, "subnet_ids", subnet_ids)
         pulumi.set(__self__, "vpc_id", vpc_id)
-        pulumi.set(__self__, "vpc_subnets", vpc_subnets)
         if bastion_enabled is not None:
             pulumi.set(__self__, "bastion_enabled", bastion_enabled)
-        if bastion_subnets is not None:
-            pulumi.set(__self__, "bastion_subnets", bastion_subnets)
-        if data_api is not None:
-            pulumi.set(__self__, "data_api", data_api)
-        if database_name is not None:
-            pulumi.set(__self__, "database_name", database_name)
+        if bastion_subnet_id is not None:
+            pulumi.set(__self__, "bastion_subnet_id", bastion_subnet_id)
         if ip_whitelist is not None:
             pulumi.set(__self__, "ip_whitelist", ip_whitelist)
-        if master_user_name is not None:
-            pulumi.set(__self__, "master_user_name", master_user_name)
         if skip_final_snapshot is not None:
             pulumi.set(__self__, "skip_final_snapshot", skip_final_snapshot)
+
+    @property
+    @pulumi.getter(name="databaseName")
+    def database_name(self) -> pulumi.Input[str]:
+        """
+        Name of the database.
+        """
+        return pulumi.get(self, "database_name")
+
+    @database_name.setter
+    def database_name(self, value: pulumi.Input[str]):
+        pulumi.set(self, "database_name", value)
 
     @property
     @pulumi.getter(name="databaseType")
@@ -67,6 +73,30 @@ class ServerlessDatabaseArgs:
         pulumi.set(self, "database_type", value)
 
     @property
+    @pulumi.getter(name="masterUserName")
+    def master_user_name(self) -> pulumi.Input[str]:
+        """
+        Master user name of the db.
+        """
+        return pulumi.get(self, "master_user_name")
+
+    @master_user_name.setter
+    def master_user_name(self, value: pulumi.Input[str]):
+        pulumi.set(self, "master_user_name", value)
+
+    @property
+    @pulumi.getter(name="subnetIds")
+    def subnet_ids(self) -> pulumi.Input[Sequence[pulumi.Input[str]]]:
+        """
+        List of subnet ip addresses. If you want your database will be accessible from the internet, it should be public (`vpc.public_subnet_ids`). Otherwise, you can use private subnets (`vpc.private_subnet_ids`).
+        """
+        return pulumi.get(self, "subnet_ids")
+
+    @subnet_ids.setter
+    def subnet_ids(self, value: pulumi.Input[Sequence[pulumi.Input[str]]]):
+        pulumi.set(self, "subnet_ids", value)
+
+    @property
     @pulumi.getter(name="vpcId")
     def vpc_id(self) -> pulumi.Input[str]:
         """
@@ -77,18 +107,6 @@ class ServerlessDatabaseArgs:
     @vpc_id.setter
     def vpc_id(self, value: pulumi.Input[str]):
         pulumi.set(self, "vpc_id", value)
-
-    @property
-    @pulumi.getter(name="vpcSubnets")
-    def vpc_subnets(self) -> pulumi.Input[Sequence[pulumi.Input[str]]]:
-        """
-        List of subnet ip addresses.
-        """
-        return pulumi.get(self, "vpc_subnets")
-
-    @vpc_subnets.setter
-    def vpc_subnets(self, value: pulumi.Input[Sequence[pulumi.Input[str]]]):
-        pulumi.set(self, "vpc_subnets", value)
 
     @property
     @pulumi.getter(name="bastionEnabled")
@@ -103,40 +121,16 @@ class ServerlessDatabaseArgs:
         pulumi.set(self, "bastion_enabled", value)
 
     @property
-    @pulumi.getter(name="bastionSubnets")
-    def bastion_subnets(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
+    @pulumi.getter(name="bastionSubnetId")
+    def bastion_subnet_id(self) -> Optional[pulumi.Input[str]]:
         """
-        List of public subnet ip addresses for the bastion host.
+        Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
         """
-        return pulumi.get(self, "bastion_subnets")
+        return pulumi.get(self, "bastion_subnet_id")
 
-    @bastion_subnets.setter
-    def bastion_subnets(self, value: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]):
-        pulumi.set(self, "bastion_subnets", value)
-
-    @property
-    @pulumi.getter(name="dataApi")
-    def data_api(self) -> Optional[pulumi.Input[bool]]:
-        """
-        Enable data api. Defaults to `false`
-        """
-        return pulumi.get(self, "data_api")
-
-    @data_api.setter
-    def data_api(self, value: Optional[pulumi.Input[bool]]):
-        pulumi.set(self, "data_api", value)
-
-    @property
-    @pulumi.getter(name="databaseName")
-    def database_name(self) -> Optional[pulumi.Input[str]]:
-        """
-        Name of the database.
-        """
-        return pulumi.get(self, "database_name")
-
-    @database_name.setter
-    def database_name(self, value: Optional[pulumi.Input[str]]):
-        pulumi.set(self, "database_name", value)
+    @bastion_subnet_id.setter
+    def bastion_subnet_id(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "bastion_subnet_id", value)
 
     @property
     @pulumi.getter(name="ipWhitelist")
@@ -149,18 +143,6 @@ class ServerlessDatabaseArgs:
     @ip_whitelist.setter
     def ip_whitelist(self, value: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]):
         pulumi.set(self, "ip_whitelist", value)
-
-    @property
-    @pulumi.getter(name="masterUserName")
-    def master_user_name(self) -> Optional[pulumi.Input[str]]:
-        """
-        Master user name of the db.
-        """
-        return pulumi.get(self, "master_user_name")
-
-    @master_user_name.setter
-    def master_user_name(self, value: Optional[pulumi.Input[str]]):
-        pulumi.set(self, "master_user_name", value)
 
     @property
     @pulumi.getter(name="skipFinalSnapshot")
@@ -181,15 +163,14 @@ class ServerlessDatabase(pulumi.ComponentResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  bastion_enabled: Optional[pulumi.Input[bool]] = None,
-                 bastion_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 data_api: Optional[pulumi.Input[bool]] = None,
+                 bastion_subnet_id: Optional[pulumi.Input[str]] = None,
                  database_name: Optional[pulumi.Input[str]] = None,
                  database_type: Optional[pulumi.Input[str]] = None,
                  ip_whitelist: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  master_user_name: Optional[pulumi.Input[str]] = None,
                  skip_final_snapshot: Optional[pulumi.Input[bool]] = None,
+                 subnet_ids: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  vpc_id: Optional[pulumi.Input[str]] = None,
-                 vpc_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  __props__=None):
         """
         The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.
@@ -199,31 +180,54 @@ class ServerlessDatabase(pulumi.ComponentResource):
 
         ```python
         import pulumi_nuage as nuage
+        import pulumi_awsx as awsx
+        
+        vpc = awsx.ec2.Vpc(
+            resource_name=f"foo",
+            enable_dns_hostnames=True,
+            number_of_availability_zones=2,
+            nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(
+                strategy=awsx.ec2.NatGatewayStrategy.NONE
+            ),
+            subnet_specs=[
+                awsx.ec2.SubnetSpecArgs(
+                    cidr_mask=24,
+                    type=awsx.ec2.SubnetType.PUBLIC,
+                ),
+                awsx.ec2.SubnetSpecArgs(
+                    cidr_mask=24,
+                    type=awsx.ec2.SubnetType.PRIVATE,
+                ),
+            ],
+        )
+        
         
         db = nuage.aws.ServerlessDatabase(
             "foo",
+            name="serverless-db",
             vpc_id=my_vpc.id,
-            vpc_subnets=my_vpc.private_subnet_ids,
+            subnet_ids=my_vpc.private_subnet_ids,
             database_type="mysql",
             database_name="bar",
             master_username="root",
             ip_whitelist=["0.0.0.0/0"],
-            skip_final_snapshot=True
+            skip_final_snapshot=True,
+            bastion_enabled=True,
+            bastion_subnet_id=vpc.public_subnet_ids[0]
         )
         ```
 
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[bool] bastion_enabled: Enable data api. Defaults to `false`
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] bastion_subnets: List of public subnet ip addresses for the bastion host.
-        :param pulumi.Input[bool] data_api: Enable data api. Defaults to `false`
+        :param pulumi.Input[str] bastion_subnet_id: Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
         :param pulumi.Input[str] database_name: Name of the database.
         :param pulumi.Input[str] database_type: Database type. `mysql` or `postgresql`
         :param pulumi.Input[Sequence[pulumi.Input[str]]] ip_whitelist: List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0
         :param pulumi.Input[str] master_user_name: Master user name of the db.
         :param pulumi.Input[bool] skip_final_snapshot: Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subnet_ids: List of subnet ip addresses. If you want your database will be accessible from the internet, it should be public (`vpc.public_subnet_ids`). Otherwise, you can use private subnets (`vpc.private_subnet_ids`).
         :param pulumi.Input[str] vpc_id: Vpc id.
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] vpc_subnets: List of subnet ip addresses.
         """
         ...
     @overload
@@ -239,16 +243,40 @@ class ServerlessDatabase(pulumi.ComponentResource):
 
         ```python
         import pulumi_nuage as nuage
+        import pulumi_awsx as awsx
+        
+        vpc = awsx.ec2.Vpc(
+            resource_name=f"foo",
+            enable_dns_hostnames=True,
+            number_of_availability_zones=2,
+            nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(
+                strategy=awsx.ec2.NatGatewayStrategy.NONE
+            ),
+            subnet_specs=[
+                awsx.ec2.SubnetSpecArgs(
+                    cidr_mask=24,
+                    type=awsx.ec2.SubnetType.PUBLIC,
+                ),
+                awsx.ec2.SubnetSpecArgs(
+                    cidr_mask=24,
+                    type=awsx.ec2.SubnetType.PRIVATE,
+                ),
+            ],
+        )
+        
         
         db = nuage.aws.ServerlessDatabase(
             "foo",
+            name="serverless-db",
             vpc_id=my_vpc.id,
-            vpc_subnets=my_vpc.private_subnet_ids,
+            subnet_ids=my_vpc.private_subnet_ids,
             database_type="mysql",
             database_name="bar",
             master_username="root",
             ip_whitelist=["0.0.0.0/0"],
-            skip_final_snapshot=True
+            skip_final_snapshot=True,
+            bastion_enabled=True,
+            bastion_subnet_id=vpc.public_subnet_ids[0]
         )
         ```
 
@@ -268,15 +296,14 @@ class ServerlessDatabase(pulumi.ComponentResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  bastion_enabled: Optional[pulumi.Input[bool]] = None,
-                 bastion_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 data_api: Optional[pulumi.Input[bool]] = None,
+                 bastion_subnet_id: Optional[pulumi.Input[str]] = None,
                  database_name: Optional[pulumi.Input[str]] = None,
                  database_type: Optional[pulumi.Input[str]] = None,
                  ip_whitelist: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  master_user_name: Optional[pulumi.Input[str]] = None,
                  skip_final_snapshot: Optional[pulumi.Input[bool]] = None,
+                 subnet_ids: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  vpc_id: Optional[pulumi.Input[str]] = None,
-                 vpc_subnets: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  __props__=None):
         if opts is None:
             opts = pulumi.ResourceOptions()
@@ -294,28 +321,30 @@ class ServerlessDatabase(pulumi.ComponentResource):
             __props__ = ServerlessDatabaseArgs.__new__(ServerlessDatabaseArgs)
 
             __props__.__dict__["bastion_enabled"] = bastion_enabled
-            __props__.__dict__["bastion_subnets"] = bastion_subnets
-            __props__.__dict__["data_api"] = data_api
+            __props__.__dict__["bastion_subnet_id"] = bastion_subnet_id
+            if database_name is None and not opts.urn:
+                raise TypeError("Missing required property 'database_name'")
             __props__.__dict__["database_name"] = database_name
             if database_type is None and not opts.urn:
                 raise TypeError("Missing required property 'database_type'")
             __props__.__dict__["database_type"] = database_type
             __props__.__dict__["ip_whitelist"] = ip_whitelist
+            if master_user_name is None and not opts.urn:
+                raise TypeError("Missing required property 'master_user_name'")
             __props__.__dict__["master_user_name"] = master_user_name
             __props__.__dict__["skip_final_snapshot"] = skip_final_snapshot
+            if subnet_ids is None and not opts.urn:
+                raise TypeError("Missing required property 'subnet_ids'")
+            __props__.__dict__["subnet_ids"] = subnet_ids
             if vpc_id is None and not opts.urn:
                 raise TypeError("Missing required property 'vpc_id'")
             __props__.__dict__["vpc_id"] = vpc_id
-            if vpc_subnets is None and not opts.urn:
-                raise TypeError("Missing required property 'vpc_subnets'")
-            __props__.__dict__["vpc_subnets"] = vpc_subnets
             __props__.__dict__["bastion_ip"] = None
             __props__.__dict__["bastion_private_key"] = None
             __props__.__dict__["cluster_arn"] = None
+            __props__.__dict__["database_name"] = None
             __props__.__dict__["host"] = None
-            __props__.__dict__["name"] = None
             __props__.__dict__["password"] = None
-            __props__.__dict__["policy_document"] = None
             __props__.__dict__["port"] = None
             __props__.__dict__["uri"] = None
             __props__.__dict__["user"] = None
@@ -343,23 +372,18 @@ class ServerlessDatabase(pulumi.ComponentResource):
 
     @property
     @pulumi.getter
+    def database_name(self) -> pulumi.Output[str]:
+        return pulumi.get(self, "database_name")
+
+    @property
+    @pulumi.getter
     def host(self) -> pulumi.Output[str]:
         return pulumi.get(self, "host")
 
     @property
     @pulumi.getter
-    def name(self) -> pulumi.Output[str]:
-        return pulumi.get(self, "name")
-
-    @property
-    @pulumi.getter
     def password(self) -> pulumi.Output[Optional[str]]:
         return pulumi.get(self, "password")
-
-    @property
-    @pulumi.getter
-    def policy_document(self) -> pulumi.Output[Optional[str]]:
-        return pulumi.get(self, "policy_document")
 
     @property
     @pulumi.getter

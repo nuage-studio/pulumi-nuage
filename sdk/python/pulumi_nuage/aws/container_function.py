@@ -26,7 +26,7 @@ class ContainerFunctionArgs:
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
-                 url: Optional[pulumi.Input[bool]] = None):
+                 url_enabled: Optional[pulumi.Input[bool]] = None):
         """
         The set of arguments for constructing a ContainerFunction resource.
         :param pulumi.Input[str] repository_url: Existing ECR repository name
@@ -42,7 +42,7 @@ class ContainerFunctionArgs:
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
         :param pulumi.Input[int] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
-        :param pulumi.Input[bool] url: Use Lambda URL. Defaults to `false`
+        :param pulumi.Input[bool] url_enabled: Use Lambda URL. Defaults to `false`
         """
         pulumi.set(__self__, "repository_url", repository_url)
         if architecture is not None:
@@ -69,8 +69,8 @@ class ContainerFunctionArgs:
             pulumi.set(__self__, "policy_document", policy_document)
         if timeout is not None:
             pulumi.set(__self__, "timeout", timeout)
-        if url is not None:
-            pulumi.set(__self__, "url", url)
+        if url_enabled is not None:
+            pulumi.set(__self__, "url_enabled", url_enabled)
 
     @property
     @pulumi.getter(name="repositoryUrl")
@@ -229,16 +229,16 @@ class ContainerFunctionArgs:
         pulumi.set(self, "timeout", value)
 
     @property
-    @pulumi.getter
-    def url(self) -> Optional[pulumi.Input[bool]]:
+    @pulumi.getter(name="urlEnabled")
+    def url_enabled(self) -> Optional[pulumi.Input[bool]]:
         """
         Use Lambda URL. Defaults to `false`
         """
-        return pulumi.get(self, "url")
+        return pulumi.get(self, "url_enabled")
 
-    @url.setter
-    def url(self, value: Optional[pulumi.Input[bool]]):
-        pulumi.set(self, "url", value)
+    @url_enabled.setter
+    def url_enabled(self, value: Optional[pulumi.Input[bool]]):
+        pulumi.set(self, "url_enabled", value)
 
 
 class ContainerFunction(pulumi.ComponentResource):
@@ -259,7 +259,7 @@ class ContainerFunction(pulumi.ComponentResource):
                  policy_document: Optional[pulumi.Input[str]] = None,
                  repository_url: Optional[pulumi.Input[str]] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
-                 url: Optional[pulumi.Input[bool]] = None,
+                 url_enabled: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
         """
         Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
@@ -305,7 +305,7 @@ class ContainerFunction(pulumi.ComponentResource):
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
         :param pulumi.Input[str] repository_url: Existing ECR repository name
         :param pulumi.Input[int] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
-        :param pulumi.Input[bool] url: Use Lambda URL. Defaults to `false`
+        :param pulumi.Input[bool] url_enabled: Use Lambda URL. Defaults to `false`
         """
         ...
     @overload
@@ -370,7 +370,7 @@ class ContainerFunction(pulumi.ComponentResource):
                  policy_document: Optional[pulumi.Input[str]] = None,
                  repository_url: Optional[pulumi.Input[str]] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
-                 url: Optional[pulumi.Input[bool]] = None,
+                 url_enabled: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
         if opts is None:
             opts = pulumi.ResourceOptions()
@@ -402,10 +402,10 @@ class ContainerFunction(pulumi.ComponentResource):
                 raise TypeError("Missing required property 'repository_url'")
             __props__.__dict__["repository_url"] = repository_url
             __props__.__dict__["timeout"] = timeout
-            __props__.__dict__["url"] = url
+            __props__.__dict__["url_enabled"] = url_enabled
             __props__.__dict__["arn"] = None
-            __props__.__dict__["function_url"] = None
             __props__.__dict__["image_uri"] = None
+            __props__.__dict__["url"] = None
         super(ContainerFunction, __self__).__init__(
             'nuage:aws:ContainerFunction',
             resource_name,
@@ -420,11 +420,6 @@ class ContainerFunction(pulumi.ComponentResource):
 
     @property
     @pulumi.getter
-    def function_url(self) -> pulumi.Output[str]:
-        return pulumi.get(self, "function_url")
-
-    @property
-    @pulumi.getter
     def image_uri(self) -> pulumi.Output[str]:
         return pulumi.get(self, "image_uri")
 
@@ -432,4 +427,9 @@ class ContainerFunction(pulumi.ComponentResource):
     @pulumi.getter
     def name(self) -> pulumi.Output[str]:
         return pulumi.get(self, "name")
+
+    @property
+    @pulumi.getter
+    def url(self) -> pulumi.Output[Optional[str]]:
+        return pulumi.get(self, "url")
 
