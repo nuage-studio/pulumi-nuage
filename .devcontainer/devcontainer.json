@@ -14,9 +14,9 @@
         // Set *default* container specific settings.json values on container create.
         "settings": {
           "terminal.integrated.defaultProfile.linux": "zsh",
-          "isort.path": ["/workspace/.venv/bin/isort"],
+          "isort.path": ["/usr/local/py-utils/venvs/poetry/bin/isort"],
           "isort.args": ["--settings", "/workspace/pyproject.toml"],
-          "python.formatting.blackPath": "/workspace/.venv/bin/black",
+          "python.formatting.blackPath": "/usr/local/py-utils/venvs/poetry/bin/black",
           "python.formatting.blackArgs": [
             "--preview",
             "--line-length",
@@ -48,6 +48,10 @@
   
     
 	"features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.10.8",
+      "installTools": false
+    },
 		"ghcr.io/devcontainers/features/aws-cli:1": {
 			"version": "latest"
 		},
@@ -72,7 +76,7 @@
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "pip3 install --user -r requirements.txt",
-  "postCreateCommand": "rm -rf .venv && task python-install --force"
+  "postCreateCommand": "poetry install"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
