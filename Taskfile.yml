@@ -10,6 +10,22 @@ env:
     sh: cat schema.json | jq -r '.version'
 
 tasks:
+  python-install:
+    desc: Install dependencies.
+    deps: [venv]
+    cmds:
+      - poetry install
+    sources:
+      - pyproject.toml
+      - poetry.lock
+
+  venv:
+    desc: Create a Python virtualenv
+    cmds:
+      - python -m venv .venv
+    status:
+      - test -d .venv
+
   sdk:
     desc: Generates SDKs
     cmds:

@@ -5,13 +5,13 @@ description = ""
 authors = ["burakgzt <burak.gozutok@nuage.studio>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 boto3 = "^1.26.10"
 pymysql = "^1.0.2"
 pydantic = "^1.10.2"
-psycopg2 = "^2.9.5"
+psycopg2-binary = "^2.9.5"
 pytest = "^7.2.0"
-nuage-provider = {path = "../pulumi-resource-nuage", develop = true}
+nuage-provider = { path = "../pulumi-resource-nuage", develop = true }
 sshtunnel = "^0.4.0"
 paramiko = "^2.12.0"
 

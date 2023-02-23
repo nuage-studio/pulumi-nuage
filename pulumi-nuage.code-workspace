@@ -1,6 +1,14 @@
 {
   "folders": [
     {
+      "name": "⚙️ Provider",
+      "path": "provider/cmd/pulumi-resource-nuage"
+    },
+    {
+      "name": "🧪 Tests",
+      "path": "provider/cmd/tests"
+    },
+    {
       "name": "✨  pulumi-nuage",
       "path": "."
     }
