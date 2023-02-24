@@ -28,5 +28,4 @@ jobs:
           runCmd: |
             pulumi login
               task test:default
-          env:
-            PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_TOKEN }}
+          env: PULUMI_ACCESS_TOKEN=${{ secrets.PULUMI_TOKEN }}
