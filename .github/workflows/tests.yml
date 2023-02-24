@@ -12,6 +12,8 @@ jobs:
       - name: Checkout (GitHub)
         uses: actions/checkout@v3
 
+      - name: Prepare Docker
+        uses: docker-practice/actions-setup-docker@master
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -26,7 +28,7 @@ jobs:
           imageName: ghcr.io/nuage-studio/pulumi-nuage
           # Change this to be your CI task/script
           runCmd: |
-            pulumi login
+            pulumi login            
             aws configure set aws_access_key_id  ${{ secrets.AWS_ACCESS_KEY_ID_DEV }} --profile nuage-dev
             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }} --profile nuage-dev
             aws configure set region eu-west-1 --profile nuage-dev
