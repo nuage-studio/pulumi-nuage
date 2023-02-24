@@ -6,7 +6,7 @@ authors = ["burakgzt <burak.gozutok@nuage.studio>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-boto3 = "^1.26.10"
+boto3 = ">=1.26.64"
 pymysql = "^1.0.2"
 pydantic = "^1.10.2"
 psycopg2-binary = "^2.9.5"
@@ -14,6 +14,13 @@ pytest = "^7.2.0"
 nuage-provider = { path = "../pulumi-resource-nuage", develop = true }
 sshtunnel = "^0.4.0"
 paramiko = "^2.12.0"
+pulumi = ">=3.0.0"
+pulumi-aws = ">=5.0.0"
+pulumi-awsx = ">=1.0.2"
+pulumi-tls = ">=4.6.1"
+pulumi-random = ">=4.10.0"
+pulumi-docker = ">=3.0.0,<4.0.0"
+pulumi-command = ">=0.7.0"
 
 [build-system]
 requires = ["poetry-core"]
