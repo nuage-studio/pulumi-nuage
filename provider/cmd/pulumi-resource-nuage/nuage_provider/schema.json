@@ -1,0 +1,328 @@
+{
+    "name": "nuage",
+    "version":"0.0.8",
+    "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
+    "types": {
+        "nuage:aws:ArchitectureType": {
+            "type":"string",
+            "description":"Architecture, either 'X86_64' or 'arm64'.",
+            "enum": [
+                {
+                    "description": "X86_64 architecture.",
+                    "value": "X86_64"
+                },
+                {
+                    "description": "ARM64 architecture.",
+                    "value": "ARM64"
+                }
+            ]
+        }
+    },
+    "resources": {
+        "nuage:aws:bucket_nuage": {
+            "isComponent": true,
+            "properties": {
+                "bucket": {
+                    "$ref": "/aws/v4.0.0/schema.json#/resources/aws:s3%2Fbucket:Bucket",
+                    "description": "The bucket resource."
+                }
+            },
+            "required": [
+                "bucket"
+            ]
+        },
+        "nuage:aws:Repository": {
+            "isComponent": true,
+            "inputProperties": {
+                "name": {
+                    "type": "string",
+                    "description":"Name of the resource."
+                },
+                "namePrefix": {
+                    "type": "string",
+                    "description":"Name prefix as an alternative to name and adds random suffix at the end."
+                },
+                "expireInDays": {
+                    "type": "integer",
+                    "description":"Number of days for expiring images using LifecyclePolicy."
+                }
+            },
+            "requiredInputs": [                
+            ],
+            "properties": {
+                "registry_id": {
+                    "type": "string"
+                },
+                "arn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "arn",
+                "registry_id",
+                "url",
+                "name"
+            ]
+        },
+        "nuage:aws:ContainerFunction": {
+            "isComponent": true,
+            "description":"Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    repository_url=repository.url,    \r\n    architecture=\"X86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90\r\n)\r\n```\r\n{{% \/example %}}",
+            "inputProperties": {
+                "name": {
+                    "type": "string",
+                    "description":"Name of the resource."
+                },
+                "namePrefix": {
+                    "type": "string",
+                    "description":"Name prefix as an alternative to name and adds random suffix at the end."
+                },
+                "description": {
+                    "type": "string",
+                    "description":"Description of the function."
+                },
+                "dockerfile": {
+                    "type": "string",
+                    "description":"Dockerfile path. Defaults to `./Dockerfile`"
+                },
+                "context": {
+                    "type": "string",
+                    "description":"Dockerfile context path."
+                },
+                "repositoryUrl": {
+                    "type": "string",
+                    "description":"Existing ECR repository name"
+                },
+                "architecture": {
+                    "description":"Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`",                    
+                    "type":"string"
+                },
+                "memorySize": {
+                    "type": "integer",
+                    "description":"Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`."
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description":"Amount of time your Lambda Function has to run in seconds. Defaults to `3`"
+                },            
+                "environment": {
+                    "type": "object",
+                    "description":"Environment Variables"
+                },    
+                "policyDocument": {
+                    "type": "string",
+                    "description":"Policy Document for lambda."
+                },
+                "keepWarm": {
+                    "type": "boolean",
+                    "description":"Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`"
+                },
+                "urlEnabled": {
+                    "type": "boolean",
+                    "description":"Use Lambda URL. Defaults to `false`"
+                },
+                "logRetentionInDays": {
+                    "type": "integer",
+                    "description":"Number of days for log retention to pass in cloudwatch log group.."
+                }
+            },
+            "requiredInputs": [     
+                "repositoryUrl"           
+            ],
+            "properties": {
+                "arn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "image_uri": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "arn",
+                "name",
+                "image_uri"
+            ]
+        },
+        "nuage:aws:ServerlessDatabase": {
+            "isComponent": true,
+            "description":"The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\nimport pulumi_awsx as awsx\r\n\r\nvpc = awsx.ec2.Vpc(\r\n    resource_name=f\"foo\",\r\n    enable_dns_hostnames=True,\r\n    number_of_availability_zones=2,\r\n    nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(\r\n        strategy=awsx.ec2.NatGatewayStrategy.NONE\r\n    ),\r\n    subnet_specs=[\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PUBLIC,\r\n        ),\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PRIVATE,\r\n        ),\r\n    ],\r\n)\r\n\r\n\r\ndb = nuage.aws.ServerlessDatabase(\r\n    \"foo\",\r\n    name=\"serverless-db\",\r\n    vpc_id=my_vpc.id,\r\n    subnet_ids=my_vpc.private_subnet_ids,\r\n    database_type=\"mysql\",\r\n    database_name=\"bar\",\r\n    master_username=\"root\",\r\n    ip_whitelist=[\"0.0.0.0\/0\"],\r\n    skip_final_snapshot=True,\r\n    bastion_enabled=True,\r\n    bastion_subnet_id=vpc.public_subnet_ids[0]\r\n)\r\n```\r\n{{% \/example %}}",
+            "inputProperties": {
+                "databaseType": {
+                    "type": "string",
+                    "description":"Database type. `mysql` or `postgresql`"
+                },
+                "vpcId": {
+                    "type": "string",
+                    "description":"Vpc id."
+                },
+                "subnetIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description":"List of subnet ip addresses. If you want your database will be accessible from the internet, it should be public (`vpc.public_subnet_ids`). Otherwise, you can use private subnets (`vpc.private_subnet_ids`)."
+                },
+                "databaseName": {
+                    "type": "string",
+                    "description":"Name of the database."
+                },
+                "masterUserName": {
+                    "type": "string",
+                    "description":"Master user name of the db."
+                },
+                "ipWhitelist": {
+                    "description":"List of whitelisted IP addresses. If not specified, it will be public 0.0.0.0/0",  
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "skipFinalSnapshot": {
+                    "type": "boolean",
+                    "description":"Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`"
+                },
+                "bastionSubnetId": {
+                    "type": "string",
+                    "description":"Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`"
+                },
+                "bastionEnabled": {
+                    "type": "boolean",
+                    "description":"Enable data api. Defaults to `false`"
+                }
+            },
+            "requiredInputs": [
+                "vpcId",
+                "subnetIds",
+                "databaseType",
+                "masterUserName",
+                "databaseName"
+            ],
+            "properties": {
+                "user": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "number"
+                },
+                "database_name": {
+                    "type": "string"
+                },
+                "cluster_arn": {
+                    "type": "string"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "bastion_ip": {
+                    "type": "string"
+                },
+                "bastion_private_key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "user",
+                "host",
+                "port",
+                "database_name",
+                "cluster_arn",
+                "uri"
+            ]
+        },
+        "nuage:aws:Bastion": {
+            "isComponent": true,
+            "description":"Pulumi Nuage's Bastion resource enables the creation of a bastion host through the submission of provided VPC information. The resource creates a private key, security group, and an AWS EC2 `t4g.nano` instance that can serve as the bastion host. This allows secure connectivity to sensitive resources within the VPC, while maintaining isolation from the public internet. You can leverage the outputted private key to establish a connection to the bastion host.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\nimport pulumi_awsx as awsx\r\n\r\nvpc = awsx.ec2.Vpc(\r\n    resource_name=f\"foo\",\r\n    enable_dns_hostnames=True,\r\n    number_of_availability_zones=2,\r\n    nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(\r\n        strategy=awsx.ec2.NatGatewayStrategy.NONE\r\n    ),\r\n    subnet_specs=[\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PUBLIC,\r\n        ),\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PRIVATE,\r\n        ),\r\n    ],\r\n)\r\n\r\n\r\ndb = nuage.aws.Bastion(\r\n    \"foo\",\r\n    name=\"bastion-host\",\r\n    vpc_id=my_vpc.id,\r\n    subnet_id=vpc.public_subnet_ids[0]\r\n)\r\n```\r\n{{% \/example %}}",
+            "inputProperties": {
+                "vpcId": {
+                    "type": "string",
+                    "description":"Vpc id."
+                },
+                "subnetId": {
+                    "type": "string",
+                    "description":"Public subnet id of the Vpc."
+                },
+                "sshPort": {
+                    "type": "number",
+                    "description":"Ssh port for bastion host. Defaults to 22"
+                }
+            },
+            "requiredInputs": [
+                "vpcId",
+                "subnetId"
+            ],
+            "properties": {
+                "public_ip": {
+                    "type": "string"
+                },
+                "private_key_pem": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "public_ip",
+                "private_key_pem"
+            ]
+        }    
+    },
+    "language": {
+        "csharp": {
+            "packageReferences": {
+                "Pulumi": "3.*",
+                "Pulumi.Aws": "5.*",
+                "Pulumi.Awsx":"1.0.0-beta.*",
+                "Pulumi.Docker":"3.*",
+                "Pulumi.Command":"4.6.0-alpha.*"
+            }
+        },
+        "go": {
+            "generateResourceContainerTypes": true,
+            "importBasePath": "github.com/pulumi/pulumi-nuage/sdk/go/nuage",
+            "respectSchemaVersion": true
+        },
+        "nodejs": {
+            "dependencies": {
+                "@pulumi/aws": "^5.0.0",
+                "@pulumi/awsx": "^0.40.0",
+                "@pulumi/docker": "^3.0.0",
+                "@pulumi/command": "^0.7.0"
+            },
+            "devDependencies": {
+                "@types/node": "^17.0.21",
+                "typescript": "^3.7.0"
+            },
+            "respectSchemaVersion": true
+        },
+        "python": {
+            "requires": {
+                "pulumi": ">=3.0.0,<4.0.0",
+                "pulumi-aws": ">=5.0.0,<6.0.0",
+                "pulumi-awsx": ">=1.0.0b11",
+                "pulumi_docker": ">=3.0.0,<4.0.0",
+                "pulumi-random": ">4.8.0",
+                "pulumi-command": ">=0.7.0"
+            },
+            "respectSchemaVersion": true
+        }
+    }
+}

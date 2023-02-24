@@ -135,7 +135,6 @@ dmypy.json
 sdk/**/bin/
 **/obj/
 **/node_modules/
-/provider/cmd/pulumi-resource-*/*/schema.json
 nuget/
 sdk/*/README.md
 .task/
