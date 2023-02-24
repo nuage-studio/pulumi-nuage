@@ -14,7 +14,7 @@ services:
     volumes:
       - ..:/workspace:cached
       # AWS credentials
-      - ~/.aws:/home/vscode/.aws:cached
+      #- ~/.aws:/home/vscode/.aws:cached
       # Pulumi credentials
       # - ~/.pulumi/credentials.json:/home/vscode/.pulumi/credentials.json:cached
       # Docker from Docker
