@@ -28,6 +28,6 @@ tasks:
   virtualenv:
     desc: Creates a Python virtualenv for the project
     cmds:
-      - python3.9 -m venv .venv
+      - python -m venv .venv
     status:
       - test -d .venv

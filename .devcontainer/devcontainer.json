@@ -1,0 +1,86 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "Pulumi Nuage",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workspace",
+    // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "vscode",
+    // Configure tool-specific properties.
+    "customizations": {
+      // Configure properties specific to VS Code.
+      "vscode": {
+        // Set *default* container specific settings.json values on container create.
+        "settings": {
+          "terminal.integrated.defaultProfile.linux": "zsh",
+          "isort.path": ["/usr/local/py-utils/venvs/poetry/bin/isort"],
+          "isort.args": ["--settings", "/workspace/pyproject.toml"],
+          "python.formatting.blackPath": "/usr/local/py-utils/venvs/poetry/bin/black",
+          "python.formatting.blackArgs": [
+            "--preview",
+            "--line-length",
+            "120",
+            "--config",
+            "/workspace/pyproject.toml"
+          ]
+        },
+        // Add the IDs of extensions you want installed when the container is created.
+        "extensions": [
+          // VSCode
+          "ms-python.python",
+          "ms-python.vscode-pylance",
+          "ms-azuretools.vscode-docker",
+          "visualstudioexptteam.vscodeintellicode",
+          "GitHub.copilot",
+          // AWS
+          "mark-tucker.aws-cli-configure",
+          "boto3typed.boto3-ide",
+          "amazonwebservices.aws-toolkit-vscode",
+          // 3rd party
+          "esbenp.prettier-vscode",
+          "christian-kohler.path-intellisense",
+          "davidanson.vscode-markdownlint",
+          "tamasfe.even-better-toml"
+        ]
+      }
+    },
+  
+    
+	"features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.10.8",
+      "installTools": false
+    },
+		"ghcr.io/devcontainers/features/aws-cli:1": {
+			"version": "latest"
+		},
+    "ghcr.io/eitsupi/devcontainer-features/go-task:1": {
+      "version": "3.20.0"
+    },
+		"ghcr.io/devcontainers-contrib/features/poetry:2": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers-contrib/features/pulumi:1": {
+			"bashCompletion": true,
+			"version": "latest"
+		}
+    
+	},
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "pip3 install --user -r requirements.txt",
+  "postCreateCommand": "poetry install"
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  devcontainer:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        # Update 'VARIANT' to pick a version of Python: 3, 3.10, 3.9, 3.8, 3.7, 3.6
+        # Append -bullseye or -buster to pin to an OS version.
+        # Use -bullseye variants on local arm64/Apple Silicon.
+        VARIANT: "3.10"
+    init: true
+    volumes:
+      - ..:/workspace:cached
+      # AWS credentials
+      - ~/.aws:/home/vscode/.aws:cached
+      # Pulumi credentials
+      - ~/.pulumi/credentials.json:/home/vscode/.pulumi/credentials.json:cached
+      # Docker from Docker
+      - /var/run/docker.sock:/var/run/docker-host.sock
+      # Ssh credentials for GitHub
+      - ~/.ssh:/home/vscode/.ssh:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
