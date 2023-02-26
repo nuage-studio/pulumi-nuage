@@ -275,7 +275,7 @@ class ContainerFunction(PrefixedComponentResource):
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
             aws.lambda_.Permission(
-                f"{resource_name}-keep warm",
+                f"{resource_name}-keep-warm",
                 action="lambda:InvokeFunction",
                 function=self.function.arn,
                 principal="events.amazonaws.com",
