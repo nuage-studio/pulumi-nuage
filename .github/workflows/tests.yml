@@ -12,6 +12,9 @@ jobs:
       - name: Checkout (GitHub)
         uses: actions/checkout@v3
 
+      - name: Create mount directories for the AWS and Pulumi
+        run: mkdir ~/.aws
+
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.2
         with:
