@@ -37,4 +37,5 @@ jobs:
             ls /home/vscode/.pulumi
           env: |
             PULUMI_ACCESS_TOKEN=${{ secrets.PULUMI_TOKEN }}
+            PULUMI_SOURCE_DIR=/dev/null
             PULUMI_MOUNT_DIR=./pulumi_empty
