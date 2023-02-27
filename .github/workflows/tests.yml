@@ -4,6 +4,8 @@ on: # rebuild any PRs and main branch changes
   push:
     branches:
       - main
+    paths:
+      - provider
 
 jobs:
   build:
@@ -22,7 +24,7 @@ jobs:
       - name: Create mount directories for the AWS and Pulumi
         run: mkdir ~/.aws
 
-      - name: Build and run Dev Container task
+      - name: Run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
           cacheFrom: ghcr.io/nuage-studio/pulumi-nuage
