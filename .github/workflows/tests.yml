@@ -22,7 +22,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create mount directories for the AWS and Pulumi
-        run: mkdir ~/.aws && mkdir ~/.pulumi && touch ~/.pulumi/credentials.json
+        run: mkdir ~/.aws && mkdir ~/.pulumi
 
       - name: Run Dev Container task
         uses: devcontainers/ci@v0.3
