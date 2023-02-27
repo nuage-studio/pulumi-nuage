@@ -7,6 +7,10 @@ on: # rebuild any PRs and main branch changes
     paths:
       - provider/**
 
+env:
+  PULUMI_SOURCE_DIR: /dev/null
+  PULUMI_MOUNT_DIR: ./pulumi_empty
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,5 +41,3 @@ jobs:
             ls /home/vscode/.pulumi
           env: |
             PULUMI_ACCESS_TOKEN=${{ secrets.PULUMI_TOKEN }}
-            PULUMI_SOURCE_DIR=/dev/null
-            PULUMI_MOUNT_DIR=./pulumi_empty
