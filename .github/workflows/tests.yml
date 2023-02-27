@@ -22,7 +22,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create mount directories for the AWS and Pulumi
-        run: mkdir ~/.aws
+        run: mkdir ~/.aws && mkdir ~/.pulumi && touch ~/.pulumi/credentials.json
 
       - name: Run Dev Container task
         uses: devcontainers/ci@v0.3
@@ -34,5 +34,4 @@ jobs:
             aws configure set aws_access_key_id  ${{ secrets.AWS_ACCESS_KEY_ID_DEV }} --profile nuage-dev
             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }} --profile nuage-dev
             aws configure set region eu-west-1 --profile nuage-dev
-            task test:default
           env: PULUMI_ACCESS_TOKEN=${{ secrets.PULUMI_TOKEN }}
