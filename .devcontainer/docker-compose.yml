@@ -14,11 +14,9 @@ services:
     volumes:
       - ..:/workspace:cached
       # AWS credentials
-      #- ~/.aws:/home/vscode/.aws:cached
+      - ~/.aws:/home/vscode/.aws:cached
       # Pulumi credentials
-      # - ~/.pulumi/credentials.json:/home/vscode/.pulumi/credentials.json:cached
-      # Docker from Docker
-      #- /var/run/docker.sock:/var/run/docker-host.sock
+      - ~/.pulumi/credentials.json:/home/vscode/.pulumi/credentials.json:cached
       # Ssh credentials for GitHub
       - ~/.ssh:/home/vscode/.ssh:cached
 
