@@ -30,7 +30,7 @@ jobs:
           cacheFrom: ghcr.io/nuage-studio/pulumi-nuage
           push: never
           runCmd: |
-            rm ~/.pulumi/credentials.json && pulumi login            
+            rm /home/vscode/.pulumi/credentials.json && pulumi login            
             aws configure set aws_access_key_id  ${{ secrets.AWS_ACCESS_KEY_ID_DEV }} --profile nuage-dev
             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }} --profile nuage-dev
             aws configure set region eu-west-1 --profile nuage-dev
