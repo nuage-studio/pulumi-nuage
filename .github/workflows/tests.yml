@@ -20,6 +20,8 @@ jobs:
         with:
           # Change this to point to your image name
           imageName: ghcr.io/nuage-studio/pulumi-nuage
+          cacheFrom: ghcr.io/nuage-studio/pulumi-nuage
+          push: always
           # Change this to be your CI task/script
           runCmd: |
             pulumi login            
