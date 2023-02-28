@@ -10,6 +10,16 @@ tasks:
     env:
       AWS_PROFILE: "nuage-dev"
       AWS_DEFAULT_REGION: "eu-west-1"
+      FULL_TEST: true
+  quick:
+    desc: Run python integration tests without db tests.
+    deps:
+      - install
+    cmds:
+      - poetry run pytest -k 'not TestDatabase' --capture=sys ./tests/ -s
+    env:
+      AWS_PROFILE: "nuage-dev"
+      AWS_DEFAULT_REGION: "eu-west-1"
 
   install:
     desc: Installs the Python dependencies
@@ -28,6 +38,6 @@ tasks:
   virtualenv:
     desc: Creates a Python virtualenv for the project
     cmds:
-      - python -m venv .venv
+      - python3.10 -m venv .venv
     status:
       - test -d .venv
