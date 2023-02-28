@@ -5,10 +5,7 @@ on: # rebuild any PRs and main branch changes
     branches:
       - main
     paths:
-      - provider/**
-
-env:
-  PULUMI_MOUNT_DIR: ./pulumi_empty
+      - provider/*
 
 jobs:
   build:
