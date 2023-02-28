@@ -2,6 +2,15 @@ version: "3"
 
 tasks:
   default:
+    desc: Run python integration tests without db tests.
+    deps:
+      - install
+    cmds:
+      - poetry run pytest -k 'not TestDatabase' --capture=sys ./tests/ -s
+    env:
+      AWS_PROFILE: "nuage-dev"
+      AWS_DEFAULT_REGION: "eu-west-1"
+  full:
     desc: Run python integration tests.
     deps:
       - install
@@ -11,15 +20,6 @@ tasks:
       AWS_PROFILE: "nuage-dev"
       AWS_DEFAULT_REGION: "eu-west-1"
       FULL_TEST: true
-  quick:
-    desc: Run python integration tests without db tests.
-    deps:
-      - install
-    cmds:
-      - poetry run pytest -k 'not TestDatabase' --capture=sys ./tests/ -s
-    env:
-      AWS_PROFILE: "nuage-dev"
-      AWS_DEFAULT_REGION: "eu-west-1"
 
   install:
     desc: Installs the Python dependencies
