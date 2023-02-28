@@ -1,7 +1,7 @@
 {
     "name": "nuage",
-    "version":"0.0.8",
-    "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
+    "version":"0.0.9",
+    "pluginDownloadURL": "github://api.github.com/nuage-studio/pulumi-nuage",
     "types": {
         "nuage:aws:ArchitectureType": {
             "type":"string",
