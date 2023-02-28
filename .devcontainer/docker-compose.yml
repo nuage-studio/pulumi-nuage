@@ -18,7 +18,7 @@ services:
       # AWS credentials
       - ~/.aws:/home/vscode/.aws:cached
       # Pulumi credentials, We set PULUMI_MOUNT_DIR to overwrite or ignore this.
-      - ~/.pulumi:${PULUMI_MOUNT_DIR:-/home/vscode/.pulumi}:cached
+      - ~/.pulumi:./pulumi_empty:cached
       # Ssh credentials for GitHub
       - ~/.ssh:/home/vscode/.ssh:cached
 
