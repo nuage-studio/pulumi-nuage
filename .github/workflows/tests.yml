@@ -9,7 +9,6 @@ on: # rebuild any PRs and main branch changes
 
 env:
   PULUMI_MOUNT_DIR: /home/vscode/.temp_pulumi
-  DOCKER_MOUNT_DIR: /var/run/docker.sock
 
 jobs:
   build:
