@@ -8,7 +8,7 @@ on: # rebuild any PRs and main branch changes
       - provider/**
 
 env:
-  PULUMI_MOUNT_DIR: ./pulumi_empty
+  PULUMI_MOUNT_DIR: /home/vscode/.temp_pulumi
 
 jobs:
   build:
