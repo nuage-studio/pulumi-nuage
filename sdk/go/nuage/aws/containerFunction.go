@@ -67,6 +67,10 @@ type containerFunctionArgs struct {
 	PolicyDocument *string `pulumi:"policyDocument"`
 	// Existing ECR repository name
 	RepositoryUrl string `pulumi:"repositoryUrl"`
+	// Expression for creating a cloudwatch event rule.
+	ScheduleExpression *string `pulumi:"scheduleExpression"`
+	// Input for cloudwatch event target.
+	ScheduleInput map[string]string `pulumi:"scheduleInput"`
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout *int `pulumi:"timeout"`
 	// Use Lambda URL. Defaults to `false`
@@ -99,6 +103,10 @@ type ContainerFunctionArgs struct {
 	PolicyDocument pulumi.StringPtrInput
 	// Existing ECR repository name
 	RepositoryUrl pulumi.StringInput
+	// Expression for creating a cloudwatch event rule.
+	ScheduleExpression pulumi.StringPtrInput
+	// Input for cloudwatch event target.
+	ScheduleInput pulumi.StringMapInput
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout pulumi.IntPtrInput
 	// Use Lambda URL. Defaults to `false`

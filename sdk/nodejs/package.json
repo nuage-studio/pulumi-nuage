@@ -1,9 +1,9 @@
 {
     "name": "@pulumi/nuage",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "scripts": {
         "build": "tsc",
-        "install": "node scripts/install-pulumi-plugin.js resource nuage 0.0.8"
+        "install": "node scripts/install-pulumi-plugin.js resource nuage 0.0.9"
     },
     "dependencies": {
         "@pulumi/aws": "^5.0.0",
@@ -19,8 +19,8 @@
         "@pulumi/pulumi": "latest"
     },
     "pulumi": {
-        "version": "0.0.8",
+        "version": "0.0.9",
         "resource": true,
-        "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage"
+        "pluginDownloadURL": "github://api.github.com/nuage-studio/pulumi-nuage"
     }
 }

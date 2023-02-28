@@ -55,6 +55,8 @@ export class ContainerFunction extends pulumi.ComponentResource {
             resourceInputs["namePrefix"] = args ? args.namePrefix : undefined;
             resourceInputs["policyDocument"] = args ? args.policyDocument : undefined;
             resourceInputs["repositoryUrl"] = args ? args.repositoryUrl : undefined;
+            resourceInputs["scheduleExpression"] = args ? args.scheduleExpression : undefined;
+            resourceInputs["scheduleInput"] = args ? args.scheduleInput : undefined;
             resourceInputs["timeout"] = args ? args.timeout : undefined;
             resourceInputs["urlEnabled"] = args ? args.urlEnabled : undefined;
             resourceInputs["arn"] = undefined /*out*/;
@@ -123,6 +125,14 @@ export interface ContainerFunctionArgs {
      * Existing ECR repository name
      */
     repositoryUrl: pulumi.Input<string>;
+    /**
+     * Expression for creating a cloudwatch event rule.
+     */
+    scheduleExpression?: pulumi.Input<string>;
+    /**
+     * Input for cloudwatch event target.
+     */
+    scheduleInput?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
     /**
      * Amount of time your Lambda Function has to run in seconds. Defaults to `3`
      */

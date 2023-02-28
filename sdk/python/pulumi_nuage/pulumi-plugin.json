@@ -1,6 +1,6 @@
 {
   "resource": true,
   "name": "nuage",
-  "version": "0.0.8",
-  "server": "github://api.github.com/nuage/pulumi-nuage"
+  "version": "0.0.9",
+  "server": "github://api.github.com/nuage-studio/pulumi-nuage"
 }

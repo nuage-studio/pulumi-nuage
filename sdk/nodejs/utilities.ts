@@ -50,5 +50,5 @@ export function getVersion(): string {
 
 /** @internal */
 export function resourceOptsDefaults(): any {
-    return { version: getVersion(), pluginDownloadURL: "github://api.github.com/nuage/pulumi-nuage" };
+    return { version: getVersion(), pluginDownloadURL: "github://api.github.com/nuage-studio/pulumi-nuage" };
 }
