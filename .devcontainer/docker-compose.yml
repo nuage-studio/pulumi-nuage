@@ -19,6 +19,8 @@ services:
       - ~/.pulumi:${PULUMI_MOUNT_DIR:-/home/vscode/.pulumi}:cached
       # Ssh credentials for GitHub
       - ~/.ssh:/home/vscode/.ssh:cached
+      # Docker from Docker
+      - /var/run/docker.sock:/var/run/docker-host.sock
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
