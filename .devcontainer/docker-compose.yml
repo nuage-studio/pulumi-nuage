@@ -11,6 +11,8 @@ services:
         # Use -bullseye variants on local arm64/Apple Silicon.
         VARIANT: "3.10"
     init: true
+    environment:
+      - PULUMI_MOUNT_DIR: ${PULUMI_MOUNT_DIR}
     volumes:
       - ..:/workspace:cached
       # AWS credentials
