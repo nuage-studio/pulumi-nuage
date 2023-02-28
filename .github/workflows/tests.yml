@@ -2,7 +2,7 @@ name: "integration-tests"
 on: # rebuild any PRs and main branch changes
   pull_request:
     branches:
-      - main
+      - master
     paths:
       - provider/**
 
