@@ -1,6 +1,6 @@
 name: "integration-tests"
 on: # rebuild any PRs and main branch changes
-  push:
+  pull_request:
     branches:
       - main
     paths:
