@@ -1,6 +1,7 @@
 {
     "name": "nuage",
     "version":"0.0.8",
+    "license": "Apache-2.0",
     "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
     "types": {
         "nuage:aws:ArchitectureType": {
@@ -39,19 +40,24 @@
             ],
             "properties": {
                 "registry_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Registry id of the repository"
                 },
                 "arn": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"ARN (Amazon Resource Name) of the repository"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Id of the repository"
                 },
                 "url": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"URL of the repository"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Name of the repository"
                 }
             },
             "required": [
@@ -120,7 +126,7 @@
                 },
                 "logRetentionInDays": {
                     "type": "integer",
-                    "description":"Number of days for log retention to pass in cloudwatch log group.."
+                    "description":"Number of days for log retention to pass in cloudwatch log group. Defaults to `90`"
                 },
                 "scheduleExpression": {
                     "type": "string",
@@ -136,16 +142,20 @@
             ],
             "properties": {
                 "arn": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"ARN (Amazon Resource Name) of the Lambda Function."
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Name of the Lambda Function."
                 },
                 "url": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Lambda Function URL (Only valid if `urlEnabled` is used)."
                 },
                 "image_uri": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Image URI of pushed Docker Image."
                 }
             },
             "required": [
@@ -210,31 +220,40 @@
             ],
             "properties": {
                 "user": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Username of DB credentials."
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Password of DB credentials"
                 },
                 "host": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Host address of DB server"
                 },
                 "port": {
-                    "type": "number"
+                    "type": "number",
+                    "description":"Port number of DB"
                 },
                 "database_name": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Name of the database"
                 },
                 "cluster_arn": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"ARN (Amazon Resource Name) of the RDS cluster."
                 },
                 "uri": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Database URI for connection."
                 },
                 "bastion_ip": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"IP address of the bastion host. Exists only if `bastionEnabled` is true."
                 },
                 "bastion_private_key": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Private key to connect bastion host over SSH. Exists only if `bastionEnabled` is true."
                 }
             },
             "required": [
