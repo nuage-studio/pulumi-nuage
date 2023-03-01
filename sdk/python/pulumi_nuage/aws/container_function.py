@@ -25,6 +25,8 @@ class ContainerFunctionArgs:
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
+                 schedule_expression: Optional[pulumi.Input[str]] = None,
+                 schedule_input: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
                  url_enabled: Optional[pulumi.Input[bool]] = None):
         """
@@ -41,6 +43,8 @@ class ContainerFunctionArgs:
         :param pulumi.Input[str] name: Name of the resource.
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
+        :param pulumi.Input[str] schedule_expression: Expression for creating a cloudwatch event rule.
+        :param pulumi.Input[Mapping[str, pulumi.Input[str]]] schedule_input: Input for cloudwatch event target.
         :param pulumi.Input[int] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
         :param pulumi.Input[bool] url_enabled: Use Lambda URL. Defaults to `false`
         """
@@ -67,6 +71,10 @@ class ContainerFunctionArgs:
             pulumi.set(__self__, "name_prefix", name_prefix)
         if policy_document is not None:
             pulumi.set(__self__, "policy_document", policy_document)
+        if schedule_expression is not None:
+            pulumi.set(__self__, "schedule_expression", schedule_expression)
+        if schedule_input is not None:
+            pulumi.set(__self__, "schedule_input", schedule_input)
         if timeout is not None:
             pulumi.set(__self__, "timeout", timeout)
         if url_enabled is not None:
@@ -217,6 +225,30 @@ class ContainerFunctionArgs:
         pulumi.set(self, "policy_document", value)
 
     @property
+    @pulumi.getter(name="scheduleExpression")
+    def schedule_expression(self) -> Optional[pulumi.Input[str]]:
+        """
+        Expression for creating a cloudwatch event rule.
+        """
+        return pulumi.get(self, "schedule_expression")
+
+    @schedule_expression.setter
+    def schedule_expression(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "schedule_expression", value)
+
+    @property
+    @pulumi.getter(name="scheduleInput")
+    def schedule_input(self) -> Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]]:
+        """
+        Input for cloudwatch event target.
+        """
+        return pulumi.get(self, "schedule_input")
+
+    @schedule_input.setter
+    def schedule_input(self, value: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]]):
+        pulumi.set(self, "schedule_input", value)
+
+    @property
     @pulumi.getter
     def timeout(self) -> Optional[pulumi.Input[int]]:
         """
@@ -258,6 +290,8 @@ class ContainerFunction(pulumi.ComponentResource):
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
                  repository_url: Optional[pulumi.Input[str]] = None,
+                 schedule_expression: Optional[pulumi.Input[str]] = None,
+                 schedule_input: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
                  url_enabled: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
@@ -304,6 +338,8 @@ class ContainerFunction(pulumi.ComponentResource):
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
         :param pulumi.Input[str] repository_url: Existing ECR repository name
+        :param pulumi.Input[str] schedule_expression: Expression for creating a cloudwatch event rule.
+        :param pulumi.Input[Mapping[str, pulumi.Input[str]]] schedule_input: Input for cloudwatch event target.
         :param pulumi.Input[int] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
         :param pulumi.Input[bool] url_enabled: Use Lambda URL. Defaults to `false`
         """
@@ -369,6 +405,8 @@ class ContainerFunction(pulumi.ComponentResource):
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
                  repository_url: Optional[pulumi.Input[str]] = None,
+                 schedule_expression: Optional[pulumi.Input[str]] = None,
+                 schedule_input: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
                  url_enabled: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
@@ -401,6 +439,8 @@ class ContainerFunction(pulumi.ComponentResource):
             if repository_url is None and not opts.urn:
                 raise TypeError("Missing required property 'repository_url'")
             __props__.__dict__["repository_url"] = repository_url
+            __props__.__dict__["schedule_expression"] = schedule_expression
+            __props__.__dict__["schedule_input"] = schedule_input
             __props__.__dict__["timeout"] = timeout
             __props__.__dict__["url_enabled"] = url_enabled
             __props__.__dict__["arn"] = None
