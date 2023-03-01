@@ -20,7 +20,6 @@ from pulumi import Inputs, ResourceOptions
 from pulumi.provider import ConstructResult
 
 import nuage_provider
-from nuage_provider.bucket_nuage import bucket_nuage
 from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
 from nuage_provider.repository import Repository, RepositoryArgs
 from nuage_provider.serverless_database import (
@@ -42,9 +41,7 @@ class Provider(provider.Provider):
         options: Optional[ResourceOptions] = None,
     ) -> ConstructResult:
 
-        if resource_type == "nuage:aws:bucket_nuage":
-            return _create_bucket(name, inputs, options)
-        elif resource_type == "nuage:aws:ContainerFunction":
+        if resource_type == "nuage:aws:ContainerFunction":
             return _create_container(name, inputs, options)
         elif resource_type == "nuage:aws:Repository":
             return _create_repository(name, inputs, options)
@@ -125,17 +122,4 @@ def _create_container(
             "image_uri": created_container.image_uri,
             "url": created_container.url,
         },
-    )
-
-
-def _create_bucket(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-) -> ConstructResult:
-
-    # Create the component resource
-    created_bucket = bucket_nuage(name, dict(inputs), options)
-
-    # Return the component resource's URN and outputs as its state.
-    return provider.ConstructResult(
-        urn=created_bucket.urn, state={"bucket": created_bucket.bucket}
     )
