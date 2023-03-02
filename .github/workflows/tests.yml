@@ -8,7 +8,6 @@ on: # rebuild any PRs and main branch changes
 
 env:
   PULUMI_MOUNT_DIR: /home/vscode/.temp_pulumi
-  AWS_MOUNT_DIR: /home/vscode/.temp_aws
 
 jobs:
   build:
