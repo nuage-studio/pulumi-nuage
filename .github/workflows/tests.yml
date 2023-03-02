@@ -26,11 +26,11 @@ jobs:
 
       - name: Run Dev Container task
         uses: devcontainers/ci@v0.3
-        options: --user root
         with:
           cacheFrom: ghcr.io/nuage-studio/pulumi-nuage
           push: never
           runCmd: |
+            sudo chown -R $USER:$USER ~/.aws
             pulumi login            
             aws configure set aws_access_key_id  ${{ secrets.AWS_ACCESS_KEY_ID_DEV }} --profile nuage-dev
             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }} --profile nuage-dev
