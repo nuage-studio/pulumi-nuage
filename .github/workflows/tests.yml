@@ -24,9 +24,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create mount directories for the AWS and Pulumai
-        run: mkdir ~/.aws
-
       - name: Run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
