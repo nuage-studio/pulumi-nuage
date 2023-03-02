@@ -1,7 +1,8 @@
 version: "3"
 
 tasks:
-  default:
+  test:
+    aliases: [default]
     desc: Run python integration tests without db tests.
     deps:
       - install
