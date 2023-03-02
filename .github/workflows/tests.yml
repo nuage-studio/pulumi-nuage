@@ -26,6 +26,7 @@ jobs:
 
       - name: Run Dev Container task
         uses: devcontainers/ci@v0.3
+        options: --user root
         with:
           cacheFrom: ghcr.io/nuage-studio/pulumi-nuage
           push: never
