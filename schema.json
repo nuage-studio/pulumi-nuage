@@ -22,6 +22,7 @@
     "resources": {
         "nuage:aws:Repository": {
             "isComponent": true,
+            "description":"Creates ECR Repository with a lifecycle policy. `url` output of this component can be used within container function to push your images.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "name": {
                     "type": "string",
