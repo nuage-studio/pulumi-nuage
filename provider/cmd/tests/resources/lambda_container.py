@@ -4,6 +4,7 @@ from constants import LAMBDA
 # Import pulumi provider methods.
 from .ecr import repository
 from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
+from nuage_provider.models import ScheduleConfig
 
 # Lambda Container
 function = ContainerFunction(
@@ -22,8 +23,10 @@ function = ContainerFunction(
         policy_document=None,
         keep_warm=True,
         url_enabled=False,
-        schedule_expression=None,
-        schedule_input=None,
+        schedule_config=ScheduleConfig(
+            schedule_expression="rate(5 minutes)",
+            schedule_input=None,
+        ),
         log_retention_in_days=90,
     ),
     opts=pulumi.ResourceOptions(parent=repository),

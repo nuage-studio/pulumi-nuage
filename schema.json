@@ -3,6 +3,23 @@
     "version":"0.0.8",
     "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
     "types": {
+        "nuage:aws:getFunctionScheduleConfig": {
+            "properties": {
+                "scheduleExpression": {
+                    "type": "string",
+                    "description":"Expression for creating a cloudwatch event rule."
+                },                      
+                "scheduleInput": {
+                    "type": "object",
+                    "description":"Input for cloudwatch event target."
+                }
+            },
+            "type": "object",
+            "required": [
+                "scheduleExpression",
+                "scheduleInput"
+            ]
+        },
         "nuage:aws:ArchitectureType": {
             "type":"string",
             "description":"Architecture, either 'X86_64' or 'arm64'.",
@@ -134,13 +151,9 @@
                     "type": "integer",
                     "description":"Number of days for log retention to pass in cloudwatch log group.."
                 },
-                "scheduleExpression": {
-                    "type": "string",
-                    "description":"Expression for creating a cloudwatch event rule."
-                },                      
-                "scheduleInput": {
-                    "type": "object",
-                    "description":"Input for cloudwatch event target."
+                "scheduleConfig":{
+                    "$ref": "#/types/nuage:aws:getFunctionScheduleConfig",
+                    "description": "Configure the function's cloudwatch event rule schedule."
                 }
             },
             "requiredInputs": [     

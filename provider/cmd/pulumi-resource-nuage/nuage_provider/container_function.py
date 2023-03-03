@@ -27,6 +27,7 @@ from .prefixed_component_resource import (
     PrefixedComponentResource,
     PrefixedComponentResourceArgs,
 )
+from .models import ScheduleConfig
 
 
 class Architecture(IntEnum):
@@ -63,12 +64,13 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     url_enabled: pulumi.Input[bool]
     log_retention_in_days: pulumi.Input[int]
     # Schedule
-    schedule_expression: Optional[pulumi.Input[str]]
-    schedule_input: Optional[pulumi.Input[Dict[str, pulumi.Input[Any]]]]
+    schedule_config: Optional[pulumi.Input[ScheduleConfig]]
     # cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ContainerFunctionArgs":
+        schedule_config = inputs.get("scheduleConfig", None)
+
         return ContainerFunctionArgs(
             name=inputs.get("name", None),
             name_prefix=inputs.get("namePrefix", None),
@@ -84,8 +86,9 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             keep_warm=inputs.get("keepWarm", False),
             url_enabled=inputs.get("urlEnabled", False),
             log_retention_in_days=int(inputs.get("logRetentionInDays", 90)),
-            schedule_expression=inputs.get("scheduleExpression", None),
-            schedule_input=inputs.get("scheduleInput", None),
+            schedule_config=ScheduleConfig.from_inputs(schedule_config)
+            if schedule_config
+            else None,
             # cors_configuration = None,#inputs['corsConfiguration'],
         )
 
@@ -290,11 +293,13 @@ class ContainerFunction(PrefixedComponentResource):
                 opts=pulumi.ResourceOptions(parent=rule),
             )
 
-        if args.schedule_expression:
+        if args.schedule_config:
+            print("IAMHERE and ")
+            print(args.schedule_config)
             schedule_rule = aws.cloudwatch.EventRule(
                 resource_name=f"{resource_name}-schedule",
                 name=self.get_suffixed_name("schedule"),
-                schedule_expression=args.schedule_expression,
+                schedule_expression=args.schedule_config.schedule_expression,
                 description=args.description,
                 opts=pulumi.ResourceOptions(parent=self),
             )
@@ -303,7 +308,7 @@ class ContainerFunction(PrefixedComponentResource):
                 resource_name=f"{resource_name}-schedule",
                 arn=self.function.arn,
                 rule=schedule_rule.id,
-                input=json.dumps(args.schedule_input or {}),
+                input=json.dumps(args.schedule_config.schedule_input or {}),
                 opts=pulumi.ResourceOptions(parent=schedule_rule),
             )
 
