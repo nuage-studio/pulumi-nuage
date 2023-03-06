@@ -21,7 +21,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_docker as docker
 from pulumi_command import local
-from pulumi_docker import DockerBuild, CacheFrom
+
 from .prefixed_component_resource import (
     PrefixedComponentResource,
     PrefixedComponentResourceArgs,
@@ -29,19 +29,21 @@ from .prefixed_component_resource import (
 
 
 @dataclass
-class ImageArgs(PrefixedComponentResourceArgs):
-    args: Optional[pulumi.Input[Dict[str, str]]]
-    cache_from: pulumi.Input[CacheFrom]
-    context: Optional[pulumi.Input[str]]
-    dockerfile: Optional[pulumi.Input[str]]
-    env: Optional[pulumi.Input[Dict[str, str]]]
-    extra_options: Optional[pulumi.Input[List[str]]]
-    target: Optional[pulumi.Input[str]]
+class ImageArgs:
+    args: pulumi.Input[docker.docker.DockerBuild]
+    repository_url: pulumi.Input[str]
+    # args: Optional[pulumi.Input[Dict[str, str]]] = None
+    # cache_from: Optional[pulumi.Input[docker.CacheFrom]] = None
+    # context: Optional[pulumi.Input[str]] = None
+    # dockerfile: Optional[pulumi.Input[str]] = None
+    # env: Optional[pulumi.Input[Dict[str, str]]] = None
+    # extra_options: Optional[pulumi.Input[List[str]]] = None
+    # target: Optional[pulumi.Input[str]] = None
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ImageArgs":
         return ImageArgs(
-            args=DockerBuild(
+            args=docker.docker.DockerBuild(
                 args=inputs.get("args", None),
                 cache_from=inputs.get("cacheFrom", None),
                 context=inputs.get("context", None),
@@ -49,11 +51,12 @@ class ImageArgs(PrefixedComponentResourceArgs):
                 env=inputs.get("env", None),
                 extra_options=inputs.get("extraOptions", []),
                 target=inputs.get("target", None),
-            )
+            ),
+            repository_url=inputs.get("repositoryUrl", None),
         )
 
 
-class Image(PrefixedComponentResource):
+class Image(pulumi.ComponentResource):
     name: pulumi.Output[str]
     uri: pulumi.Output[str]
 
@@ -64,27 +67,31 @@ class Image(PrefixedComponentResource):
         props: Optional[dict] = None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ) -> None:
+        super().__init__("nuage:aws:Image", resource_name, props, opts)
 
-        super().__init__("nuage:aws:Image", resource_name, args, props, opts)
-        if "--platform" not in args.extra_options:
-            args.extra_options += ["--platform", "linux/amd64"]
-        if "--quiet" not in args.extra_options:
-            args.extra_options.append("--quiet")
+        docker_args: docker.docker.DockerBuild = args.args
+
+        if not docker_args.extra_options:
+            docker_args.extra_options = []
+        if "--platform" not in docker_args.extra_options:
+            docker_args.extra_options += ["--platform", "linux/amd64"]
+        if "--quiet" not in docker_args.extra_options:
+            docker_args.extra_options.append("--quiet")
 
         if os.getenv("GITHUB_ACTIONS"):
             # If we're running on a GitHub Actions runner, enable Caching API
             extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
 
-        if args.dockerfile:
+        if docker_args.dockerfile:
             # Use specified dockerfile.
             build = docker.DockerBuild(
-                context=args.context or "./",
-                dockerfile=args.dockerfile,
-                extra_options=extra_options,
-                target=args.target,
-                env=args.env,
-                cache_from=args.cache_from,
-                args=args.args,
+                context=docker_args.context or "./",
+                dockerfile=docker_args.dockerfile,
+                extra_options=docker_args.extra_options,
+                target=docker_args.target,
+                env=docker_args.env,
+                cache_from=docker_args.cache_from,
+                args=docker_args.args,
             )
             image_ignore_changes = []
         else:
@@ -111,16 +118,14 @@ class Image(PrefixedComponentResource):
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
 
         self.image_uri = pulumi.Output.all(
-            url=args.repository_url, name=self.name_
+            url=args.repository_url, name=resource_name
         ).apply(lambda args: f"{args['url']}:{args['name']}")
         # Build and Push docker Image.
         image = docker.Image(
             resource_name,
             build=build,
             image_name=self.image_uri,
-            local_image_name=self.name_.apply(
-                lambda name: f"{pulumi.get_organization()}:{name}"
-            ),
+            local_image_name=f"{pulumi.get_organization()}:{resource_name}",
             registry=docker.ImageRegistry(
                 server=auth.proxy_endpoint,
                 username=auth.user_name,

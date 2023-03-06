@@ -68,6 +68,18 @@
             },
             "type": "object"
         },
+        "nuage:aws:Image": {
+            "properties": {
+                "args": {
+                    "$ref": "/docker/v3.6.1/schema.json#/types/docker:index/dockerBuild:DockerBuild",
+                    "description": "ImageBuildArgs"
+                }
+            },
+            "type": "object",
+            "required": [
+                "args"
+            ]
+        },
         "nuage:aws:FunctionSchedule": {
             "properties": {
                 "scheduleExpression": {
