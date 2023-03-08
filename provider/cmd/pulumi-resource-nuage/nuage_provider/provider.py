@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from typing import Optional
-from venv import create
 
 import pulumi.provider as provider
 from pulumi import Inputs, ResourceOptions
@@ -23,6 +22,7 @@ import nuage_provider
 from nuage_provider.bucket_nuage import bucket_nuage
 from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
 from nuage_provider.repository import Repository, RepositoryArgs
+from nuage_provider.image import Image, ImageArgs
 from nuage_provider.serverless_database import (
     ServerlessDatabase,
     ServerlessDatabaseArgs,
@@ -52,6 +52,8 @@ class Provider(provider.Provider):
             return _create_database(name, inputs, options)
         elif resource_type == "nuage:aws:Bastion":
             return _create_bastion(name, inputs, options)
+        elif resource_type == "nuage:aws:Image":
+            return _create_image(name, inputs, options)
 
         raise Exception(f"Unknown resource type {resource_type}")
 
@@ -107,6 +109,14 @@ def _create_repository(
             "url": created_repository.url,
             "registry_id": created_repository.registry_id,
         },
+    )
+
+
+def _create_image(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None):
+    created_image = Image(name, ImageArgs.from_inputs(inputs), dict(inputs), options)
+    return provider.ConstructResult(
+        urn=created_image.urn,
+        state={"name": created_image.name, "uri": created_image.uri},
     )
 
 

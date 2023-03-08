@@ -15,44 +15,23 @@
 import os
 import tempfile
 from dataclasses import dataclass
-from typing import Any, List, Dict, Optional
+from typing import Any, Dict, Optional
 
 import pulumi
 import pulumi_aws as aws
 import pulumi_docker as docker
 from pulumi_command import local
 
-from .prefixed_component_resource import (
-    PrefixedComponentResource,
-    PrefixedComponentResourceArgs,
-)
-
 
 @dataclass
 class ImageArgs:
     args: pulumi.Input[docker.docker.DockerBuild]
     repository_url: pulumi.Input[str]
-    # args: Optional[pulumi.Input[Dict[str, str]]] = None
-    # cache_from: Optional[pulumi.Input[docker.CacheFrom]] = None
-    # context: Optional[pulumi.Input[str]] = None
-    # dockerfile: Optional[pulumi.Input[str]] = None
-    # env: Optional[pulumi.Input[Dict[str, str]]] = None
-    # extra_options: Optional[pulumi.Input[List[str]]] = None
-    # target: Optional[pulumi.Input[str]] = None
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ImageArgs":
         return ImageArgs(
-            args=docker.docker.DockerBuild(
-                args=inputs.get("args", None),
-                cache_from=inputs.get("cacheFrom", None),
-                context=inputs.get("context", None),
-                dockerfile=inputs.get("dockerfile", None),
-                env=inputs.get("env", None),
-                extra_options=inputs.get("extraOptions", []),
-                target=inputs.get("target", None),
-            ),
-            repository_url=inputs.get("repositoryUrl", None),
+            args=inputs.get("args"), repository_url=inputs.get("repositoryUrl")
         )
 
 
