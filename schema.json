@@ -2,6 +2,13 @@
     "name": "nuage",
     "version":"0.0.8",
     "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
+    "keywords": [
+        "pulumi",
+        "aws",
+        "nuage",
+        "kind/component",
+        "category/cloud"
+    ],
     "types": {
         "nuage:aws:FunctionSchedule": {
             "properties": {
@@ -74,6 +81,7 @@
     "resources": {
         "nuage:aws:Image": {
             "isComponent": true,
+            "description":"Provides a resource to manage build and deployment of Docker builds. It automatically builds the Docker image and pushes it to the specified repository.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\nimage = nuage.aws.Image(\r\n    \"foo\",\r\n    build_args=nuage.aws.DockerBuildArgs(\r\n        dockerfile=\"../api/Dockerfile\",\r\n        context=\"../\"\r\n    ),\r\n    repository_url=repository.url,\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {   
                 "buildArgs":{
                     "$ref": "#/types/nuage:aws:DockerBuild",
@@ -158,7 +166,7 @@
         },
         "nuage:aws:ContainerFunction": {
             "isComponent": true,
-            "description":"Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    repository_url=repository.url,    \r\n    architecture=\"X86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90\r\n)\r\n```\r\n{{% \/example %}}",
+            "description":"Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature for schedule (cron) definitions and automated X-Ray tracing.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\nimage = nuage.aws.Image(\r\n    \"foo\",\r\n    build_args=nuage.aws.DockerBuildArgs(\r\n        dockerfile=\"../api/Dockerfile\",\r\n        context=\"../\"\r\n    ),\r\n    repository_url=repository.url,\r\n)\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    image_uri=image.uri,\r\n    architecture=\"X86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90,\r\n    schedule_config=nuage.aws.FunctionScheduleArgs(\r\n        schedule_expression=\"rate(5 minutes)\"\r\n    ),\r\n)\r\n```\r\n{{% \/example %}}\r\n\r\n{{% example %}}\r\n### Custom Policy Document Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\npolicy_doc = aws.iam.get_policy_document(\r\n    version=\"2012-10-17\",\r\n    statements=[\r\n        aws.iam.GetPolicyDocumentStatementArgs(\r\n            effect=\"Allow\",\r\n            actions=[\"s3:*\"],\r\n            resources=[\r\n                bucket.arn\r\n            ],\r\n        ),\r\n    ],\r\n).json\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    image_uri=image.uri,\r\n    architecture=\"X86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90,\r\n    schedule_config=nuage.aws.FunctionScheduleArgs(\r\n        schedule_expression=\"rate(5 minutes)\"\r\n    ),\r\n    policy_document=policy_doc\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "name": {
                     "type": "string",
