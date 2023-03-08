@@ -19,6 +19,43 @@
                 "scheduleExpression"
             ]
         },
+        "nuage:aws:DockerBuild": {
+            "properties": {
+                "context": {
+                    "type": "string",
+                    "description": "The path to the build context to use."
+                },
+                "dockerfile": {
+                    "type": "string",
+                    "description": "The path to the Dockerfile to use."
+                },
+                "env": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "Environment variables to set on the invocation of docker build, for example to support DOCKER_BUILDKIT=1 docker build."
+                },
+                "extraOptions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "A bag of extra options to pass on to the docker SDK."
+                },
+                "target": {
+                    "type": "string",
+                    "description": "The target of the Dockerfile to build"
+                },
+                "architecture": {
+                    "description":"Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`",                    
+                    "type":"string"
+                }
+            },
+            "type": "object",
+            "required": [
+            ]
+        },
         "nuage:aws:ArchitectureType": {
             "type":"string",
             "description":"Architecture, either 'X86_64' or 'arm64'.",
@@ -36,18 +73,19 @@
     },
     "resources": {
         "nuage:aws:Image": {
+            "isComponent": true,
             "inputProperties": {   
-                "args": {
-                    "$ref": "/docker/v4.0.0-alpha.2/schema.json#/types/docker:index/dockerBuild:DockerBuild",
-                    "description": "ImageBuildArgs"
-                },                
+                "buildArgs":{
+                    "$ref": "#/types/nuage:aws:DockerBuild",
+                    "description": "Docker build arguments of the image."
+                },               
                 "repositoryUrl": {
                     "type": "string",
-                    "description":"repository url"
+                    "description":"Url of the repository."
                 }             
             },
             "requiredInputs": [    
-                "args",
+                "buildArgs",
                 "repositoryUrl"            
             ],
             "properties": {
@@ -133,23 +171,15 @@
                 "description": {
                     "type": "string",
                     "description":"Description of the function."
-                },
-                "dockerfile": {
+                },                
+                "imageUri": {
                     "type": "string",
-                    "description":"Dockerfile path. Defaults to `./Dockerfile`"
-                },
-                "context": {
-                    "type": "string",
-                    "description":"Dockerfile context path."
-                },
-                "repositoryUrl": {
-                    "type": "string",
-                    "description":"Existing ECR repository name"
-                },
+                    "description":"Image uri of the docker image."
+                },                       
                 "architecture": {
                     "description":"Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`",                    
                     "type":"string"
-                },
+                },         
                 "memorySize": {
                     "type": "integer",
                     "description":"Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`."
@@ -184,7 +214,7 @@
                 }
             },
             "requiredInputs": [     
-                "repositoryUrl"           
+                "imageUri"           
             ],
             "properties": {
                 "arn": {
@@ -195,15 +225,11 @@
                 },
                 "url": {
                     "type": "string"
-                },
-                "image_uri": {
-                    "type": "string"
                 }
             },
             "required": [
                 "arn",
-                "name",
-                "image_uri"
+                "name"
             ]
         },
         "nuage:aws:ServerlessDatabase": {

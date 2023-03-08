@@ -27,34 +27,13 @@ from .prefixed_component_resource import (
     PrefixedComponentResource,
     PrefixedComponentResourceArgs,
 )
-from .models import ScheduleConfig
-
-
-class Architecture(IntEnum):
-    """CPU architecture & instruction set to use"""
-
-    X86_64 = 1
-    ARM64 = 2
-
-    @property
-    def lambda_value(self) -> str:
-        """AWS Lambda value for the `architectures` argument"""
-        mapping = {self.X86_64.value: "x86_64", self.ARM64.value: "arm64"}
-        return mapping[self.value]
-
-    @property
-    def docker_value(self) -> str:
-        """Docker value for the `--platform` flag"""
-        mapping = {self.X86_64.value: "linux/amd64", self.ARM64.value: "linux/arm64"}
-        return mapping[self.value]
+from .models import Architecture, ScheduleConfig
 
 
 @dataclass
 class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     description: Optional[pulumi.Input[str]]
-    dockerfile: Optional[pulumi.Input[str]]
-    context: Optional[pulumi.Input[str]]
-    repository_url: pulumi.Input[str]
+    image_uri: pulumi.Input[str]
     architecture: Optional[str]
     memory_size: Optional[pulumi.Input[int]]
     timeout: Optional[pulumi.Input[int]]
@@ -75,9 +54,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             name=inputs.get("name", None),
             name_prefix=inputs.get("namePrefix", None),
             description=inputs.get("description", None),
-            dockerfile=inputs.get("dockerfile", None),
-            context=inputs.get("context", None),
-            repository_url=inputs.get("repositoryUrl"),
+            image_uri=inputs.get("imageUri"),
             architecture=inputs.get("architecture", "X86_64"),
             memory_size=int(inputs.get("memorySize", 512)),
             timeout=int(inputs.get("timeout", 3)),
@@ -86,9 +63,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             keep_warm=inputs.get("keepWarm", False),
             url_enabled=inputs.get("urlEnabled", False),
             log_retention_in_days=int(inputs.get("logRetentionInDays", 90)),
-            schedule_config=ScheduleConfig.from_inputs(schedule_config)
-            if schedule_config
-            else None,
+            schedule_config=ScheduleConfig.from_inputs(schedule_config) if schedule_config else None,
             # cors_configuration = None,#inputs['corsConfiguration'],
         )
 
@@ -96,7 +71,6 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
 class ContainerFunction(PrefixedComponentResource):
     arn: pulumi.Output[str]
     name: pulumi.Output[str]
-    image_uri: pulumi.Output[str]
     url: Optional[pulumi.Output[str]]
 
     def __init__(
@@ -106,81 +80,8 @@ class ContainerFunction(PrefixedComponentResource):
         props: Optional[dict] = None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ) -> None:
-
-        super().__init__(
-            "nuage:aws:ContainerFunction", resource_name, args, props, opts
-        )
+        super().__init__("nuage:aws:ContainerFunction", resource_name, args, props, opts)
         architecture = Architecture[args.architecture]
-
-        extra_options = ["--platform", architecture.docker_value, "--quiet"]
-        if os.getenv("GITHUB_ACTIONS"):
-            # If we're running on a GitHub Actions runner, enable Caching API
-            extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
-
-        if args.dockerfile:
-            # Use specified dockerfile.
-            build = docker.DockerBuild(
-                context=args.context or "./",
-                dockerfile=args.dockerfile,
-                extra_options=extra_options,
-            )
-            image_ignore_changes = []
-        else:
-            tmp = tempfile.NamedTemporaryFile(dir="./", delete=True)
-            # Use default aws lambda docker image.
-            with open(tmp.name, "w") as f:
-                f.writelines(
-                    [
-                        "FROM public.ecr.aws/lambda/provided:al2",
-                        "\n" 'CMD [ "function.handler" ]',
-                    ]
-                )
-
-            build = docker.DockerBuild(
-                context="./",
-                dockerfile=tmp.name,
-                extra_options=extra_options,
-            )
-            # Ignore changes on image_name if default docker image is used.
-            image_ignore_changes = ["image_name"]
-
-        # Authenticate with ECR and get cridentals.
-        registry_id = args.repository_url.apply(lambda x: x.split(".")[0])
-        auth = aws.ecr.get_authorization_token(registry_id=registry_id)
-
-        self.image_uri = pulumi.Output.all(
-            url=args.repository_url, name=self.name_
-        ).apply(lambda args: f"{args['url']}:{args['name']}")
-        # Build and Push docker Image.
-        image = docker.Image(
-            resource_name,
-            build=build,
-            image_name=self.image_uri,
-            local_image_name=self.name_.apply(
-                lambda name: f"{pulumi.get_organization()}:{name}"
-            ),
-            registry=docker.ImageRegistry(
-                server=auth.proxy_endpoint,
-                username=auth.user_name,
-                password=auth.password,
-            ),
-            opts=pulumi.ResourceOptions(
-                parent=self, ignore_changes=image_ignore_changes
-            ),
-        )
-
-        # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name}.
-        image.image_name.apply(
-            lambda generated_image_name: (
-                local.Command(
-                    resource_name,
-                    create=self.image_uri.apply(
-                        lambda image_uri: f"docker rmi {image_uri} && docker rmi {generated_image_name}"
-                    ),
-                    opts=pulumi.ResourceOptions(parent=image),
-                )
-            )
-        )
 
         # Define inline policies for role definition
         log_group = aws.cloudwatch.LogGroup(
@@ -250,18 +151,14 @@ class ContainerFunction(PrefixedComponentResource):
             name=self.name_,
             description=args.description,
             package_type="Image",
-            image_uri=image.image_name,
+            image_uri=args.image_uri,
             memory_size=args.memory_size,
             timeout=args.timeout,
             architectures=[architecture.lambda_value],
             role=self.role.arn,
-            environment=(
-                aws.lambda_.FunctionEnvironmentArgs(variables=args.environment)
-                if args.environment
-                else None
-            ),
+            environment=(aws.lambda_.FunctionEnvironmentArgs(variables=args.environment) if args.environment else None),
             tracing_config=aws.lambda_.FunctionTracingConfigArgs(mode="Active"),
-            opts=pulumi.ResourceOptions(parent=self, depends_on=[self.role, image]),
+            opts=pulumi.ResourceOptions(parent=self, depends_on=[self.role]),
         )
 
         if args.keep_warm:
@@ -269,16 +166,14 @@ class ContainerFunction(PrefixedComponentResource):
             rule = aws.cloudwatch.EventRule(
                 f"{resource_name}-keep-warm",
                 name=self.get_suffixed_name("keep-warm"),
-                description=self.name_.apply(
-                    lambda name: f"Refreshes {name} regularly to keep the container warm"
-                ),
+                description=self.name_.apply(lambda name: f"Refreshes {name} regularly to keep the container warm"),
                 is_enabled=True,
                 role_arn=None,
                 schedule_expression="rate(5 minutes)",
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
             aws.lambda_.Permission(
-                f"{resource_name}-keep warm",
+                f"{resource_name}-keep-warm",
                 action="lambda:InvokeFunction",
                 function=self.function.arn,
                 principal="events.amazonaws.com",
@@ -294,8 +189,6 @@ class ContainerFunction(PrefixedComponentResource):
             )
 
         if args.schedule_config:
-            print("IAMHERE and ")
-            print(args.schedule_config)
             schedule_rule = aws.cloudwatch.EventRule(
                 resource_name=f"{resource_name}-schedule",
                 name=self.get_suffixed_name("schedule"),
@@ -321,11 +214,7 @@ class ContainerFunction(PrefixedComponentResource):
                 opts=pulumi.ResourceOptions(parent=schedule_rule),
             )
 
-        outputs = {
-            "arn": self.function.arn,
-            "name": self.function.name,
-            "image_uri": self.image_uri,
-        }
+        outputs = {"arn": self.function.arn, "name": self.function.name}
 
         if args.url_enabled:
             # Lambda URL

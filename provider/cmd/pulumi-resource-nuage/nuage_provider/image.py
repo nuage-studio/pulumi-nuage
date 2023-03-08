@@ -22,16 +22,19 @@ import pulumi_aws as aws
 import pulumi_docker as docker
 from pulumi_command import local
 
+from .models import DockerBuild, Architecture
+
 
 @dataclass
 class ImageArgs:
-    args: pulumi.Input[docker.docker.DockerBuild]
+    build_args: pulumi.Input[DockerBuild]
     repository_url: pulumi.Input[str]
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ImageArgs":
         return ImageArgs(
-            args=inputs.get("args"), repository_url=inputs.get("repositoryUrl")
+            build_args=DockerBuild.from_inputs(inputs.get("buildArgs")),
+            repository_url=inputs.get("repositoryUrl"),
         )
 
 
@@ -48,29 +51,24 @@ class Image(pulumi.ComponentResource):
     ) -> None:
         super().__init__("nuage:aws:Image", resource_name, props, opts)
 
-        docker_args: docker.docker.DockerBuild = args.args
+        architecture = Architecture[args.build_args.architecture]
+        extra_options = ["--platform", architecture.docker_value, "--quiet"]
 
-        if not docker_args.extra_options:
-            docker_args.extra_options = []
-        if "--platform" not in docker_args.extra_options:
-            docker_args.extra_options += ["--platform", "linux/amd64"]
-        if "--quiet" not in docker_args.extra_options:
-            docker_args.extra_options.append("--quiet")
+        if args.build_args.extra_options:
+            extra_options += args.build_args.extra_options
 
         if os.getenv("GITHUB_ACTIONS"):
             # If we're running on a GitHub Actions runner, enable Caching API
             extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
 
-        if docker_args.dockerfile:
+        if args.build_args.dockerfile:
             # Use specified dockerfile.
             build = docker.DockerBuild(
-                context=docker_args.context or "./",
-                dockerfile=docker_args.dockerfile,
-                extra_options=docker_args.extra_options,
-                target=docker_args.target,
-                env=docker_args.env,
-                cache_from=docker_args.cache_from,
-                args=docker_args.args,
+                context=args.build_args.context or "./",
+                dockerfile=args.build_args.dockerfile,
+                extra_options=extra_options,
+                target=args.build_args.target,
+                env=args.build_args.env,
             )
             image_ignore_changes = []
         else:
@@ -80,7 +78,7 @@ class Image(pulumi.ComponentResource):
                 f.writelines(
                     [
                         "FROM public.ecr.aws/lambda/provided:al2",
-                        "\n" 'CMD [ "function.handler" ]',
+                        '\nCMD [ "function.handler" ]',
                     ]
                 )
 
@@ -96,41 +94,41 @@ class Image(pulumi.ComponentResource):
         registry_id = args.repository_url.apply(lambda x: x.split(".")[0])
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
 
-        self.image_uri = pulumi.Output.all(
-            url=args.repository_url, name=resource_name
-        ).apply(lambda args: f"{args['url']}:{args['name']}")
+        self.image_uri = pulumi.Output.all(url=args.repository_url, name=resource_name).apply(
+            lambda args: f"{args['url']}:{args['name']}"
+        )
+
+        self.name = f"{pulumi.get_organization()}:{resource_name}"
         # Build and Push docker Image.
         image = docker.Image(
             resource_name,
             build=build,
             image_name=self.image_uri,
-            local_image_name=f"{pulumi.get_organization()}:{resource_name}",
+            local_image_name=self.name,
             registry=docker.ImageRegistry(
                 server=auth.proxy_endpoint,
                 username=auth.user_name,
                 password=auth.password,
             ),
-            opts=pulumi.ResourceOptions(
-                parent=self, ignore_changes=image_ignore_changes
-            ),
+            opts=pulumi.ResourceOptions(parent=self, ignore_changes=image_ignore_changes),
         )
 
         # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name}.
-        image.image_name.apply(
-            lambda generated_image_name: (
-                local.Command(
-                    resource_name,
-                    create=self.image_uri.apply(
-                        lambda image_uri: f"docker rmi {image_uri} && docker rmi {generated_image_name}"
-                    ),
-                    opts=pulumi.ResourceOptions(parent=image),
-                )
-            )
-        )
+        # image.image_name.apply(
+        #     lambda generated_image_name: (
+        #         local.Command(
+        #             resource_name,
+        #             create=self.image_uri.apply(
+        #                 lambda image_uri: f"docker rmi {image_uri} && docker rmi {generated_image_name}"
+        #             ),
+        #             opts=pulumi.ResourceOptions(parent=image),
+        #         )
+        #     )
+        # )
 
         outputs = {
-            "name": image.image_name,
-            "uri": self.image_uri,
+            "uri": image.image_name,
+            "name": self.name,
         }
         self.set_outputs(outputs)
 

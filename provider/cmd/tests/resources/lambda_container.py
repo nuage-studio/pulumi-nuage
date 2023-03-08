@@ -3,6 +3,7 @@ from constants import LAMBDA
 
 # Import pulumi provider methods.
 from .ecr import repository
+from .image import image
 from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
 from nuage_provider.models import ScheduleConfig
 
@@ -13,9 +14,7 @@ function = ContainerFunction(
         name=LAMBDA["NAME"],
         name_prefix=None,
         description="Integration Tests Lambda Function",
-        dockerfile="./files/lambda/Dockerfile.lambda",
-        context="./files/lambda/",
-        repository_url=repository.url,
+        image_uri=image.uri,
         architecture=LAMBDA["ARCHITECTURE"],
         memory_size=LAMBDA["MEMORY"],
         timeout=LAMBDA["TIMEOUT"],
@@ -34,6 +33,5 @@ function = ContainerFunction(
 pulumi.export("lambda_arn", function.function.arn)
 pulumi.export("lambda_name", function.function.name)
 pulumi.export("lambda_role_arn", function.role.arn)
-pulumi.export("image_uri", function.image_uri)
 if function.url:
     pulumi.export("lambda_function_url", function.url)

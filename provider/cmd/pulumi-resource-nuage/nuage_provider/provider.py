@@ -41,7 +41,6 @@ class Provider(provider.Provider):
         inputs: Inputs,
         options: Optional[ResourceOptions] = None,
     ) -> ConstructResult:
-
         if resource_type == "nuage:aws:bucket_nuage":
             return _create_bucket(name, inputs, options)
         elif resource_type == "nuage:aws:ContainerFunction":
@@ -58,12 +57,8 @@ class Provider(provider.Provider):
         raise Exception(f"Unknown resource type {resource_type}")
 
 
-def _create_bastion(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-):
-    created_resource = Bastion(
-        name, BastionArgs.from_inputs(inputs), dict(inputs), options
-    )
+def _create_bastion(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None):
+    created_resource = Bastion(name, BastionArgs.from_inputs(inputs), dict(inputs), options)
     return provider.ConstructResult(
         urn=created_resource.urn,
         state={
@@ -73,12 +68,8 @@ def _create_bastion(
     )
 
 
-def _create_database(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-) -> ConstructResult:
-    created_resource = ServerlessDatabase(
-        name, ServerlessDatabaseArgs.from_inputs(inputs), dict(inputs), options
-    )
+def _create_database(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+    created_resource = ServerlessDatabase(name, ServerlessDatabaseArgs.from_inputs(inputs), dict(inputs), options)
     return provider.ConstructResult(
         urn=created_resource.urn,
         state={
@@ -94,12 +85,8 @@ def _create_database(
     )
 
 
-def _create_repository(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-) -> ConstructResult:
-    created_repository = Repository(
-        name, RepositoryArgs.from_inputs(inputs), dict(inputs), options
-    )
+def _create_repository(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+    created_repository = Repository(name, RepositoryArgs.from_inputs(inputs), dict(inputs), options)
 
     return provider.ConstructResult(
         urn=created_repository.urn,
@@ -112,7 +99,7 @@ def _create_repository(
     )
 
 
-def _create_image(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None):
+def _create_image(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
     created_image = Image(name, ImageArgs.from_inputs(inputs), dict(inputs), options)
     return provider.ConstructResult(
         urn=created_image.urn,
@@ -120,32 +107,22 @@ def _create_image(name: str, inputs: Inputs, options: Optional[ResourceOptions] 
     )
 
 
-def _create_container(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-) -> ConstructResult:
-    created_container = ContainerFunction(
-        name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options
-    )
+def _create_container(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+    created_container = ContainerFunction(name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options)
 
     return provider.ConstructResult(
         urn=created_container.urn,
         state={
             "arn": created_container.arn,
             "name": created_container.name,
-            "image_uri": created_container.image_uri,
             "url": created_container.url,
         },
     )
 
 
-def _create_bucket(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-) -> ConstructResult:
-
+def _create_bucket(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
     # Create the component resource
     created_bucket = bucket_nuage(name, dict(inputs), options)
 
     # Return the component resource's URN and outputs as its state.
-    return provider.ConstructResult(
-        urn=created_bucket.urn, state={"bucket": created_bucket.bucket}
-    )
+    return provider.ConstructResult(urn=created_bucket.urn, state={"bucket": created_bucket.bucket})
