@@ -229,6 +229,18 @@ class ContainerFunction(PrefixedComponentResource):
         else:
             outputs["url"] = None
 
+        # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name}.
+        # rsplit is because the generated name contains suffix at the end and we also need to untag image without that suffix
+        args.image_uri.apply(
+            lambda generated_image_name: (
+                local.Command(
+                    resource_name,
+                    create=f"docker rmi {generated_image_name.rsplit('-', 1)[0]} && docker rmi {generated_image_name}",
+                    opts=pulumi.ResourceOptions(parent=self.function),
+                )
+            )
+        )
+
         self.set_outputs(outputs)
 
     def set_outputs(self, outputs: Dict[str, Any]):

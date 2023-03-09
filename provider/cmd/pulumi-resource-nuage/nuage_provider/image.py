@@ -113,19 +113,6 @@ class Image(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self, ignore_changes=image_ignore_changes),
         )
 
-        # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name}.
-        # image.image_name.apply(
-        #     lambda generated_image_name: (
-        #         local.Command(
-        #             resource_name,
-        #             create=self.image_uri.apply(
-        #                 lambda image_uri: f"docker rmi {image_uri} && docker rmi {generated_image_name}"
-        #             ),
-        #             opts=pulumi.ResourceOptions(parent=image),
-        #         )
-        #     )
-        # )
-
         outputs = {
             "uri": image.image_name,
             "name": self.name,
