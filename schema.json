@@ -214,6 +214,10 @@
                 "scheduleConfig":{
                     "$ref": "#/types/nuage:aws:FunctionSchedule",
                     "description": "Configure the function's cloudwatch event rule schedule."
+                },
+                "corsConfiguration":{
+                    "$ref": "/aws/v5.30.0/schema.json#/types/aws:lambda/FunctionUrlCors:FunctionUrlCors",
+                    "description": "CORS Configuration."
                 }
             },
             "requiredInputs": [     

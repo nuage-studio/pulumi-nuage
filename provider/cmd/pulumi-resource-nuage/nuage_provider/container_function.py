@@ -44,7 +44,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     log_retention_in_days: pulumi.Input[int]
     # Schedule
     schedule_config: Optional[pulumi.Input[ScheduleConfig]]
-    # cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
+    cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ContainerFunctionArgs":
@@ -64,7 +64,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             url_enabled=inputs.get("urlEnabled", False),
             log_retention_in_days=int(inputs.get("logRetentionInDays", 90)),
             schedule_config=ScheduleConfig.from_inputs(schedule_config) if schedule_config else None,
-            # cors_configuration = None,#inputs['corsConfiguration'],
+            cors_configuration=inputs.get("corsConfiguration", None),
         )
 
 
@@ -222,7 +222,7 @@ class ContainerFunction(PrefixedComponentResource):
                 resource_name,
                 function_name=self.function.name,
                 authorization_type="NONE",
-                cors=None,  # args.cors_configuration,
+                cors=args.cors_configuration,
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
             outputs["url"] = self.function_url.function_url

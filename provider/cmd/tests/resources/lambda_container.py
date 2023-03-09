@@ -1,4 +1,5 @@
 import pulumi
+import pulumi_aws as aws
 from constants import LAMBDA
 
 # Import pulumi provider methods.
@@ -25,6 +26,20 @@ function = ContainerFunction(
         schedule_config=ScheduleConfig(
             schedule_expression="rate(5 minutes)",
             schedule_input=None,
+        ),
+        cors_configuration=aws.lambda_.FunctionUrlCorsArgs(
+            allow_credentials=True,
+            allow_origins=["*"],
+            allow_methods=["*"],
+            allow_headers=[
+                "date",
+                "keep-alive",
+            ],
+            expose_headers=[
+                "keep-alive",
+                "date",
+            ],
+            max_age=86400,
         ),
         log_retention_in_days=90,
     ),
