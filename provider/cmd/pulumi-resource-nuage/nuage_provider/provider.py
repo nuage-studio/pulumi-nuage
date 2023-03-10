@@ -19,14 +19,11 @@ from pulumi import Inputs, ResourceOptions
 from pulumi.provider import ConstructResult
 
 import nuage_provider
-from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
-from nuage_provider.repository import Repository, RepositoryArgs
-from nuage_provider.image import Image, ImageArgs
-from nuage_provider.serverless_database import (
-    ServerlessDatabase,
-    ServerlessDatabaseArgs,
-)
 from nuage_provider.bastion import Bastion, BastionArgs
+from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
+from nuage_provider.image import Image, ImageArgs
+from nuage_provider.repository import Repository, RepositoryArgs
+from nuage_provider.serverless_database import ServerlessDatabase, ServerlessDatabaseArgs
 
 
 class Provider(provider.Provider):
@@ -41,7 +38,7 @@ class Provider(provider.Provider):
         options: Optional[ResourceOptions] = None,
     ) -> ConstructResult:
         if resource_type == "nuage:aws:ContainerFunction":
-            return _create_container(name, inputs, options)
+            return _create_function(name, inputs, options)
         elif resource_type == "nuage:aws:Repository":
             return _create_repository(name, inputs, options)
         elif resource_type == "nuage:aws:ServerlessDatabase":
@@ -104,7 +101,7 @@ def _create_image(name: str, inputs: Inputs, options: Optional[ResourceOptions] 
     )
 
 
-def _create_container(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+def _create_function(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
     created_container = ContainerFunction(name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options)
 
     return provider.ConstructResult(
