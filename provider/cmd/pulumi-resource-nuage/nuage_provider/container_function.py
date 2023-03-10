@@ -12,22 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import json
+import os
 import tempfile
-from enum import IntEnum
 from dataclasses import dataclass
-from typing import Any, List, Dict, Optional
+from enum import IntEnum
+from typing import Any, Dict, List, Optional
 
 import pulumi
 import pulumi_aws as aws
 import pulumi_docker as docker
 from pulumi_command import local
-from .prefixed_component_resource import (
-    PrefixedComponentResource,
-    PrefixedComponentResourceArgs,
-)
-from .models import Architecture, ScheduleConfig
+
+from .models import Architecture, ScheduleConfig, UrlConfig
+from .prefixed_component_resource import PrefixedComponentResource, PrefixedComponentResourceArgs
 
 
 @dataclass
@@ -40,15 +38,15 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]]
     policy_document: Optional[pulumi.Input[str]]
     keep_warm: pulumi.Input[bool]
-    url_enabled: pulumi.Input[bool]
     log_retention_in_days: pulumi.Input[int]
     # Schedule
     schedule_config: Optional[pulumi.Input[ScheduleConfig]]
-    cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]]
+    url_config: Optional[pulumi.Input[UrlConfig]]
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ContainerFunctionArgs":
         schedule_config = inputs.get("scheduleConfig", None)
+        url_config = inputs.get("urlConfig", UrlConfig(url_enabled=False))
 
         return ContainerFunctionArgs(
             name=inputs.get("name", None),
@@ -61,10 +59,9 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             environment=inputs.get("environment", None),
             policy_document=inputs.get("policyDocument", None),
             keep_warm=inputs.get("keepWarm", False),
-            url_enabled=inputs.get("urlEnabled", False),
             log_retention_in_days=int(inputs.get("logRetentionInDays", 90)),
             schedule_config=ScheduleConfig.from_inputs(schedule_config) if schedule_config else None,
-            cors_configuration=inputs.get("corsConfiguration", None),
+            url_config=UrlConfig.from_inputs(url_config) if url_config else None,
         )
 
 
@@ -216,13 +213,13 @@ class ContainerFunction(PrefixedComponentResource):
 
         outputs = {"arn": self.function.arn, "name": self.function.name}
 
-        if args.url_enabled:
+        if args.url_config.url_enabled:
             # Lambda URL
             self.function_url = aws.lambda_.FunctionUrl(
                 resource_name,
                 function_name=self.function.name,
                 authorization_type="NONE",
-                cors=args.cors_configuration,
+                cors=args.url_config.cors_configuration,
                 opts=pulumi.ResourceOptions(parent=self.function),
             )
             outputs["url"] = self.function_url.function_url

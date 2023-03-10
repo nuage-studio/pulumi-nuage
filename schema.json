@@ -27,6 +27,21 @@
                 "scheduleExpression"
             ]
         },
+        "nuage:aws:FunctionUrl": {
+            "properties": {
+                "urlEnabled": {
+                    "type": "boolean",
+                    "description":"Use Lambda URL. Defaults to `false`"
+                },
+                "corsConfiguration":{
+                    "$ref": "/aws/v5.30.0/schema.json#/types/aws:lambda/FunctionUrlCors:FunctionUrlCors",
+                    "description": "CORS Configuration."
+                }
+            },
+            "type": "object",
+            "required": [
+            ]
+        },
         "nuage:aws:DockerBuild": {
             "properties": {
                 "context": {
@@ -203,21 +218,17 @@
                     "type": "boolean",
                     "description":"Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`"
                 },
-                "urlEnabled": {
-                    "type": "boolean",
-                    "description":"Use Lambda URL. Defaults to `false`"
-                },
                 "logRetentionInDays": {
                     "type": "integer",
                     "description":"Number of days for log retention to pass in cloudwatch log group. Defaults to `90`"
                 },
+                "urlConfig":{
+                    "$ref": "#/types/nuage:aws:FunctionUrl",
+                    "description": "Configure lambda function url."
+                },
                 "scheduleConfig":{
                     "$ref": "#/types/nuage:aws:FunctionSchedule",
                     "description": "Configure the function's cloudwatch event rule schedule."
-                },
-                "corsConfiguration":{
-                    "$ref": "/aws/v5.30.0/schema.json#/types/aws:lambda/FunctionUrlCors:FunctionUrlCors",
-                    "description": "CORS Configuration."
                 }
             },
             "requiredInputs": [     
