@@ -46,7 +46,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ContainerFunctionArgs":
         schedule_config = inputs.get("scheduleConfig", None)
-        url_config = inputs.get("urlConfig", UrlConfig(url_enabled=False))
+        url_config = inputs.get("urlConfig", None)
 
         return ContainerFunctionArgs(
             name=inputs.get("name", None),
@@ -61,7 +61,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             keep_warm=inputs.get("keepWarm", False),
             log_retention_in_days=int(inputs.get("logRetentionInDays", 90)),
             schedule_config=ScheduleConfig.from_inputs(schedule_config) if schedule_config else None,
-            url_config=UrlConfig.from_inputs(url_config) if url_config else None,
+            url_config=UrlConfig.from_inputs(url_config) if url_config else UrlConfig(url_enabled=False),
         )
 
 
