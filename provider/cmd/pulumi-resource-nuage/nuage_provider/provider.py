@@ -13,20 +13,17 @@
 #  limitations under the License.
 
 from typing import Optional
-from venv import create
 
 import pulumi.provider as provider
 from pulumi import Inputs, ResourceOptions
 from pulumi.provider import ConstructResult
 
 import nuage_provider
-from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
-from nuage_provider.repository import Repository, RepositoryArgs
-from nuage_provider.serverless_database import (
-    ServerlessDatabase,
-    ServerlessDatabaseArgs,
-)
 from nuage_provider.bastion import Bastion, BastionArgs
+from nuage_provider.container_function import ContainerFunction, ContainerFunctionArgs
+from nuage_provider.image import Image, ImageArgs
+from nuage_provider.repository import Repository, RepositoryArgs
+from nuage_provider.serverless_database import ServerlessDatabase, ServerlessDatabaseArgs
 
 
 class Provider(provider.Provider):
@@ -40,25 +37,22 @@ class Provider(provider.Provider):
         inputs: Inputs,
         options: Optional[ResourceOptions] = None,
     ) -> ConstructResult:
-
         if resource_type == "nuage:aws:ContainerFunction":
-            return _create_container(name, inputs, options)
+            return _create_function(name, inputs, options)
         elif resource_type == "nuage:aws:Repository":
             return _create_repository(name, inputs, options)
         elif resource_type == "nuage:aws:ServerlessDatabase":
             return _create_database(name, inputs, options)
         elif resource_type == "nuage:aws:Bastion":
             return _create_bastion(name, inputs, options)
+        elif resource_type == "nuage:aws:Image":
+            return _create_image(name, inputs, options)
 
         raise Exception(f"Unknown resource type {resource_type}")
 
 
-def _create_bastion(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-):
-    created_resource = Bastion(
-        name, BastionArgs.from_inputs(inputs), dict(inputs), options
-    )
+def _create_bastion(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None):
+    created_resource = Bastion(name, BastionArgs.from_inputs(inputs), dict(inputs), options)
     return provider.ConstructResult(
         urn=created_resource.urn,
         state={
@@ -68,12 +62,8 @@ def _create_bastion(
     )
 
 
-def _create_database(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-) -> ConstructResult:
-    created_resource = ServerlessDatabase(
-        name, ServerlessDatabaseArgs.from_inputs(inputs), dict(inputs), options
-    )
+def _create_database(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+    created_resource = ServerlessDatabase(name, ServerlessDatabaseArgs.from_inputs(inputs), dict(inputs), options)
     return provider.ConstructResult(
         urn=created_resource.urn,
         state={
@@ -89,12 +79,8 @@ def _create_database(
     )
 
 
-def _create_repository(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-) -> ConstructResult:
-    created_repository = Repository(
-        name, RepositoryArgs.from_inputs(inputs), dict(inputs), options
-    )
+def _create_repository(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+    created_repository = Repository(name, RepositoryArgs.from_inputs(inputs), dict(inputs), options)
 
     return provider.ConstructResult(
         urn=created_repository.urn,
@@ -107,19 +93,22 @@ def _create_repository(
     )
 
 
-def _create_container(
-    name: str, inputs: Inputs, options: Optional[ResourceOptions] = None
-) -> ConstructResult:
-    created_container = ContainerFunction(
-        name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options
+def _create_image(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+    created_image = Image(name, ImageArgs.from_inputs(inputs), dict(inputs), options)
+    return provider.ConstructResult(
+        urn=created_image.urn,
+        state={"name": created_image.name, "uri": created_image.uri},
     )
+
+
+def _create_function(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
+    created_container = ContainerFunction(name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options)
 
     return provider.ConstructResult(
         urn=created_container.urn,
         state={
             "arn": created_container.arn,
             "name": created_container.name,
-            "image_uri": created_container.image_uri,
             "url": created_container.url,
         },
     )
