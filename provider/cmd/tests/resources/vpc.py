@@ -7,7 +7,7 @@ vpc = aws.ec2.Vpc(
     instance_tenancy="default",
     enable_dns_hostnames=True,
     tags={
-        "Name": "main",
+        "Name": "foo-test-vpc",
     },
 )
 public_subnet_1 = aws.ec2.Subnet(
