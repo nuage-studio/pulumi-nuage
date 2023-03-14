@@ -21,6 +21,6 @@ setup(
         "pulumi>=3.0.0",
         "pulumi_aws>=5.0.0",
         "pulumi_random>=4.8.0",
-        "pulumi_docker>=3.0.0,<4.0.0",
+        "pulumi_docker>=4.0.0",
     ],
 )
