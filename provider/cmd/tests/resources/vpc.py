@@ -101,20 +101,3 @@ ngw = aws.ec2.NatGateway(
 route = aws.ec2.Route(
     "foo-vpc-test-route", route_table_id=route_table.id, destination_cidr_block="0.0.0.0/0", gateway_id=igw.id
 )
-
-# vpc = awsx.ec2.Vpc(
-#     resource_name=f"itest-vpc",
-#     enable_dns_hostnames=True,
-#     number_of_availability_zones=2,
-#     nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(strategy=awsx.ec2.NatGatewayStrategy.NONE),
-#     subnet_specs=[
-#         awsx.ec2.SubnetSpecArgs(
-#             cidr_mask=24,
-#             type=awsx.ec2.SubnetType.PUBLIC,
-#         ),
-#         awsx.ec2.SubnetSpecArgs(
-#             cidr_mask=24,
-#             type=awsx.ec2.SubnetType.PRIVATE,
-#         ),
-#     ],
-# )
