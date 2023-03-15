@@ -1,15 +1,14 @@
 import pulumi
 import pulumi_docker
-from nuage_provider.image import (
-    Image,
-    ImageArgs,
-)
-from constants import LAMBDA
-from .ecr import repository
+from nuage_provider.image import Image, ImageArgs
 from nuage_provider.models import DockerBuild
 
+from constants import LAMBDA
+
+from .ecr import repository
+
 image_args = DockerBuild(
-    dockerfile="./files/lambda/Dockerfile.lambda",
+    dockerfile="./Dockerfile.lambda",
     context="./files/lambda/",
     extra_options=[],
     env=None,

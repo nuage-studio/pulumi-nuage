@@ -22,7 +22,7 @@ import pulumi_aws as aws
 import pulumi_docker as docker
 from pulumi_command import local
 
-from .models import DockerBuild, Architecture
+from .models import Architecture, DockerBuild
 
 
 @dataclass
@@ -52,23 +52,20 @@ class Image(pulumi.ComponentResource):
         super().__init__("nuage:aws:Image", resource_name, props, opts)
 
         architecture = Architecture[args.build_args.architecture]
-        extra_options = ["--platform", architecture.docker_value, "--quiet"]
 
-        if args.build_args.extra_options:
-            extra_options += args.build_args.extra_options
-
-        if os.getenv("GITHUB_ACTIONS"):
-            # If we're running on a GitHub Actions runner, enable Caching API
-            extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
+        # FIXME: There is no cache-to and extra_options parameter in Pulumi Docker 4.0 (Only cache_from)
+        # if os.getenv("GITHUB_ACTIONS"):
+        #    # If we're running on a GitHub Actions runner, enable Caching API
+        #    extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
 
         if args.build_args.dockerfile:
             # Use specified dockerfile.
-            build = docker.DockerBuild(
+            build = docker.DockerBuildArgs(
                 context=args.build_args.context or "./",
                 dockerfile=args.build_args.dockerfile,
-                extra_options=extra_options,
                 target=args.build_args.target,
-                env=args.build_args.env,
+                platform=architecture.docker_value,
+                # cache_from=docker.CacheFromArgs(images=["type=gha"]),
             )
             image_ignore_changes = []
         else:
@@ -82,11 +79,7 @@ class Image(pulumi.ComponentResource):
                     ]
                 )
 
-            build = docker.DockerBuild(
-                context="./",
-                dockerfile=tmp.name,
-                extra_options=extra_options,
-            )
+            build = docker.DockerBuildArgs(context="./", dockerfile=tmp.name, platform=architecture.docker_value)
             # Ignore changes on image_name if default docker image is used.
             image_ignore_changes = ["image_name"]
 
@@ -104,8 +97,9 @@ class Image(pulumi.ComponentResource):
             resource_name,
             build=build,
             image_name=self.image_uri,
-            local_image_name=self.name,
-            registry=docker.ImageRegistry(
+            # FIXME: local_image_name doesn't exists in Docker 4.0 yet
+            # local_image_name=self.name,
+            registry=docker.RegistryArgs(
                 server=auth.proxy_endpoint,
                 username=auth.user_name,
                 password=auth.password,
