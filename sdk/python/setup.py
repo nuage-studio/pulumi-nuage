@@ -8,8 +8,8 @@ from setuptools.command.install import install
 from subprocess import check_call
 
 
-VERSION = "0.0.8"
-PLUGIN_VERSION = "0.0.8"
+VERSION = "0.0.10"
+PLUGIN_VERSION = "0.0.10"
 
 class InstallPluginCommand(install):
     def run(self):
@@ -44,6 +44,8 @@ setup(name='pulumi_nuage',
       cmdclass={
           'install': InstallPluginCommand,
       },
+      keywords='pulumi aws nuage kind/component category/cloud',
+      license='Apache-2.0',
       packages=find_packages(),
       package_data={
           'pulumi_nuage': [
@@ -55,10 +57,9 @@ setup(name='pulumi_nuage',
           'parver>=0.2.1',
           'pulumi>=3.0.0,<4.0.0',
           'pulumi-aws>=5.0.0,<6.0.0',
-          'pulumi-awsx>=1.0.0b11',
           'pulumi-command>=0.7.0',
           'pulumi-random>4.8.0',
-          'pulumi_docker>=3.0.0,<4.0.0',
+          'pulumi_docker>=4.0.0',
           'semver>=2.8.1'
       ],
       zip_safe=False)

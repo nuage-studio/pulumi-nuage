@@ -4,6 +4,11 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "../utilities";
 
+/**
+ * Creates ECR Repository with a lifecycle policy. `url` output of this component can be used within container function to push your images.
+ *
+ * ## Example Usage
+ */
 export class Repository extends pulumi.ComponentResource {
     /** @internal */
     public static readonly __pulumiType = 'nuage:aws:Repository';
@@ -19,10 +24,25 @@ export class Repository extends pulumi.ComponentResource {
         return obj['__pulumiType'] === Repository.__pulumiType;
     }
 
+    /**
+     * ARN (Amazon Resource Name) of the repository
+     */
     public /*out*/ readonly arn!: pulumi.Output<string>;
+    /**
+     * Id of the repository
+     */
     public /*out*/ readonly id!: pulumi.Output<string>;
+    /**
+     * Name of the repository
+     */
     public readonly name!: pulumi.Output<string>;
+    /**
+     * Registry id of the repository
+     */
     public /*out*/ readonly registry_id!: pulumi.Output<string>;
+    /**
+     * URL of the repository
+     */
     public /*out*/ readonly url!: pulumi.Output<string>;
 
     /**

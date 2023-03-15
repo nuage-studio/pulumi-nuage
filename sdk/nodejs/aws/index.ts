@@ -6,8 +6,8 @@ import * as utilities from "../utilities";
 
 // Export members:
 export * from "./bastion";
-export * from "./bucket_nuage";
 export * from "./containerFunction";
+export * from "./image";
 export * from "./repository";
 export * from "./serverlessDatabase";
 
@@ -17,9 +17,9 @@ export * from "../types/enums/aws";
 // Import resources to register:
 import { Bastion } from "./bastion";
 import { ContainerFunction } from "./containerFunction";
+import { Image } from "./image";
 import { Repository } from "./repository";
 import { ServerlessDatabase } from "./serverlessDatabase";
-import { Bucket_nuage } from "./bucket_nuage";
 
 const _module = {
     version: utilities.getVersion(),
@@ -29,12 +29,12 @@ const _module = {
                 return new Bastion(name, <any>undefined, { urn })
             case "nuage:aws:ContainerFunction":
                 return new ContainerFunction(name, <any>undefined, { urn })
+            case "nuage:aws:Image":
+                return new Image(name, <any>undefined, { urn })
             case "nuage:aws:Repository":
                 return new Repository(name, <any>undefined, { urn })
             case "nuage:aws:ServerlessDatabase":
                 return new ServerlessDatabase(name, <any>undefined, { urn })
-            case "nuage:aws:bucket_nuage":
-                return new Bucket_nuage(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }

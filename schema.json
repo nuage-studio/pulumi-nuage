@@ -1,6 +1,6 @@
 {
     "name": "nuage",
-    "version":"0.0.8",
+    "version":"0.0.10",
     "license": "Apache-2.0",
     "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
     "keywords": [

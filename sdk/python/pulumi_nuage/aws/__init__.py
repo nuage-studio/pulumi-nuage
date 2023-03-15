@@ -7,7 +7,8 @@ import typing
 # Export this package's modules as members:
 from ._enums import *
 from .bastion import *
-from .bucket_nuage import *
 from .container_function import *
+from .image import *
 from .repository import *
 from .serverless_database import *
+from ._inputs import *

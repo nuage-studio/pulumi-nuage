@@ -24,9 +24,9 @@ _utilities.register(
   "classes": {
    "nuage:aws:Bastion": "Bastion",
    "nuage:aws:ContainerFunction": "ContainerFunction",
+   "nuage:aws:Image": "Image",
    "nuage:aws:Repository": "Repository",
-   "nuage:aws:ServerlessDatabase": "ServerlessDatabase",
-   "nuage:aws:bucket_nuage": "Bucket_nuage"
+   "nuage:aws:ServerlessDatabase": "ServerlessDatabase"
   }
  }
 ]

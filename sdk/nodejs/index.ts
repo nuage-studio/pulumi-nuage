@@ -9,9 +9,11 @@ export * from "./provider";
 
 // Export sub-modules:
 import * as aws from "./aws";
+import * as types from "./types";
 
 export {
     aws,
+    types,
 };
 
 import { Provider } from "./provider";

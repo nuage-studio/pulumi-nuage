@@ -11,16 +11,18 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-// Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
+// Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature for schedule (cron) definitions and automated X-Ray tracing.
 //
 // ## Example Usage
 type ContainerFunction struct {
 	pulumi.ResourceState
 
-	Arn       pulumi.StringOutput    `pulumi:"arn"`
-	Image_uri pulumi.StringOutput    `pulumi:"image_uri"`
-	Name      pulumi.StringOutput    `pulumi:"name"`
-	Url       pulumi.StringPtrOutput `pulumi:"url"`
+	// ARN (Amazon Resource Name) of the Lambda Function.
+	Arn pulumi.StringOutput `pulumi:"arn"`
+	// Name of the Lambda Function.
+	Name pulumi.StringOutput `pulumi:"name"`
+	// Lambda Function URL (Only valid if `urlEnabled` is used).
+	Url pulumi.StringPtrOutput `pulumi:"url"`
 }
 
 // NewContainerFunction registers a new resource with the given unique name, arguments, and options.
@@ -30,8 +32,8 @@ func NewContainerFunction(ctx *pulumi.Context,
 		return nil, errors.New("missing one or more required arguments")
 	}
 
-	if args.RepositoryUrl == nil {
-		return nil, errors.New("invalid value for required argument 'RepositoryUrl'")
+	if args.ImageUri == nil {
+		return nil, errors.New("invalid value for required argument 'ImageUri'")
 	}
 	opts = pkgResourceDefaultOpts(opts)
 	var resource ContainerFunction
@@ -45,17 +47,15 @@ func NewContainerFunction(ctx *pulumi.Context,
 type containerFunctionArgs struct {
 	// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
 	Architecture *string `pulumi:"architecture"`
-	// Dockerfile context path.
-	Context *string `pulumi:"context"`
 	// Description of the function.
 	Description *string `pulumi:"description"`
-	// Dockerfile path. Defaults to `./Dockerfile`
-	Dockerfile *string `pulumi:"dockerfile"`
 	// Environment Variables
 	Environment map[string]string `pulumi:"environment"`
+	// Image uri of the docker image.
+	ImageUri string `pulumi:"imageUri"`
 	// Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
 	KeepWarm *bool `pulumi:"keepWarm"`
-	// Number of days for log retention to pass in cloudwatch log group..
+	// Number of days for log retention to pass in cloudwatch log group. Defaults to `90`
 	LogRetentionInDays *int `pulumi:"logRetentionInDays"`
 	// Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
 	MemorySize *int `pulumi:"memorySize"`
@@ -65,29 +65,27 @@ type containerFunctionArgs struct {
 	NamePrefix *string `pulumi:"namePrefix"`
 	// Policy Document for lambda.
 	PolicyDocument *string `pulumi:"policyDocument"`
-	// Existing ECR repository name
-	RepositoryUrl string `pulumi:"repositoryUrl"`
+	// Configure the function's cloudwatch event rule schedule.
+	ScheduleConfig *FunctionSchedule `pulumi:"scheduleConfig"`
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout *int `pulumi:"timeout"`
-	// Use Lambda URL. Defaults to `false`
-	UrlEnabled *bool `pulumi:"urlEnabled"`
+	// Configure lambda function url.
+	UrlConfig *FunctionUrl `pulumi:"urlConfig"`
 }
 
 // The set of arguments for constructing a ContainerFunction resource.
 type ContainerFunctionArgs struct {
 	// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
 	Architecture pulumi.StringPtrInput
-	// Dockerfile context path.
-	Context pulumi.StringPtrInput
 	// Description of the function.
 	Description pulumi.StringPtrInput
-	// Dockerfile path. Defaults to `./Dockerfile`
-	Dockerfile pulumi.StringPtrInput
 	// Environment Variables
 	Environment pulumi.StringMapInput
+	// Image uri of the docker image.
+	ImageUri pulumi.StringInput
 	// Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
 	KeepWarm pulumi.BoolPtrInput
-	// Number of days for log retention to pass in cloudwatch log group..
+	// Number of days for log retention to pass in cloudwatch log group. Defaults to `90`
 	LogRetentionInDays pulumi.IntPtrInput
 	// Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
 	MemorySize pulumi.IntPtrInput
@@ -97,12 +95,12 @@ type ContainerFunctionArgs struct {
 	NamePrefix pulumi.StringPtrInput
 	// Policy Document for lambda.
 	PolicyDocument pulumi.StringPtrInput
-	// Existing ECR repository name
-	RepositoryUrl pulumi.StringInput
+	// Configure the function's cloudwatch event rule schedule.
+	ScheduleConfig FunctionSchedulePtrInput
 	// Amount of time your Lambda Function has to run in seconds. Defaults to `3`
 	Timeout pulumi.IntPtrInput
-	// Use Lambda URL. Defaults to `false`
-	UrlEnabled pulumi.BoolPtrInput
+	// Configure lambda function url.
+	UrlConfig FunctionUrlPtrInput
 }
 
 func (ContainerFunctionArgs) ElementType() reflect.Type {
