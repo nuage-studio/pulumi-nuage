@@ -63,7 +63,7 @@ RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local
 
 # Install AWS CLI
 # ARCH can either be "arm64" or "x86_64"
-ARG ARCH="aarch64"
+ARG ARCH="x86_64"
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     sudo ./aws/install --install-dir /usr/local/aws-cli --bin-dir /usr/local/bin &&\
