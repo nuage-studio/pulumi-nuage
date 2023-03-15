@@ -18,10 +18,9 @@ jobs:
         uses: pulumi/actions@v4
 
       - name: Login Pulumi
-        run: |
-          pulumi login
-        env: |
-          PULUMI_ACCESS_TOKEN=${{ secrets.PULUMI_TOKEN }}
+        run: pulumi login
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_TOKEN }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
