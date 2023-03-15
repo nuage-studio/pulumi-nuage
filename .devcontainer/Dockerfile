@@ -1,6 +1,5 @@
 ARG VARIANT
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT} AS base
-
 # Options for setup script
 ARG INSTALL_ZSH="true"
 ARG UPGRADE_PACKAGES="true"
@@ -77,4 +76,4 @@ ENV PATH="~/.local/bin:$PATH"
 # # Install Pulumi
 # # https://www.pulumi.com/docs/get-started/install/
 RUN curl -fsSL https://get.pulumi.com | sh -s -- --version 3.57.1
-ENV PATH "~/.pulumi/bin:$PATH"
+ENV PATH "$PATH:/home/vscode/.pulumi/bin"

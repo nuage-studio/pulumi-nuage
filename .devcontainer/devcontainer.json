@@ -76,7 +76,7 @@
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "pip3 install --user -r requirements.txt",
-  "postCreateCommand": "task test:install"
+  //"postCreateCommand": "task test:install"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
