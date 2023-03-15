@@ -20,8 +20,7 @@ setup(
     install_requires=[
         "pulumi>=3.0.0",
         "pulumi_aws>=5.0.0",
-        "pulumi_awsx>=1.0.0b11",
         "pulumi_random>=4.8.0",
-        "pulumi_docker>=3.0.0,<4.0.0",
+        "pulumi_docker>=4.0.0",
     ],
 )
