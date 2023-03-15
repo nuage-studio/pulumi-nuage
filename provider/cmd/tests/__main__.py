@@ -6,4 +6,4 @@ full_test = os.environ.get("FULL_TEST", False)
 if full_test:
     from resources import database
 
-from resources import database, ecr, image, lambda_container
+from resources import ecr, image, lambda_container

@@ -7,15 +7,21 @@ on: # rebuild any PRs and main branch changes
     paths:
       - provider/**
 
-env:
-  PULUMI_MOUNT_DIR: /home/vscode/.temp_pulumi
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (GitHub)
         uses: actions/checkout@v3
+
+      - name: Install Pulumi
+        uses: pulumi/actions@v4
+
+      - name: Login Pulumi
+        run: |
+          pulumi login
+        env: |
+          PULUMI_ACCESS_TOKEN=${{ secrets.PULUMI_TOKEN }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
@@ -30,11 +36,8 @@ jobs:
           cacheFrom: ghcr.io/nuage-studio/pulumi-nuage
           push: never
           runCmd: |
-            sudo chown -R $USER:$USER ~/.aws
-            pulumi login            
+            sudo chown -R $USER:$USER ~/.aws                        
             aws configure set aws_access_key_id  ${{ secrets.AWS_ACCESS_KEY_ID_DEV }} --profile nuage-dev
             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }} --profile nuage-dev
             aws configure set region eu-west-1 --profile nuage-dev
             task test:default
-          env: |
-            PULUMI_ACCESS_TOKEN=${{ secrets.PULUMI_TOKEN }}
