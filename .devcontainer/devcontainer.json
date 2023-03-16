@@ -48,6 +48,7 @@
   
     
 	"features": {
+    /*"ghcr.io/devcontainers/features/docker-from-docker:1": {},
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.10.8",
       "installTools": false
@@ -64,8 +65,7 @@
 		"ghcr.io/devcontainers-contrib/features/pulumi:1": {
 			"bashCompletion": true,
 			"version": "latest"
-		}
-    
+		}*/
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -76,7 +76,7 @@
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "pip3 install --user -r requirements.txt",
-  "postCreateCommand": "poetry install"
+  //"postCreateCommand": "task test:install"
 
 	// Configure tool-specific properties.
 	// "customizations": {},

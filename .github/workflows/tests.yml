@@ -1,0 +1,42 @@
+name: "integration-tests"
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - master
+    paths:
+      - provider/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (GitHub)
+        uses: actions/checkout@v3
+
+      - name: Install Pulumi
+        uses: pulumi/actions@v4
+
+      - name: Login Pulumi
+        run: pulumi login
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Dev Container task
+        uses: devcontainers/ci@v0.3
+        with:
+          cacheFrom: ghcr.io/nuage-studio/pulumi-nuage
+          push: never
+          runCmd: |
+            sudo chown -R $USER:$USER ~/.aws                        
+            aws configure set aws_access_key_id  ${{ secrets.AWS_ACCESS_KEY_ID_DEV }} --profile nuage-dev
+            aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }} --profile nuage-dev
+            aws configure set region eu-west-1 --profile nuage-dev
+            task test:default

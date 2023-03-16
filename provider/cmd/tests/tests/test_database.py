@@ -39,9 +39,7 @@ class TestDatabase:
 
         # Get bastion config
         bastion_ip = stack_outputs.get("database_postgresql_bastion_ip").value
-        bastion_private_key = stack_outputs.get(
-            "database_postgresql_bastion_private_key"
-        ).value
+        bastion_private_key = stack_outputs.get("database_postgresql_bastion_private_key").value
 
         keyfile = StringIO(bastion_private_key)
         pkey = paramiko.RSAKey.from_private_key(keyfile)

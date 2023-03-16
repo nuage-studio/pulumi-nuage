@@ -6,7 +6,7 @@ authors = ["burakgzt <burak.gozutok@nuage.studio>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-boto3 = "^1.26.10"
+boto3 = ">=1.26.64"
 pymysql = "^1.0.2"
 pydantic = "^1.10.2"
 psycopg2-binary = "^2.9.5"
