@@ -49,3 +49,16 @@ class UrlConfig:
             url_enabled=inputs.get("urlEnabled", False),
             cors_configuration=inputs.get("corsConfiguration", None),
         )
+
+
+@dataclass
+class BastionConfig:
+    enabled: pulumi.Input[bool]
+    subnet_id: Optional[pulumi.Input[str]]
+
+    @staticmethod
+    def from_inputs(inputs: pulumi.Inputs) -> "BastionConfig":
+        return BastionConfig(
+            enabled=inputs.get("enabled"),
+            subnet_id=inputs.get("subnetId", None),
+        )

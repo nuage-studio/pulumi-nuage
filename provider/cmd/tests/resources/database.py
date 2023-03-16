@@ -1,6 +1,7 @@
 """An AWS Python Pulumi program"""
 
 import pulumi
+from nuage_provider.models import BastionConfig
 
 # Import pulumi provider methods.
 from nuage_provider.serverless_database import ServerlessDatabase, ServerlessDatabaseArgs
@@ -23,8 +24,7 @@ database = ServerlessDatabase(
         master_username=DB["USER"],
         ip_whitelist=None,
         skip_final_snapshot=True,
-        bastion_enabled=False,
-        bastion_subnet_id=None,
+        bastion=BastionConfig(enabled=False, subnet_id=None),
     ),
 )
 pulumi.export("database_mysql_user", database.user)
@@ -48,8 +48,7 @@ database = ServerlessDatabase(
         master_username=DB["USER"],
         ip_whitelist=None,
         skip_final_snapshot=True,
-        bastion_enabled=True,
-        bastion_subnet_id=public_subnet_1.id,
+        bastion=BastionConfig(enabled=True, subnet_id=public_subnet_1.id),
     ),
 )
 

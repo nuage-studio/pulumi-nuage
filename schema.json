@@ -27,6 +27,22 @@
                 "scheduleExpression"
             ]
         },
+        "nuage:aws:BastionConfig": {
+            "properties": {                
+                "subnetId": {
+                    "type": "string",
+                    "description":"Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`"
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "description":"Enable data api. Defaults to `false`"
+                }
+            },
+            "type": "object",
+            "required": [
+                "enabled"
+            ]
+        },
         "nuage:aws:FunctionUrl": {
             "properties": {
                 "urlEnabled": {
@@ -268,13 +284,9 @@
                     "type": "boolean",
                     "description":"Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`"
                 },
-                "bastionSubnetId": {
-                    "type": "string",
-                    "description":"Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`"
-                },
-                "bastionEnabled": {
-                    "type": "boolean",
-                    "description":"Enable data api. Defaults to `false`"
+                "bastion":{
+                    "$ref": "#/types/nuage:aws:BastionConfig",
+                    "description": "Configure the bastion host for connecting the db."
                 }
             },
             "requiredInputs": [
@@ -315,11 +327,11 @@
                 },
                 "bastion_ip": {
                     "type": "string",
-                    "description":"IP address of the bastion host. Exists only if `bastionEnabled` is true."
+                    "description":"IP address of the bastion host. Exists only if bastion is enabled"
                 },
                 "bastion_private_key": {
                     "type": "string",
-                    "description":"Private key to connect bastion host over SSH. Exists only if `bastionEnabled` is true."
+                    "description":"Private key to connect bastion host over SSH. Exists only if bastion is enabled."
                 }
             },
             "required": [

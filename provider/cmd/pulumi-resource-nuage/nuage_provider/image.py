@@ -56,19 +56,19 @@ class Image(pulumi.ComponentResource):
     ) -> None:
         super().__init__("nuage:aws:Image", resource_name, props, opts)
 
-        architecture = Architecture[args.build_args.architecture]
+        architecture = Architecture[args.architecture]
 
         # FIXME: There is no cache-to and extra_options parameter in Pulumi Docker 4.0 (Only cache_from)
         # if os.getenv("GITHUB_ACTIONS"):
         #    # If we're running on a GitHub Actions runner, enable Caching API
         #    extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
 
-        # if args.build_args.dockerfile:
+        # if args.dockerfile:
         # Use specified dockerfile.
         build = docker.DockerBuildArgs(
-            context=args.build_args.context,
-            dockerfile=args.build_args.dockerfile,
-            target=args.build_args.target,
+            context=args.context,
+            dockerfile=args.dockerfile,
+            target=args.target,
             platform=architecture.docker_value,
             # cache_from=docker.CacheFromArgs(images=["type=gha"]),
         )
