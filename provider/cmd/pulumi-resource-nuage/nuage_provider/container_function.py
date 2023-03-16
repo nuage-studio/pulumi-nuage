@@ -67,7 +67,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
 
 class ContainerFunction(PrefixedComponentResource):
     arn: pulumi.Output[str]
-    function_name: pulumi.Output[str]
+    name: pulumi.Output[str]
     url: Optional[pulumi.Output[str]]
 
     def __init__(
@@ -211,7 +211,7 @@ class ContainerFunction(PrefixedComponentResource):
                 opts=pulumi.ResourceOptions(parent=schedule_rule),
             )
 
-        outputs = {"arn": self.function.arn, "function_name": self.function.name}
+        outputs = {"arn": self.function.arn, "name": self.function.name}
 
         if args.url_config.url_enabled:
             # Lambda URL

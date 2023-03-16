@@ -216,7 +216,7 @@
                     "type": "string",
                     "description":"ARN (Amazon Resource Name) of the Lambda Function."
                 },
-                "function_name": {
+                "name": {
                     "type": "string",
                     "description":"Name of the Lambda Function."
                 },
@@ -227,7 +227,7 @@
             },
             "required": [
                 "arn",
-                "function_name"
+                "name"
             ]
         },
         "nuage:aws:ServerlessDatabase": {
