@@ -17,15 +17,24 @@ import (
 type ServerlessDatabase struct {
 	pulumi.ResourceState
 
-	Bastion_ip          pulumi.StringPtrOutput `pulumi:"bastion_ip"`
+	// IP address of the bastion host. Exists only if `bastionEnabled` is true.
+	Bastion_ip pulumi.StringPtrOutput `pulumi:"bastion_ip"`
+	// Private key to connect bastion host over SSH. Exists only if `bastionEnabled` is true.
 	Bastion_private_key pulumi.StringPtrOutput `pulumi:"bastion_private_key"`
-	Cluster_arn         pulumi.StringOutput    `pulumi:"cluster_arn"`
-	Database_name       pulumi.StringOutput    `pulumi:"database_name"`
-	Host                pulumi.StringOutput    `pulumi:"host"`
-	Password            pulumi.StringPtrOutput `pulumi:"password"`
-	Port                pulumi.Float64Output   `pulumi:"port"`
-	Uri                 pulumi.StringOutput    `pulumi:"uri"`
-	User                pulumi.StringOutput    `pulumi:"user"`
+	// ARN (Amazon Resource Name) of the RDS cluster.
+	Cluster_arn pulumi.StringOutput `pulumi:"cluster_arn"`
+	// Name of the database
+	Database_name pulumi.StringOutput `pulumi:"database_name"`
+	// Host address of DB server
+	Host pulumi.StringOutput `pulumi:"host"`
+	// Password of DB credentials
+	Password pulumi.StringPtrOutput `pulumi:"password"`
+	// Port number of DB
+	Port pulumi.Float64Output `pulumi:"port"`
+	// Database URI for connection.
+	Uri pulumi.StringOutput `pulumi:"uri"`
+	// Username of DB credentials.
+	User pulumi.StringOutput `pulumi:"user"`
 }
 
 // NewServerlessDatabase registers a new resource with the given unique name, arguments, and options.

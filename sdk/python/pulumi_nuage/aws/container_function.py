@@ -7,17 +7,17 @@ import pulumi
 import pulumi.runtime
 from typing import Any, Mapping, Optional, Sequence, Union, overload
 from .. import _utilities
+from ._inputs import *
+import pulumi_aws
 
 __all__ = ['ContainerFunctionArgs', 'ContainerFunction']
 
 @pulumi.input_type
 class ContainerFunctionArgs:
     def __init__(__self__, *,
-                 repository_url: pulumi.Input[str],
+                 image_uri: pulumi.Input[str],
                  architecture: Optional[pulumi.Input[str]] = None,
-                 context: Optional[pulumi.Input[str]] = None,
                  description: Optional[pulumi.Input[str]] = None,
-                 dockerfile: Optional[pulumi.Input[str]] = None,
                  environment: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
                  keep_warm: Optional[pulumi.Input[bool]] = None,
                  log_retention_in_days: Optional[pulumi.Input[int]] = None,
@@ -25,34 +25,30 @@ class ContainerFunctionArgs:
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
+                 schedule_config: Optional[pulumi.Input['FunctionScheduleArgs']] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
-                 url_enabled: Optional[pulumi.Input[bool]] = None):
+                 url_config: Optional[pulumi.Input['FunctionUrlArgs']] = None):
         """
         The set of arguments for constructing a ContainerFunction resource.
-        :param pulumi.Input[str] repository_url: Existing ECR repository name
+        :param pulumi.Input[str] image_uri: Image uri of the docker image.
         :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
-        :param pulumi.Input[str] context: Dockerfile context path.
         :param pulumi.Input[str] description: Description of the function.
-        :param pulumi.Input[str] dockerfile: Dockerfile path. Defaults to `./Dockerfile`
         :param pulumi.Input[Mapping[str, pulumi.Input[str]]] environment: Environment Variables
         :param pulumi.Input[bool] keep_warm: Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
-        :param pulumi.Input[int] log_retention_in_days: Number of days for log retention to pass in cloudwatch log group..
+        :param pulumi.Input[int] log_retention_in_days: Number of days for log retention to pass in cloudwatch log group. Defaults to `90`
         :param pulumi.Input[int] memory_size: Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         :param pulumi.Input[str] name: Name of the resource.
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
+        :param pulumi.Input['FunctionScheduleArgs'] schedule_config: Configure the function's cloudwatch event rule schedule.
         :param pulumi.Input[int] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
-        :param pulumi.Input[bool] url_enabled: Use Lambda URL. Defaults to `false`
+        :param pulumi.Input['FunctionUrlArgs'] url_config: Configure lambda function url.
         """
-        pulumi.set(__self__, "repository_url", repository_url)
+        pulumi.set(__self__, "image_uri", image_uri)
         if architecture is not None:
             pulumi.set(__self__, "architecture", architecture)
-        if context is not None:
-            pulumi.set(__self__, "context", context)
         if description is not None:
             pulumi.set(__self__, "description", description)
-        if dockerfile is not None:
-            pulumi.set(__self__, "dockerfile", dockerfile)
         if environment is not None:
             pulumi.set(__self__, "environment", environment)
         if keep_warm is not None:
@@ -67,22 +63,24 @@ class ContainerFunctionArgs:
             pulumi.set(__self__, "name_prefix", name_prefix)
         if policy_document is not None:
             pulumi.set(__self__, "policy_document", policy_document)
+        if schedule_config is not None:
+            pulumi.set(__self__, "schedule_config", schedule_config)
         if timeout is not None:
             pulumi.set(__self__, "timeout", timeout)
-        if url_enabled is not None:
-            pulumi.set(__self__, "url_enabled", url_enabled)
+        if url_config is not None:
+            pulumi.set(__self__, "url_config", url_config)
 
     @property
-    @pulumi.getter(name="repositoryUrl")
-    def repository_url(self) -> pulumi.Input[str]:
+    @pulumi.getter(name="imageUri")
+    def image_uri(self) -> pulumi.Input[str]:
         """
-        Existing ECR repository name
+        Image uri of the docker image.
         """
-        return pulumi.get(self, "repository_url")
+        return pulumi.get(self, "image_uri")
 
-    @repository_url.setter
-    def repository_url(self, value: pulumi.Input[str]):
-        pulumi.set(self, "repository_url", value)
+    @image_uri.setter
+    def image_uri(self, value: pulumi.Input[str]):
+        pulumi.set(self, "image_uri", value)
 
     @property
     @pulumi.getter
@@ -98,18 +96,6 @@ class ContainerFunctionArgs:
 
     @property
     @pulumi.getter
-    def context(self) -> Optional[pulumi.Input[str]]:
-        """
-        Dockerfile context path.
-        """
-        return pulumi.get(self, "context")
-
-    @context.setter
-    def context(self, value: Optional[pulumi.Input[str]]):
-        pulumi.set(self, "context", value)
-
-    @property
-    @pulumi.getter
     def description(self) -> Optional[pulumi.Input[str]]:
         """
         Description of the function.
@@ -119,18 +105,6 @@ class ContainerFunctionArgs:
     @description.setter
     def description(self, value: Optional[pulumi.Input[str]]):
         pulumi.set(self, "description", value)
-
-    @property
-    @pulumi.getter
-    def dockerfile(self) -> Optional[pulumi.Input[str]]:
-        """
-        Dockerfile path. Defaults to `./Dockerfile`
-        """
-        return pulumi.get(self, "dockerfile")
-
-    @dockerfile.setter
-    def dockerfile(self, value: Optional[pulumi.Input[str]]):
-        pulumi.set(self, "dockerfile", value)
 
     @property
     @pulumi.getter
@@ -160,7 +134,7 @@ class ContainerFunctionArgs:
     @pulumi.getter(name="logRetentionInDays")
     def log_retention_in_days(self) -> Optional[pulumi.Input[int]]:
         """
-        Number of days for log retention to pass in cloudwatch log group..
+        Number of days for log retention to pass in cloudwatch log group. Defaults to `90`
         """
         return pulumi.get(self, "log_retention_in_days")
 
@@ -217,6 +191,18 @@ class ContainerFunctionArgs:
         pulumi.set(self, "policy_document", value)
 
     @property
+    @pulumi.getter(name="scheduleConfig")
+    def schedule_config(self) -> Optional[pulumi.Input['FunctionScheduleArgs']]:
+        """
+        Configure the function's cloudwatch event rule schedule.
+        """
+        return pulumi.get(self, "schedule_config")
+
+    @schedule_config.setter
+    def schedule_config(self, value: Optional[pulumi.Input['FunctionScheduleArgs']]):
+        pulumi.set(self, "schedule_config", value)
+
+    @property
     @pulumi.getter
     def timeout(self) -> Optional[pulumi.Input[int]]:
         """
@@ -229,16 +215,16 @@ class ContainerFunctionArgs:
         pulumi.set(self, "timeout", value)
 
     @property
-    @pulumi.getter(name="urlEnabled")
-    def url_enabled(self) -> Optional[pulumi.Input[bool]]:
+    @pulumi.getter(name="urlConfig")
+    def url_config(self) -> Optional[pulumi.Input['FunctionUrlArgs']]:
         """
-        Use Lambda URL. Defaults to `false`
+        Configure lambda function url.
         """
-        return pulumi.get(self, "url_enabled")
+        return pulumi.get(self, "url_config")
 
-    @url_enabled.setter
-    def url_enabled(self, value: Optional[pulumi.Input[bool]]):
-        pulumi.set(self, "url_enabled", value)
+    @url_config.setter
+    def url_config(self, value: Optional[pulumi.Input['FunctionUrlArgs']]):
+        pulumi.set(self, "url_config", value)
 
 
 class ContainerFunction(pulumi.ComponentResource):
@@ -247,22 +233,21 @@ class ContainerFunction(pulumi.ComponentResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  architecture: Optional[pulumi.Input[str]] = None,
-                 context: Optional[pulumi.Input[str]] = None,
                  description: Optional[pulumi.Input[str]] = None,
-                 dockerfile: Optional[pulumi.Input[str]] = None,
                  environment: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
+                 image_uri: Optional[pulumi.Input[str]] = None,
                  keep_warm: Optional[pulumi.Input[bool]] = None,
                  log_retention_in_days: Optional[pulumi.Input[int]] = None,
                  memory_size: Optional[pulumi.Input[int]] = None,
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
-                 repository_url: Optional[pulumi.Input[str]] = None,
+                 schedule_config: Optional[pulumi.Input[pulumi.InputType['FunctionScheduleArgs']]] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
-                 url_enabled: Optional[pulumi.Input[bool]] = None,
+                 url_config: Optional[pulumi.Input[pulumi.InputType['FunctionUrlArgs']]] = None,
                  __props__=None):
         """
-        Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
+        Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature for schedule (cron) definitions and automated X-Ray tracing.
 
         ## Example Usage
         ### Basic Example
@@ -276,36 +261,82 @@ class ContainerFunction(pulumi.ComponentResource):
             expire_in_days=30,
         )
         
+        image = nuage.aws.Image(
+            "foo",
+            build_args=nuage.aws.DockerBuildArgs(
+                dockerfile="../api/Dockerfile",
+                context="../"
+            ),
+            repository_url=repository.url,
+        )
+        
         container_function = nuage.aws.ContainerFunction("foo",
             name="lambda-function",
             description="Nuage AWS ContainerFunction resource.",
-            repository_url=repository.url,    
+            image_uri=image.uri,
             architecture="X86_64",
             memory_size=512,
             timeout=30,
             environment={"bar":"baz"},
             keep_warm=True,
             url=True,
-            log_retention_in_days=90
+            log_retention_in_days=90,
+            schedule_config=nuage.aws.FunctionScheduleArgs(
+                schedule_expression="rate(5 minutes)"
+            ),
+        )
+        ```
+        ### Custom Policy Document Example
+
+        ```python
+        import pulumi_nuage as nuage
+        
+        policy_doc = aws.iam.get_policy_document(
+            version="2012-10-17",
+            statements=[
+                aws.iam.GetPolicyDocumentStatementArgs(
+                    effect="Allow",
+                    actions=["s3:*"],
+                    resources=[
+                        bucket.arn
+                    ],
+                ),
+            ],
+        ).json
+        
+        container_function = nuage.aws.ContainerFunction("foo",
+            name="lambda-function",
+            description="Nuage AWS ContainerFunction resource.",
+            image_uri=image.uri,
+            architecture="X86_64",
+            memory_size=512,
+            timeout=30,
+            environment={"bar":"baz"},
+            keep_warm=True,
+            url=True,
+            log_retention_in_days=90,
+            schedule_config=nuage.aws.FunctionScheduleArgs(
+                schedule_expression="rate(5 minutes)"
+            ),
+            policy_document=policy_doc
         )
         ```
 
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
-        :param pulumi.Input[str] context: Dockerfile context path.
         :param pulumi.Input[str] description: Description of the function.
-        :param pulumi.Input[str] dockerfile: Dockerfile path. Defaults to `./Dockerfile`
         :param pulumi.Input[Mapping[str, pulumi.Input[str]]] environment: Environment Variables
+        :param pulumi.Input[str] image_uri: Image uri of the docker image.
         :param pulumi.Input[bool] keep_warm: Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
-        :param pulumi.Input[int] log_retention_in_days: Number of days for log retention to pass in cloudwatch log group..
+        :param pulumi.Input[int] log_retention_in_days: Number of days for log retention to pass in cloudwatch log group. Defaults to `90`
         :param pulumi.Input[int] memory_size: Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`.
         :param pulumi.Input[str] name: Name of the resource.
         :param pulumi.Input[str] name_prefix: Name prefix as an alternative to name and adds random suffix at the end.
         :param pulumi.Input[str] policy_document: Policy Document for lambda.
-        :param pulumi.Input[str] repository_url: Existing ECR repository name
+        :param pulumi.Input[pulumi.InputType['FunctionScheduleArgs']] schedule_config: Configure the function's cloudwatch event rule schedule.
         :param pulumi.Input[int] timeout: Amount of time your Lambda Function has to run in seconds. Defaults to `3`
-        :param pulumi.Input[bool] url_enabled: Use Lambda URL. Defaults to `false`
+        :param pulumi.Input[pulumi.InputType['FunctionUrlArgs']] url_config: Configure lambda function url.
         """
         ...
     @overload
@@ -314,7 +345,7 @@ class ContainerFunction(pulumi.ComponentResource):
                  args: ContainerFunctionArgs,
                  opts: Optional[pulumi.ResourceOptions] = None):
         """
-        Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
+        Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature for schedule (cron) definitions and automated X-Ray tracing.
 
         ## Example Usage
         ### Basic Example
@@ -328,17 +359,64 @@ class ContainerFunction(pulumi.ComponentResource):
             expire_in_days=30,
         )
         
+        image = nuage.aws.Image(
+            "foo",
+            build_args=nuage.aws.DockerBuildArgs(
+                dockerfile="../api/Dockerfile",
+                context="../"
+            ),
+            repository_url=repository.url,
+        )
+        
         container_function = nuage.aws.ContainerFunction("foo",
             name="lambda-function",
             description="Nuage AWS ContainerFunction resource.",
-            repository_url=repository.url,    
+            image_uri=image.uri,
             architecture="X86_64",
             memory_size=512,
             timeout=30,
             environment={"bar":"baz"},
             keep_warm=True,
             url=True,
-            log_retention_in_days=90
+            log_retention_in_days=90,
+            schedule_config=nuage.aws.FunctionScheduleArgs(
+                schedule_expression="rate(5 minutes)"
+            ),
+        )
+        ```
+        ### Custom Policy Document Example
+
+        ```python
+        import pulumi_nuage as nuage
+        
+        policy_doc = aws.iam.get_policy_document(
+            version="2012-10-17",
+            statements=[
+                aws.iam.GetPolicyDocumentStatementArgs(
+                    effect="Allow",
+                    actions=["s3:*"],
+                    resources=[
+                        bucket.arn
+                    ],
+                ),
+            ],
+        ).json
+        
+        container_function = nuage.aws.ContainerFunction("foo",
+            name="lambda-function",
+            description="Nuage AWS ContainerFunction resource.",
+            image_uri=image.uri,
+            architecture="X86_64",
+            memory_size=512,
+            timeout=30,
+            environment={"bar":"baz"},
+            keep_warm=True,
+            url=True,
+            log_retention_in_days=90,
+            schedule_config=nuage.aws.FunctionScheduleArgs(
+                schedule_expression="rate(5 minutes)"
+            ),
+            policy_document=policy_doc
         )
         ```
 
@@ -358,19 +436,18 @@ class ContainerFunction(pulumi.ComponentResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  architecture: Optional[pulumi.Input[str]] = None,
-                 context: Optional[pulumi.Input[str]] = None,
                  description: Optional[pulumi.Input[str]] = None,
-                 dockerfile: Optional[pulumi.Input[str]] = None,
                  environment: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
+                 image_uri: Optional[pulumi.Input[str]] = None,
                  keep_warm: Optional[pulumi.Input[bool]] = None,
                  log_retention_in_days: Optional[pulumi.Input[int]] = None,
                  memory_size: Optional[pulumi.Input[int]] = None,
                  name: Optional[pulumi.Input[str]] = None,
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  policy_document: Optional[pulumi.Input[str]] = None,
-                 repository_url: Optional[pulumi.Input[str]] = None,
+                 schedule_config: Optional[pulumi.Input[pulumi.InputType['FunctionScheduleArgs']]] = None,
                  timeout: Optional[pulumi.Input[int]] = None,
-                 url_enabled: Optional[pulumi.Input[bool]] = None,
+                 url_config: Optional[pulumi.Input[pulumi.InputType['FunctionUrlArgs']]] = None,
                  __props__=None):
         if opts is None:
             opts = pulumi.ResourceOptions()
@@ -388,23 +465,21 @@ class ContainerFunction(pulumi.ComponentResource):
             __props__ = ContainerFunctionArgs.__new__(ContainerFunctionArgs)
 
             __props__.__dict__["architecture"] = architecture
-            __props__.__dict__["context"] = context
             __props__.__dict__["description"] = description
-            __props__.__dict__["dockerfile"] = dockerfile
             __props__.__dict__["environment"] = environment
+            if image_uri is None and not opts.urn:
+                raise TypeError("Missing required property 'image_uri'")
+            __props__.__dict__["image_uri"] = image_uri
             __props__.__dict__["keep_warm"] = keep_warm
             __props__.__dict__["log_retention_in_days"] = log_retention_in_days
             __props__.__dict__["memory_size"] = memory_size
             __props__.__dict__["name"] = name
             __props__.__dict__["name_prefix"] = name_prefix
             __props__.__dict__["policy_document"] = policy_document
-            if repository_url is None and not opts.urn:
-                raise TypeError("Missing required property 'repository_url'")
-            __props__.__dict__["repository_url"] = repository_url
+            __props__.__dict__["schedule_config"] = schedule_config
             __props__.__dict__["timeout"] = timeout
-            __props__.__dict__["url_enabled"] = url_enabled
+            __props__.__dict__["url_config"] = url_config
             __props__.__dict__["arn"] = None
-            __props__.__dict__["image_uri"] = None
             __props__.__dict__["url"] = None
         super(ContainerFunction, __self__).__init__(
             'nuage:aws:ContainerFunction',
@@ -416,20 +491,24 @@ class ContainerFunction(pulumi.ComponentResource):
     @property
     @pulumi.getter
     def arn(self) -> pulumi.Output[str]:
+        """
+        ARN (Amazon Resource Name) of the Lambda Function.
+        """
         return pulumi.get(self, "arn")
 
     @property
     @pulumi.getter
-    def image_uri(self) -> pulumi.Output[str]:
-        return pulumi.get(self, "image_uri")
-
-    @property
-    @pulumi.getter
     def name(self) -> pulumi.Output[str]:
+        """
+        Name of the Lambda Function.
+        """
         return pulumi.get(self, "name")
 
     @property
     @pulumi.getter
     def url(self) -> pulumi.Output[Optional[str]]:
+        """
+        Lambda Function URL (Only valid if `urlEnabled` is used).
+        """
         return pulumi.get(self, "url")
 

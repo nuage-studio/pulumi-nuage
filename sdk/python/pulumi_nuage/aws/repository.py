@@ -76,7 +76,21 @@ class Repository(pulumi.ComponentResource):
                  name_prefix: Optional[pulumi.Input[str]] = None,
                  __props__=None):
         """
-        Create a Repository resource with the given unique name, props, and options.
+        Creates ECR Repository with a lifecycle policy. `url` output of this component can be used within container function to push your images.
+
+        ## Example Usage
+        ### Basic Example
+
+        ```python
+        import pulumi_nuage as nuage
+        
+        repository = nuage.aws.Repository(
+            "foo",
+            name="repository",
+            expire_in_days=30,
+        )
+        ```
+
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[int] expire_in_days: Number of days for expiring images using LifecyclePolicy.
@@ -90,7 +104,21 @@ class Repository(pulumi.ComponentResource):
                  args: Optional[RepositoryArgs] = None,
                  opts: Optional[pulumi.ResourceOptions] = None):
         """
-        Create a Repository resource with the given unique name, props, and options.
+        Creates ECR Repository with a lifecycle policy. `url` output of this component can be used within container function to push your images.
+
+        ## Example Usage
+        ### Basic Example
+
+        ```python
+        import pulumi_nuage as nuage
+        
+        repository = nuage.aws.Repository(
+            "foo",
+            name="repository",
+            expire_in_days=30,
+        )
+        ```
+
         :param str resource_name: The name of the resource.
         :param RepositoryArgs args: The arguments to use to populate this resource's properties.
         :param pulumi.ResourceOptions opts: Options for the resource.
@@ -142,25 +170,40 @@ class Repository(pulumi.ComponentResource):
     @property
     @pulumi.getter
     def arn(self) -> pulumi.Output[str]:
+        """
+        ARN (Amazon Resource Name) of the repository
+        """
         return pulumi.get(self, "arn")
 
     @property
     @pulumi.getter
     def id(self) -> pulumi.Output[str]:
+        """
+        Id of the repository
+        """
         return pulumi.get(self, "id")
 
     @property
     @pulumi.getter
     def name(self) -> pulumi.Output[str]:
+        """
+        Name of the repository
+        """
         return pulumi.get(self, "name")
 
     @property
     @pulumi.getter
     def registry_id(self) -> pulumi.Output[str]:
+        """
+        Registry id of the repository
+        """
         return pulumi.get(self, "registry_id")
 
     @property
     @pulumi.getter
     def url(self) -> pulumi.Output[str]:
+        """
+        URL of the repository
+        """
         return pulumi.get(self, "url")
 

@@ -2,10 +2,13 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
+import { input as inputs, output as outputs, enums } from "../types";
 import * as utilities from "../utilities";
 
+import * as pulumiAws from "@pulumi/aws";
+
 /**
- * Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.
+ * Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature for schedule (cron) definitions and automated X-Ray tracing.
  *
  * ## Example Usage
  */
@@ -24,9 +27,17 @@ export class ContainerFunction extends pulumi.ComponentResource {
         return obj['__pulumiType'] === ContainerFunction.__pulumiType;
     }
 
+    /**
+     * ARN (Amazon Resource Name) of the Lambda Function.
+     */
     public /*out*/ readonly arn!: pulumi.Output<string>;
-    public /*out*/ readonly image_uri!: pulumi.Output<string>;
+    /**
+     * Name of the Lambda Function.
+     */
     public readonly name!: pulumi.Output<string>;
+    /**
+     * Lambda Function URL (Only valid if `urlEnabled` is used).
+     */
     public /*out*/ readonly url!: pulumi.Output<string | undefined>;
 
     /**
@@ -40,29 +51,26 @@ export class ContainerFunction extends pulumi.ComponentResource {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
-            if ((!args || args.repositoryUrl === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'repositoryUrl'");
+            if ((!args || args.imageUri === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'imageUri'");
             }
             resourceInputs["architecture"] = args ? args.architecture : undefined;
-            resourceInputs["context"] = args ? args.context : undefined;
             resourceInputs["description"] = args ? args.description : undefined;
-            resourceInputs["dockerfile"] = args ? args.dockerfile : undefined;
             resourceInputs["environment"] = args ? args.environment : undefined;
+            resourceInputs["imageUri"] = args ? args.imageUri : undefined;
             resourceInputs["keepWarm"] = args ? args.keepWarm : undefined;
             resourceInputs["logRetentionInDays"] = args ? args.logRetentionInDays : undefined;
             resourceInputs["memorySize"] = args ? args.memorySize : undefined;
             resourceInputs["name"] = args ? args.name : undefined;
             resourceInputs["namePrefix"] = args ? args.namePrefix : undefined;
             resourceInputs["policyDocument"] = args ? args.policyDocument : undefined;
-            resourceInputs["repositoryUrl"] = args ? args.repositoryUrl : undefined;
+            resourceInputs["scheduleConfig"] = args ? args.scheduleConfig : undefined;
             resourceInputs["timeout"] = args ? args.timeout : undefined;
-            resourceInputs["urlEnabled"] = args ? args.urlEnabled : undefined;
+            resourceInputs["urlConfig"] = args ? args.urlConfig : undefined;
             resourceInputs["arn"] = undefined /*out*/;
-            resourceInputs["image_uri"] = undefined /*out*/;
             resourceInputs["url"] = undefined /*out*/;
         } else {
             resourceInputs["arn"] = undefined /*out*/;
-            resourceInputs["image_uri"] = undefined /*out*/;
             resourceInputs["name"] = undefined /*out*/;
             resourceInputs["url"] = undefined /*out*/;
         }
@@ -80,27 +88,23 @@ export interface ContainerFunctionArgs {
      */
     architecture?: pulumi.Input<string>;
     /**
-     * Dockerfile context path.
-     */
-    context?: pulumi.Input<string>;
-    /**
      * Description of the function.
      */
     description?: pulumi.Input<string>;
-    /**
-     * Dockerfile path. Defaults to `./Dockerfile`
-     */
-    dockerfile?: pulumi.Input<string>;
     /**
      * Environment Variables
      */
     environment?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
     /**
+     * Image uri of the docker image.
+     */
+    imageUri: pulumi.Input<string>;
+    /**
      * Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`
      */
     keepWarm?: pulumi.Input<boolean>;
     /**
-     * Number of days for log retention to pass in cloudwatch log group..
+     * Number of days for log retention to pass in cloudwatch log group. Defaults to `90`
      */
     logRetentionInDays?: pulumi.Input<number>;
     /**
@@ -120,15 +124,15 @@ export interface ContainerFunctionArgs {
      */
     policyDocument?: pulumi.Input<string>;
     /**
-     * Existing ECR repository name
+     * Configure the function's cloudwatch event rule schedule.
      */
-    repositoryUrl: pulumi.Input<string>;
+    scheduleConfig?: pulumi.Input<inputs.aws.FunctionScheduleArgs>;
     /**
      * Amount of time your Lambda Function has to run in seconds. Defaults to `3`
      */
     timeout?: pulumi.Input<number>;
     /**
-     * Use Lambda URL. Defaults to `false`
+     * Configure lambda function url.
      */
-    urlEnabled?: pulumi.Input<boolean>;
+    urlConfig?: pulumi.Input<inputs.aws.FunctionUrlArgs>;
 }

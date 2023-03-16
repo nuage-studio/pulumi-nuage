@@ -25,12 +25,12 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 		r = &Bastion{}
 	case "nuage:aws:ContainerFunction":
 		r = &ContainerFunction{}
+	case "nuage:aws:Image":
+		r = &Image{}
 	case "nuage:aws:Repository":
 		r = &Repository{}
 	case "nuage:aws:ServerlessDatabase":
 		r = &ServerlessDatabase{}
-	case "nuage:aws:bucket_nuage":
-		r = &Bucket_nuage{}
 	default:
 		return nil, fmt.Errorf("unknown resource type: %s", typ)
 	}

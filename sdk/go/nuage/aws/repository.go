@@ -10,14 +10,22 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
+// Creates ECR Repository with a lifecycle policy. `url` output of this component can be used within container function to push your images.
+//
+// ## Example Usage
 type Repository struct {
 	pulumi.ResourceState
 
-	Arn         pulumi.StringOutput `pulumi:"arn"`
-	Id          pulumi.StringOutput `pulumi:"id"`
-	Name        pulumi.StringOutput `pulumi:"name"`
+	// ARN (Amazon Resource Name) of the repository
+	Arn pulumi.StringOutput `pulumi:"arn"`
+	// Id of the repository
+	Id pulumi.StringOutput `pulumi:"id"`
+	// Name of the repository
+	Name pulumi.StringOutput `pulumi:"name"`
+	// Registry id of the repository
 	Registry_id pulumi.StringOutput `pulumi:"registry_id"`
-	Url         pulumi.StringOutput `pulumi:"url"`
+	// URL of the repository
+	Url pulumi.StringOutput `pulumi:"url"`
 }
 
 // NewRepository registers a new resource with the given unique name, arguments, and options.

@@ -24,14 +24,41 @@ export class ServerlessDatabase extends pulumi.ComponentResource {
         return obj['__pulumiType'] === ServerlessDatabase.__pulumiType;
     }
 
+    /**
+     * IP address of the bastion host. Exists only if `bastionEnabled` is true.
+     */
     public /*out*/ readonly bastion_ip!: pulumi.Output<string | undefined>;
+    /**
+     * Private key to connect bastion host over SSH. Exists only if `bastionEnabled` is true.
+     */
     public /*out*/ readonly bastion_private_key!: pulumi.Output<string | undefined>;
+    /**
+     * ARN (Amazon Resource Name) of the RDS cluster.
+     */
     public /*out*/ readonly cluster_arn!: pulumi.Output<string>;
+    /**
+     * Name of the database
+     */
     public /*out*/ readonly database_name!: pulumi.Output<string>;
+    /**
+     * Host address of DB server
+     */
     public /*out*/ readonly host!: pulumi.Output<string>;
+    /**
+     * Password of DB credentials
+     */
     public /*out*/ readonly password!: pulumi.Output<string | undefined>;
+    /**
+     * Port number of DB
+     */
     public /*out*/ readonly port!: pulumi.Output<number>;
+    /**
+     * Database URI for connection.
+     */
     public /*out*/ readonly uri!: pulumi.Output<string>;
+    /**
+     * Username of DB credentials.
+     */
     public /*out*/ readonly user!: pulumi.Output<string>;
 
     /**

@@ -358,45 +358,72 @@ class ServerlessDatabase(pulumi.ComponentResource):
     @property
     @pulumi.getter
     def bastion_ip(self) -> pulumi.Output[Optional[str]]:
+        """
+        IP address of the bastion host. Exists only if `bastionEnabled` is true.
+        """
         return pulumi.get(self, "bastion_ip")
 
     @property
     @pulumi.getter
     def bastion_private_key(self) -> pulumi.Output[Optional[str]]:
+        """
+        Private key to connect bastion host over SSH. Exists only if `bastionEnabled` is true.
+        """
         return pulumi.get(self, "bastion_private_key")
 
     @property
     @pulumi.getter
     def cluster_arn(self) -> pulumi.Output[str]:
+        """
+        ARN (Amazon Resource Name) of the RDS cluster.
+        """
         return pulumi.get(self, "cluster_arn")
 
     @property
     @pulumi.getter
     def database_name(self) -> pulumi.Output[str]:
+        """
+        Name of the database
+        """
         return pulumi.get(self, "database_name")
 
     @property
     @pulumi.getter
     def host(self) -> pulumi.Output[str]:
+        """
+        Host address of DB server
+        """
         return pulumi.get(self, "host")
 
     @property
     @pulumi.getter
     def password(self) -> pulumi.Output[Optional[str]]:
+        """
+        Password of DB credentials
+        """
         return pulumi.get(self, "password")
 
     @property
     @pulumi.getter
     def port(self) -> pulumi.Output[float]:
+        """
+        Port number of DB
+        """
         return pulumi.get(self, "port")
 
     @property
     @pulumi.getter
     def uri(self) -> pulumi.Output[str]:
+        """
+        Database URI for connection.
+        """
         return pulumi.get(self, "uri")
 
     @property
     @pulumi.getter
     def user(self) -> pulumi.Output[str]:
+        """
+        Username of DB credentials.
+        """
         return pulumi.get(self, "user")
 
