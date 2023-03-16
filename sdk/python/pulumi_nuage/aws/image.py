@@ -7,34 +7,45 @@ import pulumi
 import pulumi.runtime
 from typing import Any, Mapping, Optional, Sequence, Union, overload
 from .. import _utilities
-from ._inputs import *
 
 __all__ = ['ImageArgs', 'Image']
 
 @pulumi.input_type
 class ImageArgs:
     def __init__(__self__, *,
-                 build_args: pulumi.Input['DockerBuildArgs'],
-                 repository_url: pulumi.Input[str]):
+                 dockerfile: pulumi.Input[str],
+                 repository_url: pulumi.Input[str],
+                 architecture: Optional[pulumi.Input[str]] = None,
+                 context: Optional[pulumi.Input[str]] = None,
+                 target: Optional[pulumi.Input[str]] = None):
         """
         The set of arguments for constructing a Image resource.
-        :param pulumi.Input['DockerBuildArgs'] build_args: Docker build arguments of the image.
+        :param pulumi.Input[str] dockerfile: The path to the Dockerfile to use.
         :param pulumi.Input[str] repository_url: Url of the repository.
+        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
+        :param pulumi.Input[str] context: The path to the build context to use.
+        :param pulumi.Input[str] target: The target of the Dockerfile to build
         """
-        pulumi.set(__self__, "build_args", build_args)
+        pulumi.set(__self__, "dockerfile", dockerfile)
         pulumi.set(__self__, "repository_url", repository_url)
+        if architecture is not None:
+            pulumi.set(__self__, "architecture", architecture)
+        if context is not None:
+            pulumi.set(__self__, "context", context)
+        if target is not None:
+            pulumi.set(__self__, "target", target)
 
     @property
-    @pulumi.getter(name="buildArgs")
-    def build_args(self) -> pulumi.Input['DockerBuildArgs']:
+    @pulumi.getter
+    def dockerfile(self) -> pulumi.Input[str]:
         """
-        Docker build arguments of the image.
+        The path to the Dockerfile to use.
         """
-        return pulumi.get(self, "build_args")
+        return pulumi.get(self, "dockerfile")
 
-    @build_args.setter
-    def build_args(self, value: pulumi.Input['DockerBuildArgs']):
-        pulumi.set(self, "build_args", value)
+    @dockerfile.setter
+    def dockerfile(self, value: pulumi.Input[str]):
+        pulumi.set(self, "dockerfile", value)
 
     @property
     @pulumi.getter(name="repositoryUrl")
@@ -48,14 +59,53 @@ class ImageArgs:
     def repository_url(self, value: pulumi.Input[str]):
         pulumi.set(self, "repository_url", value)
 
+    @property
+    @pulumi.getter
+    def architecture(self) -> Optional[pulumi.Input[str]]:
+        """
+        Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
+        """
+        return pulumi.get(self, "architecture")
+
+    @architecture.setter
+    def architecture(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "architecture", value)
+
+    @property
+    @pulumi.getter
+    def context(self) -> Optional[pulumi.Input[str]]:
+        """
+        The path to the build context to use.
+        """
+        return pulumi.get(self, "context")
+
+    @context.setter
+    def context(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "context", value)
+
+    @property
+    @pulumi.getter
+    def target(self) -> Optional[pulumi.Input[str]]:
+        """
+        The target of the Dockerfile to build
+        """
+        return pulumi.get(self, "target")
+
+    @target.setter
+    def target(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "target", value)
+
 
 class Image(pulumi.ComponentResource):
     @overload
     def __init__(__self__,
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
-                 build_args: Optional[pulumi.Input[pulumi.InputType['DockerBuildArgs']]] = None,
+                 architecture: Optional[pulumi.Input[str]] = None,
+                 context: Optional[pulumi.Input[str]] = None,
+                 dockerfile: Optional[pulumi.Input[str]] = None,
                  repository_url: Optional[pulumi.Input[str]] = None,
+                 target: Optional[pulumi.Input[str]] = None,
                  __props__=None):
         """
         Provides a resource to manage build and deployment of Docker builds. It automatically builds the Docker image and pushes it to the specified repository.
@@ -74,18 +124,19 @@ class Image(pulumi.ComponentResource):
         
         image = nuage.aws.Image(
             "foo",
-            build_args=nuage.aws.DockerBuildArgs(
-                dockerfile="../api/Dockerfile",
-                context="../"
-            ),
+            dockerfile="../api/Dockerfile",
+            context="../",
             repository_url=repository.url,
         )
         ```
 
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
-        :param pulumi.Input[pulumi.InputType['DockerBuildArgs']] build_args: Docker build arguments of the image.
+        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
+        :param pulumi.Input[str] context: The path to the build context to use.
+        :param pulumi.Input[str] dockerfile: The path to the Dockerfile to use.
         :param pulumi.Input[str] repository_url: Url of the repository.
+        :param pulumi.Input[str] target: The target of the Dockerfile to build
         """
         ...
     @overload
@@ -110,10 +161,8 @@ class Image(pulumi.ComponentResource):
         
         image = nuage.aws.Image(
             "foo",
-            build_args=nuage.aws.DockerBuildArgs(
-                dockerfile="../api/Dockerfile",
-                context="../"
-            ),
+            dockerfile="../api/Dockerfile",
+            context="../",
             repository_url=repository.url,
         )
         ```
@@ -133,8 +182,11 @@ class Image(pulumi.ComponentResource):
     def _internal_init(__self__,
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
-                 build_args: Optional[pulumi.Input[pulumi.InputType['DockerBuildArgs']]] = None,
+                 architecture: Optional[pulumi.Input[str]] = None,
+                 context: Optional[pulumi.Input[str]] = None,
+                 dockerfile: Optional[pulumi.Input[str]] = None,
                  repository_url: Optional[pulumi.Input[str]] = None,
+                 target: Optional[pulumi.Input[str]] = None,
                  __props__=None):
         if opts is None:
             opts = pulumi.ResourceOptions()
@@ -151,12 +203,15 @@ class Image(pulumi.ComponentResource):
                 raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
             __props__ = ImageArgs.__new__(ImageArgs)
 
-            if build_args is None and not opts.urn:
-                raise TypeError("Missing required property 'build_args'")
-            __props__.__dict__["build_args"] = build_args
+            __props__.__dict__["architecture"] = architecture
+            __props__.__dict__["context"] = context
+            if dockerfile is None and not opts.urn:
+                raise TypeError("Missing required property 'dockerfile'")
+            __props__.__dict__["dockerfile"] = dockerfile
             if repository_url is None and not opts.urn:
                 raise TypeError("Missing required property 'repository_url'")
             __props__.__dict__["repository_url"] = repository_url
+            __props__.__dict__["target"] = target
             __props__.__dict__["name"] = None
             __props__.__dict__["uri"] = None
         super(Image, __self__).__init__(
@@ -169,10 +224,16 @@ class Image(pulumi.ComponentResource):
     @property
     @pulumi.getter
     def name(self) -> pulumi.Output[str]:
+        """
+        Name of the docker image.
+        """
         return pulumi.get(self, "name")
 
     @property
     @pulumi.getter
     def uri(self) -> pulumi.Output[str]:
+        """
+        Image uri of the docker image.
+        """
         return pulumi.get(self, "uri")
 

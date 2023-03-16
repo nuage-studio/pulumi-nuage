@@ -2,6 +2,7 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
+import { input as inputs, output as outputs, enums } from "../types";
 import * as utilities from "../utilities";
 
 /**
@@ -25,11 +26,11 @@ export class ServerlessDatabase extends pulumi.ComponentResource {
     }
 
     /**
-     * IP address of the bastion host. Exists only if `bastionEnabled` is true.
+     * IP address of the bastion host. Exists only if bastion is enabled
      */
     public /*out*/ readonly bastion_ip!: pulumi.Output<string | undefined>;
     /**
-     * Private key to connect bastion host over SSH. Exists only if `bastionEnabled` is true.
+     * Private key to connect bastion host over SSH. Exists only if bastion is enabled.
      */
     public /*out*/ readonly bastion_private_key!: pulumi.Output<string | undefined>;
     /**
@@ -87,8 +88,7 @@ export class ServerlessDatabase extends pulumi.ComponentResource {
             if ((!args || args.vpcId === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'vpcId'");
             }
-            resourceInputs["bastionEnabled"] = args ? args.bastionEnabled : undefined;
-            resourceInputs["bastionSubnetId"] = args ? args.bastionSubnetId : undefined;
+            resourceInputs["bastion"] = args ? args.bastion : undefined;
             resourceInputs["databaseName"] = args ? args.databaseName : undefined;
             resourceInputs["databaseType"] = args ? args.databaseType : undefined;
             resourceInputs["ipWhitelist"] = args ? args.ipWhitelist : undefined;
@@ -126,13 +126,9 @@ export class ServerlessDatabase extends pulumi.ComponentResource {
  */
 export interface ServerlessDatabaseArgs {
     /**
-     * Enable data api. Defaults to `false`
+     * Configure the bastion host for connecting the db.
      */
-    bastionEnabled?: pulumi.Input<boolean>;
-    /**
-     * Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
-     */
-    bastionSubnetId?: pulumi.Input<string>;
+    bastion?: pulumi.Input<inputs.aws.BastionConfigArgs>;
     /**
      * Name of the database.
      */

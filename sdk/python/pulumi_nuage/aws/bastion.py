@@ -81,32 +81,11 @@ class Bastion(pulumi.ComponentResource):
 
         ```python
         import pulumi_nuage as nuage
-        import pulumi_awsx as awsx
-        
-        vpc = awsx.ec2.Vpc(
-            resource_name=f"foo",
-            enable_dns_hostnames=True,
-            number_of_availability_zones=2,
-            nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(
-                strategy=awsx.ec2.NatGatewayStrategy.NONE
-            ),
-            subnet_specs=[
-                awsx.ec2.SubnetSpecArgs(
-                    cidr_mask=24,
-                    type=awsx.ec2.SubnetType.PUBLIC,
-                ),
-                awsx.ec2.SubnetSpecArgs(
-                    cidr_mask=24,
-                    type=awsx.ec2.SubnetType.PRIVATE,
-                ),
-            ],
-        )
-        
         
         db = nuage.aws.Bastion(
             "foo",
             name="bastion-host",
-            vpc_id=my_vpc.id,
+            vpc_id=vpc.id,
             subnet_id=vpc.public_subnet_ids[0]
         )
         ```
@@ -131,32 +110,11 @@ class Bastion(pulumi.ComponentResource):
 
         ```python
         import pulumi_nuage as nuage
-        import pulumi_awsx as awsx
-        
-        vpc = awsx.ec2.Vpc(
-            resource_name=f"foo",
-            enable_dns_hostnames=True,
-            number_of_availability_zones=2,
-            nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(
-                strategy=awsx.ec2.NatGatewayStrategy.NONE
-            ),
-            subnet_specs=[
-                awsx.ec2.SubnetSpecArgs(
-                    cidr_mask=24,
-                    type=awsx.ec2.SubnetType.PUBLIC,
-                ),
-                awsx.ec2.SubnetSpecArgs(
-                    cidr_mask=24,
-                    type=awsx.ec2.SubnetType.PRIVATE,
-                ),
-            ],
-        )
-        
         
         db = nuage.aws.Bastion(
             "foo",
             name="bastion-host",
-            vpc_id=my_vpc.id,
+            vpc_id=vpc.id,
             subnet_id=vpc.public_subnet_ids[0]
         )
         ```

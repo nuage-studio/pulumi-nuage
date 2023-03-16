@@ -17,9 +17,9 @@ import (
 type ServerlessDatabase struct {
 	pulumi.ResourceState
 
-	// IP address of the bastion host. Exists only if `bastionEnabled` is true.
+	// IP address of the bastion host. Exists only if bastion is enabled
 	Bastion_ip pulumi.StringPtrOutput `pulumi:"bastion_ip"`
-	// Private key to connect bastion host over SSH. Exists only if `bastionEnabled` is true.
+	// Private key to connect bastion host over SSH. Exists only if bastion is enabled.
 	Bastion_private_key pulumi.StringPtrOutput `pulumi:"bastion_private_key"`
 	// ARN (Amazon Resource Name) of the RDS cluster.
 	Cluster_arn pulumi.StringOutput `pulumi:"cluster_arn"`
@@ -69,10 +69,8 @@ func NewServerlessDatabase(ctx *pulumi.Context,
 }
 
 type serverlessDatabaseArgs struct {
-	// Enable data api. Defaults to `false`
-	BastionEnabled *bool `pulumi:"bastionEnabled"`
-	// Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
-	BastionSubnetId *string `pulumi:"bastionSubnetId"`
+	// Configure the bastion host for connecting the db.
+	Bastion *BastionConfig `pulumi:"bastion"`
 	// Name of the database.
 	DatabaseName string `pulumi:"databaseName"`
 	// Database type. `mysql` or `postgresql`
@@ -91,10 +89,8 @@ type serverlessDatabaseArgs struct {
 
 // The set of arguments for constructing a ServerlessDatabase resource.
 type ServerlessDatabaseArgs struct {
-	// Enable data api. Defaults to `false`
-	BastionEnabled pulumi.BoolPtrInput
-	// Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
-	BastionSubnetId pulumi.StringPtrInput
+	// Configure the bastion host for connecting the db.
+	Bastion BastionConfigPtrInput
 	// Name of the database.
 	DatabaseName pulumi.StringInput
 	// Database type. `mysql` or `postgresql`

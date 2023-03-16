@@ -17,8 +17,10 @@ import (
 type Image struct {
 	pulumi.ResourceState
 
+	// Name of the docker image.
 	Name pulumi.StringOutput `pulumi:"name"`
-	Uri  pulumi.StringOutput `pulumi:"uri"`
+	// Image uri of the docker image.
+	Uri pulumi.StringOutput `pulumi:"uri"`
 }
 
 // NewImage registers a new resource with the given unique name, arguments, and options.
@@ -28,8 +30,8 @@ func NewImage(ctx *pulumi.Context,
 		return nil, errors.New("missing one or more required arguments")
 	}
 
-	if args.BuildArgs == nil {
-		return nil, errors.New("invalid value for required argument 'BuildArgs'")
+	if args.Dockerfile == nil {
+		return nil, errors.New("invalid value for required argument 'Dockerfile'")
 	}
 	if args.RepositoryUrl == nil {
 		return nil, errors.New("invalid value for required argument 'RepositoryUrl'")
@@ -44,18 +46,30 @@ func NewImage(ctx *pulumi.Context,
 }
 
 type imageArgs struct {
-	// Docker build arguments of the image.
-	BuildArgs DockerBuild `pulumi:"buildArgs"`
+	// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
+	Architecture *string `pulumi:"architecture"`
+	// The path to the build context to use.
+	Context *string `pulumi:"context"`
+	// The path to the Dockerfile to use.
+	Dockerfile string `pulumi:"dockerfile"`
 	// Url of the repository.
 	RepositoryUrl string `pulumi:"repositoryUrl"`
+	// The target of the Dockerfile to build
+	Target *string `pulumi:"target"`
 }
 
 // The set of arguments for constructing a Image resource.
 type ImageArgs struct {
-	// Docker build arguments of the image.
-	BuildArgs DockerBuildInput
+	// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
+	Architecture pulumi.StringPtrInput
+	// The path to the build context to use.
+	Context pulumi.StringPtrInput
+	// The path to the Dockerfile to use.
+	Dockerfile pulumi.StringInput
 	// Url of the repository.
 	RepositoryUrl pulumi.StringInput
+	// The target of the Dockerfile to build
+	Target pulumi.StringPtrInput
 }
 
 func (ImageArgs) ElementType() reflect.Type {

@@ -1,6 +1,6 @@
 {
     "name": "nuage",
-    "version":"0.0.10",
+    "version":"0.1.0",
     "license": "Apache-2.0",
     "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
     "keywords": [
@@ -248,7 +248,7 @@
         },
         "nuage:aws:ServerlessDatabase": {
             "isComponent": true,
-            "description":"The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\nimport pulumi_awsx as awsx\r\n\r\n\r\ndb = nuage.aws.ServerlessDatabase(\r\n    \"foo\",\r\n    name=\"serverless-db\",\r\n    vpc_id=vpc.id,\r\n    subnet_ids=vpc.private_subnet_ids,\r\n    database_type=\"mysql\",\r\n    database_name=\"bar\",\r\n    master_username=\"root\",\r\n    ip_whitelist=[\"0.0.0.0\/0\"],\r\n    skip_final_snapshot=True,\r\n    bastion_enabled=True,\r\n    bastion_subnet_id=vpc.public_subnet_ids[0]\r\n)\r\n```\r\n{{% \/example %}}",
+            "description":"The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\nimport pulumi_awsx as awsx\r\n\r\n\r\ndb = nuage.aws.ServerlessDatabase(\r\n    \"foo\",\r\n    name=\"serverless-db\",\r\n    vpc_id=vpc.id,\r\n    subnet_ids=vpc.private_subnet_ids,\r\n    database_type=\"mysql\",\r\n    database_name=\"bar\",\r\n    master_username=\"root\",\r\n    ip_whitelist=[\"0.0.0.0\/0\"],\r\n    skip_final_snapshot=True,\r\n    bastion=nuage.aws.BastionConfigArgs(\r\n        enabled=True,\r\n        subnet_id=vpc.public_subnet_ids[0]\r\n    ),    \r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "databaseType": {
                     "type": "string",

@@ -11,101 +11,160 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-type DockerBuild struct {
-	// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
-	Architecture *string `pulumi:"architecture"`
-	// The path to the build context to use.
-	Context *string `pulumi:"context"`
-	// The path to the Dockerfile to use.
-	Dockerfile *string `pulumi:"dockerfile"`
-	// Environment variables to set on the invocation of docker build, for example to support DOCKER_BUILDKIT=1 docker build.
-	Env map[string]string `pulumi:"env"`
-	// A bag of extra options to pass on to the docker SDK.
-	ExtraOptions []string `pulumi:"extraOptions"`
-	// The target of the Dockerfile to build
-	Target *string `pulumi:"target"`
+type BastionConfig struct {
+	// Enable data api. Defaults to `false`
+	Enabled bool `pulumi:"enabled"`
+	// Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
+	SubnetId *string `pulumi:"subnetId"`
 }
 
-// DockerBuildInput is an input type that accepts DockerBuildArgs and DockerBuildOutput values.
-// You can construct a concrete instance of `DockerBuildInput` via:
+// BastionConfigInput is an input type that accepts BastionConfigArgs and BastionConfigOutput values.
+// You can construct a concrete instance of `BastionConfigInput` via:
 //
-//	DockerBuildArgs{...}
-type DockerBuildInput interface {
+//	BastionConfigArgs{...}
+type BastionConfigInput interface {
 	pulumi.Input
 
-	ToDockerBuildOutput() DockerBuildOutput
-	ToDockerBuildOutputWithContext(context.Context) DockerBuildOutput
+	ToBastionConfigOutput() BastionConfigOutput
+	ToBastionConfigOutputWithContext(context.Context) BastionConfigOutput
 }
 
-type DockerBuildArgs struct {
-	// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
-	Architecture pulumi.StringPtrInput `pulumi:"architecture"`
-	// The path to the build context to use.
-	Context pulumi.StringPtrInput `pulumi:"context"`
-	// The path to the Dockerfile to use.
-	Dockerfile pulumi.StringPtrInput `pulumi:"dockerfile"`
-	// Environment variables to set on the invocation of docker build, for example to support DOCKER_BUILDKIT=1 docker build.
-	Env pulumi.StringMapInput `pulumi:"env"`
-	// A bag of extra options to pass on to the docker SDK.
-	ExtraOptions pulumi.StringArrayInput `pulumi:"extraOptions"`
-	// The target of the Dockerfile to build
-	Target pulumi.StringPtrInput `pulumi:"target"`
+type BastionConfigArgs struct {
+	// Enable data api. Defaults to `false`
+	Enabled pulumi.BoolInput `pulumi:"enabled"`
+	// Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
+	SubnetId pulumi.StringPtrInput `pulumi:"subnetId"`
 }
 
-func (DockerBuildArgs) ElementType() reflect.Type {
-	return reflect.TypeOf((*DockerBuild)(nil)).Elem()
+func (BastionConfigArgs) ElementType() reflect.Type {
+	return reflect.TypeOf((*BastionConfig)(nil)).Elem()
 }
 
-func (i DockerBuildArgs) ToDockerBuildOutput() DockerBuildOutput {
-	return i.ToDockerBuildOutputWithContext(context.Background())
+func (i BastionConfigArgs) ToBastionConfigOutput() BastionConfigOutput {
+	return i.ToBastionConfigOutputWithContext(context.Background())
 }
 
-func (i DockerBuildArgs) ToDockerBuildOutputWithContext(ctx context.Context) DockerBuildOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(DockerBuildOutput)
+func (i BastionConfigArgs) ToBastionConfigOutputWithContext(ctx context.Context) BastionConfigOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(BastionConfigOutput)
 }
 
-type DockerBuildOutput struct{ *pulumi.OutputState }
-
-func (DockerBuildOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((*DockerBuild)(nil)).Elem()
+func (i BastionConfigArgs) ToBastionConfigPtrOutput() BastionConfigPtrOutput {
+	return i.ToBastionConfigPtrOutputWithContext(context.Background())
 }
 
-func (o DockerBuildOutput) ToDockerBuildOutput() DockerBuildOutput {
+func (i BastionConfigArgs) ToBastionConfigPtrOutputWithContext(ctx context.Context) BastionConfigPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(BastionConfigOutput).ToBastionConfigPtrOutputWithContext(ctx)
+}
+
+// BastionConfigPtrInput is an input type that accepts BastionConfigArgs, BastionConfigPtr and BastionConfigPtrOutput values.
+// You can construct a concrete instance of `BastionConfigPtrInput` via:
+//
+//	        BastionConfigArgs{...}
+//
+//	or:
+//
+//	        nil
+type BastionConfigPtrInput interface {
+	pulumi.Input
+
+	ToBastionConfigPtrOutput() BastionConfigPtrOutput
+	ToBastionConfigPtrOutputWithContext(context.Context) BastionConfigPtrOutput
+}
+
+type bastionConfigPtrType BastionConfigArgs
+
+func BastionConfigPtr(v *BastionConfigArgs) BastionConfigPtrInput {
+	return (*bastionConfigPtrType)(v)
+}
+
+func (*bastionConfigPtrType) ElementType() reflect.Type {
+	return reflect.TypeOf((**BastionConfig)(nil)).Elem()
+}
+
+func (i *bastionConfigPtrType) ToBastionConfigPtrOutput() BastionConfigPtrOutput {
+	return i.ToBastionConfigPtrOutputWithContext(context.Background())
+}
+
+func (i *bastionConfigPtrType) ToBastionConfigPtrOutputWithContext(ctx context.Context) BastionConfigPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(BastionConfigPtrOutput)
+}
+
+type BastionConfigOutput struct{ *pulumi.OutputState }
+
+func (BastionConfigOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((*BastionConfig)(nil)).Elem()
+}
+
+func (o BastionConfigOutput) ToBastionConfigOutput() BastionConfigOutput {
 	return o
 }
 
-func (o DockerBuildOutput) ToDockerBuildOutputWithContext(ctx context.Context) DockerBuildOutput {
+func (o BastionConfigOutput) ToBastionConfigOutputWithContext(ctx context.Context) BastionConfigOutput {
 	return o
 }
 
-// Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
-func (o DockerBuildOutput) Architecture() pulumi.StringPtrOutput {
-	return o.ApplyT(func(v DockerBuild) *string { return v.Architecture }).(pulumi.StringPtrOutput)
+func (o BastionConfigOutput) ToBastionConfigPtrOutput() BastionConfigPtrOutput {
+	return o.ToBastionConfigPtrOutputWithContext(context.Background())
 }
 
-// The path to the build context to use.
-func (o DockerBuildOutput) Context() pulumi.StringPtrOutput {
-	return o.ApplyT(func(v DockerBuild) *string { return v.Context }).(pulumi.StringPtrOutput)
+func (o BastionConfigOutput) ToBastionConfigPtrOutputWithContext(ctx context.Context) BastionConfigPtrOutput {
+	return o.ApplyTWithContext(ctx, func(_ context.Context, v BastionConfig) *BastionConfig {
+		return &v
+	}).(BastionConfigPtrOutput)
 }
 
-// The path to the Dockerfile to use.
-func (o DockerBuildOutput) Dockerfile() pulumi.StringPtrOutput {
-	return o.ApplyT(func(v DockerBuild) *string { return v.Dockerfile }).(pulumi.StringPtrOutput)
+// Enable data api. Defaults to `false`
+func (o BastionConfigOutput) Enabled() pulumi.BoolOutput {
+	return o.ApplyT(func(v BastionConfig) bool { return v.Enabled }).(pulumi.BoolOutput)
 }
 
-// Environment variables to set on the invocation of docker build, for example to support DOCKER_BUILDKIT=1 docker build.
-func (o DockerBuildOutput) Env() pulumi.StringMapOutput {
-	return o.ApplyT(func(v DockerBuild) map[string]string { return v.Env }).(pulumi.StringMapOutput)
+// Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
+func (o BastionConfigOutput) SubnetId() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v BastionConfig) *string { return v.SubnetId }).(pulumi.StringPtrOutput)
 }
 
-// A bag of extra options to pass on to the docker SDK.
-func (o DockerBuildOutput) ExtraOptions() pulumi.StringArrayOutput {
-	return o.ApplyT(func(v DockerBuild) []string { return v.ExtraOptions }).(pulumi.StringArrayOutput)
+type BastionConfigPtrOutput struct{ *pulumi.OutputState }
+
+func (BastionConfigPtrOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((**BastionConfig)(nil)).Elem()
 }
 
-// The target of the Dockerfile to build
-func (o DockerBuildOutput) Target() pulumi.StringPtrOutput {
-	return o.ApplyT(func(v DockerBuild) *string { return v.Target }).(pulumi.StringPtrOutput)
+func (o BastionConfigPtrOutput) ToBastionConfigPtrOutput() BastionConfigPtrOutput {
+	return o
+}
+
+func (o BastionConfigPtrOutput) ToBastionConfigPtrOutputWithContext(ctx context.Context) BastionConfigPtrOutput {
+	return o
+}
+
+func (o BastionConfigPtrOutput) Elem() BastionConfigOutput {
+	return o.ApplyT(func(v *BastionConfig) BastionConfig {
+		if v != nil {
+			return *v
+		}
+		var ret BastionConfig
+		return ret
+	}).(BastionConfigOutput)
+}
+
+// Enable data api. Defaults to `false`
+func (o BastionConfigPtrOutput) Enabled() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *BastionConfig) *bool {
+		if v == nil {
+			return nil
+		}
+		return &v.Enabled
+	}).(pulumi.BoolPtrOutput)
+}
+
+// Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
+func (o BastionConfigPtrOutput) SubnetId() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v *BastionConfig) *string {
+		if v == nil {
+			return nil
+		}
+		return v.SubnetId
+	}).(pulumi.StringPtrOutput)
 }
 
 type FunctionSchedule struct {
@@ -421,12 +480,14 @@ func (o FunctionUrlPtrOutput) UrlEnabled() pulumi.BoolPtrOutput {
 }
 
 func init() {
-	pulumi.RegisterInputType(reflect.TypeOf((*DockerBuildInput)(nil)).Elem(), DockerBuildArgs{})
+	pulumi.RegisterInputType(reflect.TypeOf((*BastionConfigInput)(nil)).Elem(), BastionConfigArgs{})
+	pulumi.RegisterInputType(reflect.TypeOf((*BastionConfigPtrInput)(nil)).Elem(), BastionConfigArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*FunctionScheduleInput)(nil)).Elem(), FunctionScheduleArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*FunctionSchedulePtrInput)(nil)).Elem(), FunctionScheduleArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*FunctionUrlInput)(nil)).Elem(), FunctionUrlArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*FunctionUrlPtrInput)(nil)).Elem(), FunctionUrlArgs{})
-	pulumi.RegisterOutputType(DockerBuildOutput{})
+	pulumi.RegisterOutputType(BastionConfigOutput{})
+	pulumi.RegisterOutputType(BastionConfigPtrOutput{})
 	pulumi.RegisterOutputType(FunctionScheduleOutput{})
 	pulumi.RegisterOutputType(FunctionSchedulePtrOutput{})
 	pulumi.RegisterOutputType(FunctionUrlOutput{})
