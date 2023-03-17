@@ -1,8 +1,63 @@
 {
     "name": "nuage",
-    "version":"0.0.8",
+    "version":"0.1.0",
+    "license": "Apache-2.0",
     "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
+    "keywords": [
+        "pulumi",
+        "aws",
+        "nuage",
+        "kind/component",
+        "category/cloud"
+    ],
     "types": {
+        "nuage:aws:FunctionSchedule": {
+            "properties": {
+                "scheduleExpression": {
+                    "type": "string",
+                    "description":"Expression for creating a cloudwatch event rule."
+                },                      
+                "scheduleInput": {
+                    "type": "object",
+                    "description":"Input for cloudwatch event target."
+                }
+            },
+            "type": "object",
+            "required": [
+                "scheduleExpression"
+            ]
+        },
+        "nuage:aws:BastionConfig": {
+            "properties": {                
+                "subnetId": {
+                    "type": "string",
+                    "description":"Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`"
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "description":"Enable data api. Defaults to `false`"
+                }
+            },
+            "type": "object",
+            "required": [
+                "enabled"
+            ]
+        },
+        "nuage:aws:FunctionUrl": {
+            "properties": {
+                "urlEnabled": {
+                    "type": "boolean",
+                    "description":"Use Lambda URL. Defaults to `false`"
+                },
+                "corsConfiguration":{
+                    "$ref": "/aws/v5.30.0/schema.json#/types/aws:lambda/FunctionUrlCors:FunctionUrlCors",
+                    "description": "CORS Configuration."
+                }
+            },
+            "type": "object",
+            "required": [
+            ]
+        },
         "nuage:aws:ArchitectureType": {
             "type":"string",
             "description":"Architecture, either 'X86_64' or 'arm64'.",
@@ -19,20 +74,53 @@
         }
     },
     "resources": {
-        "nuage:aws:bucket_nuage": {
+        "nuage:aws:Image": {
             "isComponent": true,
+            "description":"Provides a resource to manage build and deployment of Docker builds. It automatically builds the Docker image and pushes it to the specified repository.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\nimage = nuage.aws.Image(\r\n    \"foo\",\r\n    dockerfile=\"../api/Dockerfile\",\r\n    context=\"../\",\r\n    repository_url=repository.url,\r\n)\r\n```\r\n{{% \/example %}}",
+            "inputProperties": {   
+                "context": {
+                    "type": "string",
+                    "description": "The path to the build context to use."
+                },
+                "dockerfile": {
+                    "type": "string",
+                    "description": "The path to the Dockerfile to use."
+                },
+                "target": {
+                    "type": "string",
+                    "description": "The target of the Dockerfile to build"
+                },
+                "architecture": {
+                    "description":"Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`",                    
+                    "type":"string"
+                },          
+                "repositoryUrl": {
+                    "type": "string",
+                    "description":"Url of the repository."
+                }            
+            },
+            "requiredInputs": [    
+                "dockerfile",
+                "repositoryUrl"            
+            ],
             "properties": {
-                "bucket": {
-                    "$ref": "/aws/v4.0.0/schema.json#/resources/aws:s3%2Fbucket:Bucket",
-                    "description": "The bucket resource."
+                "name": {
+                    "type": "string",
+                    "description":"Name of the docker image."
+                },
+                "uri": {
+                    "type": "string",
+                    "description":"Image uri of the docker image."
                 }
             },
             "required": [
-                "bucket"
+                "name",
+                "uri"
             ]
         },
         "nuage:aws:Repository": {
             "isComponent": true,
+            "description":"Creates ECR Repository with a lifecycle policy. `url` output of this component can be used within container function to push your images.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "name": {
                     "type": "string",
@@ -51,19 +139,24 @@
             ],
             "properties": {
                 "registry_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Registry id of the repository"
                 },
                 "arn": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"ARN (Amazon Resource Name) of the repository"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Id of the repository"
                 },
                 "url": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"URL of the repository"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Name of the repository"
                 }
             },
             "required": [
@@ -76,7 +169,7 @@
         },
         "nuage:aws:ContainerFunction": {
             "isComponent": true,
-            "description":"Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature to manage build and deployment of Docker builds, removal of docker build artifacts (randomly generated image names that pollute your local docker) and automated X-Ray tracing.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    repository_url=repository.url,    \r\n    architecture=\"X86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90\r\n)\r\n```\r\n{{% \/example %}}",
+            "description":"Provides an AWS Lambda Function with additional necesary resources. It bundles several resources such as `Lambda Functions`, `Function URLs`, `CloudWatch keep-warm rules`, `Log Group with a Retention Policy`, `Role to run Lambda and Write Logs`. It also has a feature for schedule (cron) definitions and automated X-Ray tracing.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\nrepository = nuage.aws.Repository(\r\n    \"foo\",\r\n    name=\"repository\",\r\n    expire_in_days=30,\r\n)\r\n\r\nimage = nuage.aws.Image(\r\n    \"foo\",\r\n    build_args=nuage.aws.DockerBuildArgs(\r\n        dockerfile=\"../api/Dockerfile\",\r\n        context=\"../\"\r\n    ),\r\n    repository_url=repository.url,\r\n)\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    image_uri=image.uri,\r\n    architecture=\"X86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90,\r\n    schedule_config=nuage.aws.FunctionScheduleArgs(\r\n        schedule_expression=\"rate(5 minutes)\"\r\n    ),\r\n)\r\n```\r\n{{% \/example %}}\r\n\r\n{{% example %}}\r\n### Custom Policy Document Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\npolicy_doc = aws.iam.get_policy_document(\r\n    version=\"2012-10-17\",\r\n    statements=[\r\n        aws.iam.GetPolicyDocumentStatementArgs(\r\n            effect=\"Allow\",\r\n            actions=[\"s3:*\"],\r\n            resources=[\r\n                bucket.arn\r\n            ],\r\n        ),\r\n    ],\r\n).json\r\n\r\ncontainer_function = nuage.aws.ContainerFunction(\"foo\",\r\n    name=\"lambda-function\",\r\n    description=\"Nuage AWS ContainerFunction resource.\",\r\n    image_uri=image.uri,\r\n    architecture=\"X86_64\",\r\n    memory_size=512,\r\n    timeout=30,\r\n    environment={\"bar\":\"baz\"},\r\n    keep_warm=True,\r\n    url=True,\r\n    log_retention_in_days=90,\r\n    schedule_config=nuage.aws.FunctionScheduleArgs(\r\n        schedule_expression=\"rate(5 minutes)\"\r\n    ),\r\n    policy_document=policy_doc\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "name": {
                     "type": "string",
@@ -89,23 +182,15 @@
                 "description": {
                     "type": "string",
                     "description":"Description of the function."
-                },
-                "dockerfile": {
+                },                
+                "imageUri": {
                     "type": "string",
-                    "description":"Dockerfile path. Defaults to `./Dockerfile`"
-                },
-                "context": {
-                    "type": "string",
-                    "description":"Dockerfile context path."
-                },
-                "repositoryUrl": {
-                    "type": "string",
-                    "description":"Existing ECR repository name"
-                },
+                    "description":"Image uri of the docker image."
+                },                       
                 "architecture": {
                     "description":"Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`",                    
                     "type":"string"
-                },
+                },         
                 "memorySize": {
                     "type": "integer",
                     "description":"Amount of memory in MB your Lambda Function can use at runtime. Defaults to `512`."
@@ -126,41 +211,44 @@
                     "type": "boolean",
                     "description":"Keep warm by refreshing the lambda function every 5 minutes. Defaults to `false`"
                 },
-                "urlEnabled": {
-                    "type": "boolean",
-                    "description":"Use Lambda URL. Defaults to `false`"
-                },
                 "logRetentionInDays": {
                     "type": "integer",
-                    "description":"Number of days for log retention to pass in cloudwatch log group.."
+                    "description":"Number of days for log retention to pass in cloudwatch log group. Defaults to `90`"
+                },
+                "urlConfig":{
+                    "$ref": "#/types/nuage:aws:FunctionUrl",
+                    "description": "Configure lambda function url."
+                },
+                "scheduleConfig":{
+                    "$ref": "#/types/nuage:aws:FunctionSchedule",
+                    "description": "Configure the function's cloudwatch event rule schedule."
                 }
             },
             "requiredInputs": [     
-                "repositoryUrl"           
+                "imageUri"           
             ],
             "properties": {
                 "arn": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"ARN (Amazon Resource Name) of the Lambda Function."
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Name of the Lambda Function."
                 },
                 "url": {
-                    "type": "string"
-                },
-                "image_uri": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Lambda Function URL (Only valid if `urlEnabled` is used)."
                 }
             },
             "required": [
                 "arn",
-                "name",
-                "image_uri"
+                "name"
             ]
         },
         "nuage:aws:ServerlessDatabase": {
             "isComponent": true,
-            "description":"The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\nimport pulumi_awsx as awsx\r\n\r\nvpc = awsx.ec2.Vpc(\r\n    resource_name=f\"foo\",\r\n    enable_dns_hostnames=True,\r\n    number_of_availability_zones=2,\r\n    nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(\r\n        strategy=awsx.ec2.NatGatewayStrategy.NONE\r\n    ),\r\n    subnet_specs=[\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PUBLIC,\r\n        ),\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PRIVATE,\r\n        ),\r\n    ],\r\n)\r\n\r\n\r\ndb = nuage.aws.ServerlessDatabase(\r\n    \"foo\",\r\n    name=\"serverless-db\",\r\n    vpc_id=my_vpc.id,\r\n    subnet_ids=my_vpc.private_subnet_ids,\r\n    database_type=\"mysql\",\r\n    database_name=\"bar\",\r\n    master_username=\"root\",\r\n    ip_whitelist=[\"0.0.0.0\/0\"],\r\n    skip_final_snapshot=True,\r\n    bastion_enabled=True,\r\n    bastion_subnet_id=vpc.public_subnet_ids[0]\r\n)\r\n```\r\n{{% \/example %}}",
+            "description":"The ServerlessDatabase component is a convenient and efficient solution for creating serverless databases using Amazon RDS Aurora. It automatically creates components such as subnet group, security group, security group rules, and RDS cluster, and securely manages the DB credentials. With support for both MySQL and PostgreSQL, it provides a fully configured serverless database resource for your serverless database needs.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\nimport pulumi_awsx as awsx\r\n\r\n\r\ndb = nuage.aws.ServerlessDatabase(\r\n    \"foo\",\r\n    name=\"serverless-db\",\r\n    vpc_id=vpc.id,\r\n    subnet_ids=vpc.private_subnet_ids,\r\n    database_type=\"mysql\",\r\n    database_name=\"bar\",\r\n    master_username=\"root\",\r\n    ip_whitelist=[\"0.0.0.0\/0\"],\r\n    skip_final_snapshot=True,\r\n    bastion=nuage.aws.BastionConfigArgs(\r\n        enabled=True,\r\n        subnet_id=vpc.public_subnet_ids[0]\r\n    ),    \r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "databaseType": {
                     "type": "string",
@@ -196,13 +284,9 @@
                     "type": "boolean",
                     "description":"Determines whether a final DB snapshot is created before the DB instance is deleted. Defaults to `false`"
                 },
-                "bastionSubnetId": {
-                    "type": "string",
-                    "description":"Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`"
-                },
-                "bastionEnabled": {
-                    "type": "boolean",
-                    "description":"Enable data api. Defaults to `false`"
+                "bastion":{
+                    "$ref": "#/types/nuage:aws:BastionConfig",
+                    "description": "Configure the bastion host for connecting the db."
                 }
             },
             "requiredInputs": [
@@ -214,31 +298,40 @@
             ],
             "properties": {
                 "user": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Username of DB credentials."
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Password of DB credentials"
                 },
                 "host": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Host address of DB server"
                 },
                 "port": {
-                    "type": "number"
+                    "type": "number",
+                    "description":"Port number of DB"
                 },
                 "database_name": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Name of the database"
                 },
                 "cluster_arn": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"ARN (Amazon Resource Name) of the RDS cluster."
                 },
                 "uri": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Database URI for connection."
                 },
                 "bastion_ip": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"IP address of the bastion host. Exists only if bastion is enabled"
                 },
                 "bastion_private_key": {
-                    "type": "string"
+                    "type": "string",
+                    "description":"Private key to connect bastion host over SSH. Exists only if bastion is enabled."
                 }
             },
             "required": [
@@ -252,7 +345,7 @@
         },
         "nuage:aws:Bastion": {
             "isComponent": true,
-            "description":"Pulumi Nuage's Bastion resource enables the creation of a bastion host through the submission of provided VPC information. The resource creates a private key, security group, and an AWS EC2 `t4g.nano` instance that can serve as the bastion host. This allows secure connectivity to sensitive resources within the VPC, while maintaining isolation from the public internet. You can leverage the outputted private key to establish a connection to the bastion host.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\nimport pulumi_awsx as awsx\r\n\r\nvpc = awsx.ec2.Vpc(\r\n    resource_name=f\"foo\",\r\n    enable_dns_hostnames=True,\r\n    number_of_availability_zones=2,\r\n    nat_gateways=awsx.ec2.NatGatewayConfigurationArgs(\r\n        strategy=awsx.ec2.NatGatewayStrategy.NONE\r\n    ),\r\n    subnet_specs=[\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PUBLIC,\r\n        ),\r\n        awsx.ec2.SubnetSpecArgs(\r\n            cidr_mask=24,\r\n            type=awsx.ec2.SubnetType.PRIVATE,\r\n        ),\r\n    ],\r\n)\r\n\r\n\r\ndb = nuage.aws.Bastion(\r\n    \"foo\",\r\n    name=\"bastion-host\",\r\n    vpc_id=my_vpc.id,\r\n    subnet_id=vpc.public_subnet_ids[0]\r\n)\r\n```\r\n{{% \/example %}}",
+            "description":"Pulumi Nuage's Bastion resource enables the creation of a bastion host through the submission of provided VPC information. The resource creates a private key, security group, and an AWS EC2 `t4g.nano` instance that can serve as the bastion host. This allows secure connectivity to sensitive resources within the VPC, while maintaining isolation from the public internet. You can leverage the outputted private key to establish a connection to the bastion host.\r\n\r\n{{% examples %}}\r\n## Example Usage\r\n{{% example %}}\r\n### Basic Example\r\n\r\n```python\r\nimport pulumi_nuage as nuage\r\n\r\ndb = nuage.aws.Bastion(\r\n    \"foo\",\r\n    name=\"bastion-host\",\r\n    vpc_id=vpc.id,\r\n    subnet_id=vpc.public_subnet_ids[0]\r\n)\r\n```\r\n{{% \/example %}}",
             "inputProperties": {
                 "vpcId": {
                     "type": "string",
@@ -290,8 +383,7 @@
             "packageReferences": {
                 "Pulumi": "3.*",
                 "Pulumi.Aws": "5.*",
-                "Pulumi.Awsx":"1.0.0-beta.*",
-                "Pulumi.Docker":"3.*",
+                "Pulumi.Docker":"4.*",
                 "Pulumi.Command":"4.6.0-alpha.*"
             }
         },
@@ -303,8 +395,7 @@
         "nodejs": {
             "dependencies": {
                 "@pulumi/aws": "^5.0.0",
-                "@pulumi/awsx": "^0.40.0",
-                "@pulumi/docker": "^3.0.0",
+                "@pulumi/docker": "^4.0.0",
                 "@pulumi/command": "^0.7.0"
             },
             "devDependencies": {
@@ -317,8 +408,7 @@
             "requires": {
                 "pulumi": ">=3.0.0,<4.0.0",
                 "pulumi-aws": ">=5.0.0,<6.0.0",
-                "pulumi-awsx": ">=1.0.0b11",
-                "pulumi_docker": ">=3.0.0,<4.0.0",
+                "pulumi_docker": ">=4.0.0",
                 "pulumi-random": ">4.8.0",
                 "pulumi-command": ">=0.7.0"
             },

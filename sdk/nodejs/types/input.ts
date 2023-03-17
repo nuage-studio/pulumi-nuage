@@ -7,31 +7,15 @@ import { input as inputs, output as outputs, enums } from "../types";
 import * as pulumiAws from "@pulumi/aws";
 
 export namespace aws {
-    export interface DockerBuildArgs {
+    export interface BastionConfigArgs {
         /**
-         * Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
+         * Enable data api. Defaults to `false`
          */
-        architecture?: pulumi.Input<string>;
+        enabled: pulumi.Input<boolean>;
         /**
-         * The path to the build context to use.
+         * Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
          */
-        context?: pulumi.Input<string>;
-        /**
-         * The path to the Dockerfile to use.
-         */
-        dockerfile?: pulumi.Input<string>;
-        /**
-         * Environment variables to set on the invocation of docker build, for example to support DOCKER_BUILDKIT=1 docker build.
-         */
-        env?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
-        /**
-         * A bag of extra options to pass on to the docker SDK.
-         */
-        extraOptions?: pulumi.Input<pulumi.Input<string>[]>;
-        /**
-         * The target of the Dockerfile to build
-         */
-        target?: pulumi.Input<string>;
+        subnetId?: pulumi.Input<string>;
     }
 
     export interface FunctionScheduleArgs {

@@ -20,20 +20,25 @@ from typing import Any, Dict, Optional
 import pulumi
 import pulumi_aws as aws
 import pulumi_docker as docker
-from pulumi_command import local
 
-from .models import Architecture, DockerBuild
+from .models import Architecture
 
 
 @dataclass
 class ImageArgs:
-    build_args: pulumi.Input[DockerBuild]
+    context: Optional[pulumi.Input[str]]
+    dockerfile: pulumi.Input[str]
+    target: Optional[pulumi.Input[str]]
+    architecture: Optional[str]
     repository_url: pulumi.Input[str]
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ImageArgs":
         return ImageArgs(
-            build_args=DockerBuild.from_inputs(inputs.get("buildArgs")),
+            context=inputs.get("context", "./"),
+            dockerfile=inputs.get("dockerfile"),
+            target=inputs.get("target", None),
+            architecture=inputs.get("architecture", "X86_64"),
             repository_url=inputs.get("repositoryUrl"),
         )
 
@@ -51,37 +56,36 @@ class Image(pulumi.ComponentResource):
     ) -> None:
         super().__init__("nuage:aws:Image", resource_name, props, opts)
 
-        architecture = Architecture[args.build_args.architecture]
+        architecture = Architecture[args.architecture]
 
         # FIXME: There is no cache-to and extra_options parameter in Pulumi Docker 4.0 (Only cache_from)
         # if os.getenv("GITHUB_ACTIONS"):
         #    # If we're running on a GitHub Actions runner, enable Caching API
         #    extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
 
-        if args.build_args.dockerfile:
-            # Use specified dockerfile.
-            build = docker.DockerBuildArgs(
-                context=args.build_args.context or "./",
-                dockerfile=args.build_args.dockerfile,
-                target=args.build_args.target,
-                platform=architecture.docker_value,
-                # cache_from=docker.CacheFromArgs(images=["type=gha"]),
-            )
-            image_ignore_changes = []
-        else:
-            tmp = tempfile.NamedTemporaryFile(dir="./", delete=True)
-            # Use default aws lambda docker image.
-            with open(tmp.name, "w") as f:
-                f.writelines(
-                    [
-                        "FROM public.ecr.aws/lambda/provided:al2",
-                        '\nCMD [ "function.handler" ]',
-                    ]
-                )
+        # if args.dockerfile:
+        # Use specified dockerfile.
+        build = docker.DockerBuildArgs(
+            context=args.context,
+            dockerfile=args.dockerfile,
+            target=args.target,
+            platform=architecture.docker_value,
+            # cache_from=docker.CacheFromArgs(images=["type=gha"]),
+        )
+        # else:
+        #     tmp = tempfile.NamedTemporaryFile(dir="./", delete=True)
+        #     # Use default aws lambda docker image.
+        #     with open(tmp.name, "w") as f:
+        #         f.writelines(
+        #             [
+        #                 "FROM public.ecr.aws/lambda/provided:al2",
+        #                 '\nCMD [ "function.handler" ]',
+        #             ]
+        #         )
 
-            build = docker.DockerBuildArgs(context="./", dockerfile=tmp.name, platform=architecture.docker_value)
-            # Ignore changes on image_name if default docker image is used.
-            image_ignore_changes = ["image_name"]
+        #     build = docker.DockerBuildArgs(context="./", dockerfile=tmp.name, platform=architecture.docker_value)
+        #     # Ignore changes on image_name if default docker image is used.
+        #     image_ignore_changes = ["image_name"]
 
         # Authenticate with ECR and get cridentals.
         registry_id = args.repository_url.apply(lambda x: x.split(".")[0])
@@ -104,7 +108,7 @@ class Image(pulumi.ComponentResource):
                 username=auth.user_name,
                 password=auth.password,
             ),
-            opts=pulumi.ResourceOptions(parent=self, ignore_changes=image_ignore_changes),
+            opts=pulumi.ResourceOptions(parent=self, ignore_changes=[]),
         )
 
         outputs = {

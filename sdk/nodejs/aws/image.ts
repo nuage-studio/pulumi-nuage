@@ -2,7 +2,6 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
-import { input as inputs, output as outputs, enums } from "../types";
 import * as utilities from "../utilities";
 
 /**
@@ -25,7 +24,13 @@ export class Image extends pulumi.ComponentResource {
         return obj['__pulumiType'] === Image.__pulumiType;
     }
 
+    /**
+     * Name of the docker image.
+     */
     public /*out*/ readonly name!: pulumi.Output<string>;
+    /**
+     * Image uri of the docker image.
+     */
     public /*out*/ readonly uri!: pulumi.Output<string>;
 
     /**
@@ -39,14 +44,17 @@ export class Image extends pulumi.ComponentResource {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
-            if ((!args || args.buildArgs === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'buildArgs'");
+            if ((!args || args.dockerfile === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'dockerfile'");
             }
             if ((!args || args.repositoryUrl === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'repositoryUrl'");
             }
-            resourceInputs["buildArgs"] = args ? args.buildArgs : undefined;
+            resourceInputs["architecture"] = args ? args.architecture : undefined;
+            resourceInputs["context"] = args ? args.context : undefined;
+            resourceInputs["dockerfile"] = args ? args.dockerfile : undefined;
             resourceInputs["repositoryUrl"] = args ? args.repositoryUrl : undefined;
+            resourceInputs["target"] = args ? args.target : undefined;
             resourceInputs["name"] = undefined /*out*/;
             resourceInputs["uri"] = undefined /*out*/;
         } else {
@@ -63,11 +71,23 @@ export class Image extends pulumi.ComponentResource {
  */
 export interface ImageArgs {
     /**
-     * Docker build arguments of the image.
+     * Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
      */
-    buildArgs: pulumi.Input<inputs.aws.DockerBuildArgs>;
+    architecture?: pulumi.Input<string>;
+    /**
+     * The path to the build context to use.
+     */
+    context?: pulumi.Input<string>;
+    /**
+     * The path to the Dockerfile to use.
+     */
+    dockerfile: pulumi.Input<string>;
     /**
      * Url of the repository.
      */
     repositoryUrl: pulumi.Input<string>;
+    /**
+     * The target of the Dockerfile to build
+     */
+    target?: pulumi.Input<string>;
 }

@@ -52,21 +52,13 @@ class UrlConfig:
 
 
 @dataclass
-class DockerBuild:
-    context: Optional[pulumi.Input[str]]
-    dockerfile: Optional[pulumi.Input[str]]
-    env: Optional[pulumi.Input[Dict[str, Any]]]
-    extra_options: Optional[pulumi.Input[List[str]]]
-    target: Optional[pulumi.Input[str]]
-    architecture: Optional[str]
+class BastionConfig:
+    enabled: pulumi.Input[bool]
+    subnet_id: Optional[pulumi.Input[str]]
 
     @staticmethod
-    def from_inputs(inputs: pulumi.Inputs) -> "DockerBuild":
-        return DockerBuild(
-            context=inputs.get("context", None),
-            dockerfile=inputs.get("dockerfile", None),
-            env=inputs.get("env", None),
-            extra_options=inputs.get("extraOptions", []),
-            target=inputs.get("target", None),
-            architecture=inputs.get("architecture", "X86_64"),
+    def from_inputs(inputs: pulumi.Inputs) -> "BastionConfig":
+        return BastionConfig(
+            enabled=inputs.get("enabled"),
+            subnet_id=inputs.get("subnetId", None),
         )

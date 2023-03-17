@@ -11,112 +11,47 @@ from ._enums import *
 import pulumi_aws
 
 __all__ = [
-    'DockerBuildArgs',
+    'BastionConfigArgs',
     'FunctionScheduleArgs',
     'FunctionUrlArgs',
 ]
 
 @pulumi.input_type
-class DockerBuildArgs:
+class BastionConfigArgs:
     def __init__(__self__, *,
-                 architecture: Optional[pulumi.Input[str]] = None,
-                 context: Optional[pulumi.Input[str]] = None,
-                 dockerfile: Optional[pulumi.Input[str]] = None,
-                 env: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]] = None,
-                 extra_options: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 target: Optional[pulumi.Input[str]] = None):
+                 enabled: pulumi.Input[bool],
+                 subnet_id: Optional[pulumi.Input[str]] = None):
         """
-        :param pulumi.Input[str] architecture: Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
-        :param pulumi.Input[str] context: The path to the build context to use.
-        :param pulumi.Input[str] dockerfile: The path to the Dockerfile to use.
-        :param pulumi.Input[Mapping[str, pulumi.Input[str]]] env: Environment variables to set on the invocation of docker build, for example to support DOCKER_BUILDKIT=1 docker build.
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] extra_options: A bag of extra options to pass on to the docker SDK.
-        :param pulumi.Input[str] target: The target of the Dockerfile to build
+        :param pulumi.Input[bool] enabled: Enable data api. Defaults to `false`
+        :param pulumi.Input[str] subnet_id: Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
         """
-        if architecture is not None:
-            pulumi.set(__self__, "architecture", architecture)
-        if context is not None:
-            pulumi.set(__self__, "context", context)
-        if dockerfile is not None:
-            pulumi.set(__self__, "dockerfile", dockerfile)
-        if env is not None:
-            pulumi.set(__self__, "env", env)
-        if extra_options is not None:
-            pulumi.set(__self__, "extra_options", extra_options)
-        if target is not None:
-            pulumi.set(__self__, "target", target)
+        pulumi.set(__self__, "enabled", enabled)
+        if subnet_id is not None:
+            pulumi.set(__self__, "subnet_id", subnet_id)
 
     @property
     @pulumi.getter
-    def architecture(self) -> Optional[pulumi.Input[str]]:
+    def enabled(self) -> pulumi.Input[bool]:
         """
-        Architecture, either `X86_64` or `ARM64`. Defaults to `X86_64`
+        Enable data api. Defaults to `false`
         """
-        return pulumi.get(self, "architecture")
+        return pulumi.get(self, "enabled")
 
-    @architecture.setter
-    def architecture(self, value: Optional[pulumi.Input[str]]):
-        pulumi.set(self, "architecture", value)
-
-    @property
-    @pulumi.getter
-    def context(self) -> Optional[pulumi.Input[str]]:
-        """
-        The path to the build context to use.
-        """
-        return pulumi.get(self, "context")
-
-    @context.setter
-    def context(self, value: Optional[pulumi.Input[str]]):
-        pulumi.set(self, "context", value)
+    @enabled.setter
+    def enabled(self, value: pulumi.Input[bool]):
+        pulumi.set(self, "enabled", value)
 
     @property
-    @pulumi.getter
-    def dockerfile(self) -> Optional[pulumi.Input[str]]:
+    @pulumi.getter(name="subnetId")
+    def subnet_id(self) -> Optional[pulumi.Input[str]]:
         """
-        The path to the Dockerfile to use.
+        Public subnet id for the bastion host. You may use`awsx.ec2.Vpc.public_subnet_ids[0]`
         """
-        return pulumi.get(self, "dockerfile")
+        return pulumi.get(self, "subnet_id")
 
-    @dockerfile.setter
-    def dockerfile(self, value: Optional[pulumi.Input[str]]):
-        pulumi.set(self, "dockerfile", value)
-
-    @property
-    @pulumi.getter
-    def env(self) -> Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]]:
-        """
-        Environment variables to set on the invocation of docker build, for example to support DOCKER_BUILDKIT=1 docker build.
-        """
-        return pulumi.get(self, "env")
-
-    @env.setter
-    def env(self, value: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]]):
-        pulumi.set(self, "env", value)
-
-    @property
-    @pulumi.getter(name="extraOptions")
-    def extra_options(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
-        """
-        A bag of extra options to pass on to the docker SDK.
-        """
-        return pulumi.get(self, "extra_options")
-
-    @extra_options.setter
-    def extra_options(self, value: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]):
-        pulumi.set(self, "extra_options", value)
-
-    @property
-    @pulumi.getter
-    def target(self) -> Optional[pulumi.Input[str]]:
-        """
-        The target of the Dockerfile to build
-        """
-        return pulumi.get(self, "target")
-
-    @target.setter
-    def target(self, value: Optional[pulumi.Input[str]]):
-        pulumi.set(self, "target", value)
+    @subnet_id.setter
+    def subnet_id(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "subnet_id", value)
 
 
 @pulumi.input_type
