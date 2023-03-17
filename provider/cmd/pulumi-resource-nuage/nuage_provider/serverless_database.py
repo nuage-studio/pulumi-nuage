@@ -105,6 +105,25 @@ class ServerlessDatabase(PrefixedComponentResource):
             opts=pulumi.ResourceOptions(parent=security_group),
         )
 
+        if args.database_type == "mysql":
+            engine_version = aws.rds.get_engine_version(
+                engine=aws.rds.EngineType.AURORA_MYSQL,
+                version="8.0",
+                default_only=True,
+            )
+        else:
+            engine_version = aws.rds.get_engine_version(
+                engine=aws.rds.EngineType.AURORA_POSTGRESQL,
+                version="13",
+                default_only=True,
+            )
+
+        cluster_parameter_group = aws.rds.ClusterParameterGroup(
+            resource_name=resource_name,
+            family=engine_version.parameter_group_family,
+            description=self.name_.apply(lambda name: f"{name} cluster parameter group"),
+        )
+
         cluster = aws.rds.Cluster(
             resource_name=resource_name,
             cluster_identifier=self.name_,
@@ -116,15 +135,9 @@ class ServerlessDatabase(PrefixedComponentResource):
             iam_database_authentication_enabled=True,
             vpc_security_group_ids=[security_group.id],
             db_subnet_group_name=subnet_group.name,
-            db_cluster_parameter_group_name=(
-                "default.aurora-mysql8.0" if args.database_type == "mysql" else "default.aurora-postgresql13"
-            ),
-            engine=(
-                aws.rds.EngineType.AURORA_MYSQL
-                if args.database_type == "mysql"
-                else aws.rds.EngineType.AURORA_POSTGRESQL
-            ),
-            engine_version=("8.0.mysql_aurora.3.02.0" if args.database_type == "mysql" else "13.7"),
+            db_cluster_parameter_group_name=cluster_parameter_group.name,
+            engine=engine_version.engine,
+            engine_version=engine_version.version,
             port=port,
             serverlessv2_scaling_configuration=aws.rds.ClusterServerlessv2ScalingConfigurationArgs(
                 min_capacity=0.5,
