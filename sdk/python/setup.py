@@ -8,14 +8,14 @@ from setuptools.command.install import install
 from subprocess import check_call
 
 
-VERSION = "0.1.0"
-PLUGIN_VERSION = "0.1.0"
+VERSION = "0.1.1"
+PLUGIN_VERSION = "0.1.1"
 
 class InstallPluginCommand(install):
     def run(self):
         install.run(self)
         try:
-            check_call(['pulumi', 'plugin', 'install', 'resource', 'nuage', PLUGIN_VERSION, '--server', 'github://api.github.com/nuage/pulumi-nuage'])
+            check_call(['pulumi', 'plugin', 'install', 'resource', 'nuage', PLUGIN_VERSION, '--server', 'github://api.github.com/nuage-studio/pulumi-nuage'])
         except OSError as error:
             if error.errno == errno.ENOENT:
                 print(f"""
