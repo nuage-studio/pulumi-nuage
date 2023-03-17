@@ -88,14 +88,14 @@ func isZero(v interface{}) bool {
 
 // pkgResourceDefaultOpts provides package level defaults to pulumi.OptionResource.
 func pkgResourceDefaultOpts(opts []pulumi.ResourceOption) []pulumi.ResourceOption {
-	defaults := []pulumi.ResourceOption{pulumi.PluginDownloadURL("github://api.github.com/nuage/pulumi-nuage")}
+	defaults := []pulumi.ResourceOption{pulumi.PluginDownloadURL("github://api.github.com/nuage-studio/pulumi-nuage")}
 
 	return append(defaults, opts...)
 }
 
 // pkgInvokeDefaultOpts provides package level defaults to pulumi.OptionInvoke.
 func pkgInvokeDefaultOpts(opts []pulumi.InvokeOption) []pulumi.InvokeOption {
-	defaults := []pulumi.InvokeOption{pulumi.PluginDownloadURL("github://api.github.com/nuage/pulumi-nuage")}
+	defaults := []pulumi.InvokeOption{pulumi.PluginDownloadURL("github://api.github.com/nuage-studio/pulumi-nuage")}
 
 	return append(defaults, opts...)
 }

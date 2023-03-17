@@ -1,8 +1,8 @@
 {
     "name": "nuage",
-    "version":"0.1.0",
+    "version":"0.1.1",
     "license": "Apache-2.0",
-    "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage",
+    "pluginDownloadURL": "github://api.github.com/nuage-studio/pulumi-nuage",
     "keywords": [
         "pulumi",
         "aws",

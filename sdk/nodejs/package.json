@@ -1,6 +1,6 @@
 {
     "name": "@pulumi/nuage",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "keywords": [
         "pulumi",
         "aws",
@@ -11,7 +11,7 @@
     "license": "Apache-2.0",
     "scripts": {
         "build": "tsc",
-        "install": "node scripts/install-pulumi-plugin.js resource nuage 0.1.0"
+        "install": "node scripts/install-pulumi-plugin.js resource nuage 0.1.1"
     },
     "dependencies": {
         "@pulumi/aws": "^5.0.0",
@@ -26,8 +26,8 @@
         "@pulumi/pulumi": "latest"
     },
     "pulumi": {
-        "version": "0.1.0",
+        "version": "0.1.1",
         "resource": true,
-        "pluginDownloadURL": "github://api.github.com/nuage/pulumi-nuage"
+        "pluginDownloadURL": "github://api.github.com/nuage-studio/pulumi-nuage"
     }
 }
