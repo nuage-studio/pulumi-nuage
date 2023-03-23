@@ -22,8 +22,11 @@
     "python.terminal.activateEnvInCurrentTerminal": true,
     "python.terminal.activateEnvironment": true,
     "python.formatting.provider": "black",
-    "python.formatting.blackArgs": ["--preview", "--line-length=120"],
-    "python.sortImports.args": [
+    "python.formatting.blackArgs": [
+      "--preview",
+      "--line-length=120"
+    ],
+    "isort.args": [
       // https://github.com/microsoft/vscode-isort
       "--skip-gitignore",
       "--profile",
@@ -40,7 +43,9 @@
     ],
     "[python]": {
       "editor.defaultFormatter": "ms-python.python",
-      "editor.rulers": [120]
+      "editor.rulers": [
+        120
+      ]
     },
     "[json|yaml]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -51,7 +56,8 @@
     },
     "search.exclude": {
       "**/.venv": true,
-      "**/.task": true
+      "**/.task": true,
+      "**/build": true
     }
   },
   "extensions": {
