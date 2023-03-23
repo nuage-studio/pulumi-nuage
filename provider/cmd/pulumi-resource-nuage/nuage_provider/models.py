@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import pulumi
-import pulumi_aws as aws
+from pulumi_aws.lambda_ import FunctionUrlCorsArgs as FunctionUrlCorsArgs  # explicit re-export
 
 
 class Architecture(IntEnum):
@@ -41,7 +41,7 @@ class ScheduleConfig:
 @dataclass
 class UrlConfig:
     url_enabled: pulumi.Input[bool]
-    cors_configuration: Optional[pulumi.Input[aws.lambda_.FunctionUrlCorsArgs]] = None
+    cors_configuration: Optional[pulumi.Input[FunctionUrlCorsArgs]] = None
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "UrlConfig":
