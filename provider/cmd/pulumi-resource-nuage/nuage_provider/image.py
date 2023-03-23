@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import tempfile
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
@@ -38,7 +36,7 @@ class ImageArgs:
             context=inputs.get("context", "./"),
             dockerfile=inputs.get("dockerfile"),
             target=inputs.get("target", None),
-            architecture=inputs.get("architecture", "X86_64"),
+            architecture=inputs.get("architecture", Architecture.X86_64.value),
             repository_url=inputs.get("repositoryUrl"),
         )
 
@@ -63,8 +61,6 @@ class Image(pulumi.ComponentResource):
         #    # If we're running on a GitHub Actions runner, enable Caching API
         #    extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
 
-        # if args.dockerfile:
-        # Use specified dockerfile.
         build = docker.DockerBuildArgs(
             context=args.context,
             dockerfile=args.dockerfile,
@@ -72,26 +68,12 @@ class Image(pulumi.ComponentResource):
             platform=architecture.docker_value,
             # cache_from=docker.CacheFromArgs(images=["type=gha"]),
         )
-        # else:
-        #     tmp = tempfile.NamedTemporaryFile(dir="./", delete=True)
-        #     # Use default aws lambda docker image.
-        #     with open(tmp.name, "w") as f:
-        #         f.writelines(
-        #             [
-        #                 "FROM public.ecr.aws/lambda/provided:al2",
-        #                 '\nCMD [ "function.handler" ]',
-        #             ]
-        #         )
 
-        #     build = docker.DockerBuildArgs(context="./", dockerfile=tmp.name, platform=architecture.docker_value)
-        #     # Ignore changes on image_name if default docker image is used.
-        #     image_ignore_changes = ["image_name"]
-
-        # Authenticate with ECR and get cridentals.
+        # Authenticate with ECR and get credentials
         registry_id = args.repository_url.apply(lambda x: x.split(".")[0])
         auth = aws.ecr.get_authorization_token(registry_id=registry_id)
 
-        self.image_uri = pulumi.Output.all(url=args.repository_url, name=resource_name).apply(
+        ecr_uri = pulumi.Output.all(url=args.repository_url, name=resource_name).apply(
             lambda args: f"{args['url']}:{args['name']}"
         )
 
@@ -100,7 +82,7 @@ class Image(pulumi.ComponentResource):
         image = docker.Image(
             resource_name,
             build=build,
-            image_name=self.image_uri,
+            image_name=ecr_uri,
             # FIXME: local_image_name doesn't exists in Docker 4.0 yet
             # local_image_name=self.name,
             registry=docker.RegistryArgs(
@@ -113,6 +95,7 @@ class Image(pulumi.ComponentResource):
 
         outputs = {
             "uri": image.image_name,
+            "repo_digest": image.repo_digest,
             "name": self.name,
         }
         self.set_outputs(outputs)
