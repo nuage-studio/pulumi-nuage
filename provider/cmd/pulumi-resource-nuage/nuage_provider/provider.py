@@ -52,63 +52,66 @@ class Provider(provider.Provider):
 
 
 def _create_bastion(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None):
-    created_resource = Bastion(name, BastionArgs.from_inputs(inputs), dict(inputs), options)
+    bastion = Bastion(name, BastionArgs.from_inputs(inputs), dict(inputs), options)
     return provider.ConstructResult(
-        urn=created_resource.urn,
+        urn=bastion.urn,
         state={
-            "private_key_pem": created_resource.private_key_pem,
-            "public_ip": created_resource.public_ip,
+            "private_key_pem": bastion.private_key_pem,
+            "public_ip": bastion.public_ip,
         },
     )
 
 
 def _create_database(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
-    created_resource = ServerlessDatabase(name, ServerlessDatabaseArgs.from_inputs(inputs), dict(inputs), options)
+    database = ServerlessDatabase(name, ServerlessDatabaseArgs.from_inputs(inputs), dict(inputs), options)
     return provider.ConstructResult(
-        urn=created_resource.urn,
+        urn=database.urn,
         state={
-            "user": created_resource.user,
-            "host": created_resource.host,
-            "port": created_resource.port,
-            "name": created_resource.name,
-            "cluster_arn": created_resource.cluster_arn,
-            "uri": created_resource.uri,
-            "bastion_ip": created_resource.bastion_ip,
-            "bastion_private_key": created_resource.bastion_private_key,
+            "user": database.user,
+            "host": database.host,
+            "port": database.port,
+            "name": database.name,
+            "cluster_arn": database.cluster_arn,
+            "uri": database.uri,
+            "bastion_ip": database.bastion_ip,
+            "bastion_private_key": database.bastion_private_key,
         },
     )
 
 
 def _create_repository(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
-    created_repository = Repository(name, RepositoryArgs.from_inputs(inputs), dict(inputs), options)
+    repository = Repository(name, RepositoryArgs.from_inputs(inputs), dict(inputs), options)
 
     return provider.ConstructResult(
-        urn=created_repository.urn,
+        urn=repository.urn,
         state={
-            "arn": created_repository.arn,
-            "id": created_repository.id,
-            "url": created_repository.url,
-            "registry_id": created_repository.registry_id,
+            "arn": repository.arn,
+            "id": repository.id,
+            "url": repository.url,
+            "registry_id": repository.registry_id,
         },
     )
 
 
 def _create_image(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
-    created_image = Image(name, ImageArgs.from_inputs(inputs), dict(inputs), options)
+    image = Image(name, ImageArgs.from_inputs(inputs), dict(inputs), options)
     return provider.ConstructResult(
-        urn=created_image.urn,
-        state={"name": created_image.name, "uri": created_image.uri},
+        urn=image.urn,
+        state={
+            "name": image.name,
+            "uri": image.uri,
+        },
     )
 
 
 def _create_function(name: str, inputs: Inputs, options: Optional[ResourceOptions] = None) -> ConstructResult:
-    created_container = ContainerFunction(name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options)
+    function = ContainerFunction(name, ContainerFunctionArgs.from_inputs(inputs), dict(inputs), options)
 
     return provider.ConstructResult(
-        urn=created_container.urn,
+        urn=function.urn,
         state={
-            "arn": created_container.arn,
-            "name": created_container.name,
-            "url": created_container.url,
+            "arn": function.arn,
+            "name": function.name,
+            "url": function.url,
         },
     )

@@ -1,0 +1,2 @@
+--requirement requirements.txt
+black>=23.1.0

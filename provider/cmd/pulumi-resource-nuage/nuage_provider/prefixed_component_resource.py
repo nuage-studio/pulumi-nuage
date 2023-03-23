@@ -1,5 +1,5 @@
-from typing import Any, Dict, Optional
 from dataclasses import dataclass
+from typing import Optional
 
 import pulumi
 import pulumi_random as random
@@ -45,9 +45,7 @@ class PrefixedComponentResource(pulumi.ComponentResource):
                 special=False,
                 upper=False,
             ).result
-            self.name_: str = self.suffix.apply(
-                lambda suffix: f"{name_prefix}-{suffix}"
-            )
+            self.name_: str = self.suffix.apply(lambda suffix: f"{name_prefix}-{suffix}")
             self.name_prefix = pulumi.Output.from_input(name_prefix)
 
         super().__init__(resource_type, resource_name, props, opts)
@@ -57,9 +55,7 @@ class PrefixedComponentResource(pulumi.ComponentResource):
         Add name prefix and random suffix to the resource name for child resources.
         """
         if self.suffix and self.name_prefix:
-            return pulumi.Output.all(
-                name_prefix=self.name_prefix, suffix=self.suffix
-            ).apply(
+            return pulumi.Output.all(name_prefix=self.name_prefix, suffix=self.suffix).apply(
                 lambda args: f"{args['name_prefix']}-{resource_name}-{args['suffix']}"
             )
         else:

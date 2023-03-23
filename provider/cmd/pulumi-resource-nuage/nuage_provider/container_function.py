@@ -13,16 +13,11 @@
 # limitations under the License.
 
 import json
-import os
-import tempfile
 from dataclasses import dataclass
-from enum import IntEnum
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 import pulumi
 import pulumi_aws as aws
-import pulumi_docker as docker
-from pulumi_command import local
 
 from .models import Architecture, ScheduleConfig, UrlConfig
 from .prefixed_component_resource import PrefixedComponentResource, PrefixedComponentResourceArgs
@@ -35,7 +30,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     architecture: Optional[str]
     memory_size: Optional[pulumi.Input[int]]
     timeout: Optional[pulumi.Input[int]]
-    environment: Optional[pulumi.Input[Dict[str, pulumi.Input[str]]]]
+    environment: Optional[pulumi.Input[dict[str, pulumi.Input[str]]]]
     policy_document: Optional[pulumi.Input[str]]
     keep_warm: pulumi.Input[bool]
     log_retention_in_days: pulumi.Input[int]
@@ -88,7 +83,7 @@ class ContainerFunction(PrefixedComponentResource):
             opts=pulumi.ResourceOptions(parent=self),
         )
 
-        policy_documents: List[str] = [
+        policy_documents: list[str] = [
             # Can write logs to CloudWatch
             aws.iam.RoleInlinePolicyArgs(
                 name=self.get_suffixed_name("logging-policy"),
@@ -133,7 +128,8 @@ class ContainerFunction(PrefixedComponentResource):
                 ],
             ).json,
             managed_policy_arns=[
-                # FIXME: Right now, AWS_CLOUD_WATCH_LAMBDA_INSIGHTS_EXECUTION_ROLE_POLICY returns a wrong stirng with AWS prefix.
+                # FIXME: Right now, AWS_CLOUD_WATCH_LAMBDA_INSIGHTS_EXECUTION_ROLE_POLICY returns a wrong
+                # string with AWS prefix.
                 # See https://github.com/pulumi/pulumi-aws/issues/2269
                 "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy",
                 aws.iam.ManagedPolicy.AWSX_RAY_DAEMON_WRITE_ACCESS,
@@ -226,21 +222,9 @@ class ContainerFunction(PrefixedComponentResource):
         else:
             outputs["url"] = None
 
-        # Untag ecs urls and keep only {pulumi.get_organization()}:{resource_name}.
-        # rsplit is because the generated name contains suffix at the end and we also need to untag image without that suffix
-        # args.image_uri.apply(
-        #     lambda generated_image_name: (
-        #         local.Command(
-        #             resource_name,
-        #             create=f"docker rmi {generated_image_name.rsplit('-', 1)[0]} && docker rmi {generated_image_name}",
-        #             opts=pulumi.ResourceOptions(parent=self.function),
-        #         )
-        #     )
-        # )
-
         self.set_outputs(outputs)
 
-    def set_outputs(self, outputs: Dict[str, Any]):
+    def set_outputs(self, outputs: dict):
         """
         Adds the Pulumi outputs as attributes on the current object so they can be
         used as outputs by the caller, as well as registering them.
