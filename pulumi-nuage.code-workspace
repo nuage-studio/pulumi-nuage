@@ -64,9 +64,7 @@
     "recommendations": [
       "ms-python.python",
       "ms-python.vscode-pylance",
-      "visualstudioexptteam.vscodeintellicode",
       "esbenp.prettier-vscode",
-      "christian-kohler.path-intellisense",
       "davidanson.vscode-markdownlint",
       "boto3typed.boto3-ide",
       "mark-tucker.aws-cli-configure"
