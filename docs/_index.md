@@ -29,7 +29,6 @@ Here are the summary of features:
 
 The Repository component is a convenient tool for managing Amazon Elastic Container Registry (ECR) repositories. It offers the ability to create an ECR repository with a lifecycle policy on demand. The output of this repository can be easily utilized as an input for the ContainerFunction component, providing a seamless integration of these two components.
 
-
 {{< chooser language "typescript,python" >}}
 {{% choosable language typescript %}}
 
@@ -71,7 +70,7 @@ repository = nuage.aws.Repository(
 container_function = nuage.aws.ContainerFunction("foo",
     name="lambda-function",
     description="Nuage AWS ContainerFunction resource.",
-    repository_url=repository.url,    
+    repository_url=repository.url,
     architecture="X86_64",
     memory_size=512,
     timeout=30,
@@ -85,7 +84,6 @@ container_function = nuage.aws.ContainerFunction("foo",
 {{% /choosable %}}
 
 {{< /chooser >}}
-
 
 ### ServerlessDatabase
 
@@ -110,7 +108,7 @@ const db = new nuage.aws.Repository("foo",{
     skipFinalSnapshot:true
 });
 ```
- 
+
 {{% /choosable %}}
 {{% choosable language python %}}
 

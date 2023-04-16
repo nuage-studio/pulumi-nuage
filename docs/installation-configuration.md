@@ -6,7 +6,6 @@ layout: installation
 
 ## Installation
 
-
 To provision resources with the Pulumi Nuage provider,  you can set up the sdk of the language you prefer.
 
 * JavaScript/TypeScript: [`@pulumi/nuage`](https://github.com/nuage-studio/pulumi-nuage/tree/master/sdk/nodejs)
