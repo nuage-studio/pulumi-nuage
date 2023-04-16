@@ -5,11 +5,6 @@ services:
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
-      args:
-        # Update 'VARIANT' to pick a version of Python: 3, 3.10, 3.9, 3.8, 3.7, 3.6
-        # Append -bullseye or -buster to pin to an OS version.
-        # Use -bullseye variants on local arm64/Apple Silicon.
-        VARIANT: "3.10"
     init: true
     volumes:
       - ..:/workspace:cached
@@ -24,3 +19,15 @@ services:
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
+
+  localstack:
+    image: localstack/localstack:2.0.1
+    ports:
+      - "127.0.0.1:4566:4566" # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559" # external services port range
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "../.localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"

@@ -137,4 +137,9 @@ sdk/**/bin/
 **/node_modules/
 nuget/
 sdk/*/README.md
+
+# Taskfile
 .task/
+
+# Localstack
+.localstack/
