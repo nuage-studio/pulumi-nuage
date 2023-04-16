@@ -14,13 +14,8 @@
       // Set *default* container specific settings.json values on container create.
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
-        "isort.path": [
-          "/usr/local/py-utils/venvs/poetry/bin/isort"
-        ],
-        "isort.args": [
-          "--settings",
-          "/workspace/pyproject.toml"
-        ],
+        "isort.path": ["/usr/local/py-utils/venvs/poetry/bin/isort"],
+        "isort.args": ["--settings", "/workspace/pyproject.toml"],
         "python.formatting.blackPath": "/usr/local/py-utils/venvs/poetry/bin/black",
         "python.formatting.blackArgs": [
           "--preview",
@@ -35,16 +30,11 @@
         // VSCode
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-azuretools.vscode-docker",
-        "visualstudioexptteam.vscodeintellicode",
-        "GitHub.copilot",
         // AWS
-        "mark-tucker.aws-cli-configure",
         "boto3typed.boto3-ide",
         "amazonwebservices.aws-toolkit-vscode",
         // 3rd party
         "esbenp.prettier-vscode",
-        "christian-kohler.path-intellisense",
         "davidanson.vscode-markdownlint",
         "tamasfe.even-better-toml"
       ]
