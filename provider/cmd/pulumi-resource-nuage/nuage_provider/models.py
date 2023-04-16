@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import pulumi
 from pulumi_aws.lambda_ import FunctionUrlCorsArgs as FunctionUrlCorsArgs  # explicit re-export
@@ -28,7 +28,7 @@ class Architecture(IntEnum):
 @dataclass
 class ScheduleConfig:
     schedule_expression: pulumi.Input[str]
-    schedule_input: Optional[pulumi.Input[Dict[str, pulumi.Input[Any]]]] = None
+    schedule_input: Optional[pulumi.Input[dict[str, pulumi.Input[Any]]]] = None
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ScheduleConfig":
@@ -48,17 +48,4 @@ class UrlConfig:
         return UrlConfig(
             url_enabled=inputs.get("urlEnabled", False),
             cors_configuration=inputs.get("corsConfiguration", None),
-        )
-
-
-@dataclass
-class BastionConfig:
-    enabled: pulumi.Input[bool]
-    subnet_id: Optional[pulumi.Input[str]]
-
-    @staticmethod
-    def from_inputs(inputs: pulumi.Inputs) -> "BastionConfig":
-        return BastionConfig(
-            enabled=inputs.get("enabled"),
-            subnet_id=inputs.get("subnetId", None),
         )

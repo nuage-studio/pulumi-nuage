@@ -1,36 +1,49 @@
-import json
 import string
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import pulumi
 import pulumi_aws as aws
 import pulumi_random
 
 from .bastion import Bastion, BastionArgs
-from .models import BastionConfig
-from .postgres_extension import PgExtension
+
 from .prefixed_component_resource import PrefixedComponentResource, PrefixedComponentResourceArgs
+
+
+@dataclass
+class BastionConfig:
+    enabled: pulumi.Input[bool]
+    subnet_id: Optional[pulumi.Input[str]] = None
+
+    @staticmethod
+    def from_inputs(inputs: pulumi.Inputs) -> "BastionConfig":
+        return BastionConfig(
+            enabled=inputs.get("enabled"),
+            subnet_id=inputs.get("subnetId", None),
+        )
 
 
 @dataclass
 class ServerlessDatabaseArgs(PrefixedComponentResourceArgs):
     vpc_id: pulumi.Input[str]
-    subnet_ids: pulumi.Input[List[str]]
+    subnet_ids: pulumi.Input[list[str]]
     database_type: pulumi.Input[str]
 
-    database_name: Optional[pulumi.Input[str]]
-    master_username: Optional[pulumi.Input[str]]
-    ip_whitelist: Optional[pulumi.Input[List[str]]]
-    skip_final_snapshot: Optional[pulumi.Input[bool]]
+    database_name: Optional[pulumi.Input[str]] = None
+    master_username: Optional[pulumi.Input[str]] = None
+    ip_whitelist: Optional[pulumi.Input[list[str]]] = None
+    skip_final_snapshot: Optional[pulumi.Input[bool]] = None
 
-    bastion: Optional[pulumi.Input[BastionConfig]]
+    bastion: Optional[pulumi.Input[BastionConfig]] = None
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ServerlessDatabaseArgs":
         bastion = inputs.get("bastion", None)
 
         return ServerlessDatabaseArgs(
+            name=inputs.get("name", None),
+            name_prefix=inputs.get("namePrefix", None),
             vpc_id=inputs["vpcId"],
             subnet_ids=inputs["subnetIds"],
             database_type=inputs["databaseType"],
@@ -121,7 +134,7 @@ class ServerlessDatabase(PrefixedComponentResource):
         cluster_parameter_group = aws.rds.ClusterParameterGroup(
             resource_name=resource_name,
             family=engine_version.parameter_group_family,
-            description=self.name_.apply(lambda name: f"{name} cluster parameter group"),
+            description=f"{self._name} cluster parameter group",
         )
 
         cluster = aws.rds.Cluster(
@@ -147,7 +160,7 @@ class ServerlessDatabase(PrefixedComponentResource):
             # https://github.com/terraform-aws-modules/terraform-aws-rds-aurora/issues/129
             skip_final_snapshot=args.skip_final_snapshot,
             storage_encrypted=True,
-            opts=pulumi.ResourceOptions(parent=self, depends_on=[subnet_group]),
+            opts=pulumi.ResourceOptions(parent=self),
         )
         # Create a cluster instance
 
@@ -200,7 +213,7 @@ class ServerlessDatabase(PrefixedComponentResource):
 
         self.set_outputs(outputs)
 
-    def set_outputs(self, outputs: Dict[str, Any]):
+    def set_outputs(self, outputs: dict[str, Any]):
         """
         Adds the Pulumi outputs as attributes on the current object so they can be
         used as outputs by the caller, as well as registering them.
