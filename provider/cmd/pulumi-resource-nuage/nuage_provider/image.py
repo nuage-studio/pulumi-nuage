@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
 
 import pulumi
 import pulumi_aws as aws
@@ -24,65 +23,53 @@ from .models import Architecture
 
 @dataclass
 class ImageArgs:
-    context: Optional[pulumi.Input[str]]
     dockerfile: pulumi.Input[str]
-    target: Optional[pulumi.Input[str]]
-    architecture: Optional[str]
     repository_url: pulumi.Input[str]
+    context: pulumi.Input[str] | None = "./"
+    target: pulumi.Input[str] | None
+    architecture: str = Architecture.ARM64.value
 
     @staticmethod
     def from_inputs(inputs: pulumi.Inputs) -> "ImageArgs":
-        return ImageArgs(
-            context=inputs.get("context", "./"),
-            dockerfile=inputs.get("dockerfile"),
-            target=inputs.get("target", None),
-            architecture=inputs.get("architecture", Architecture.X86_64.value),
-            repository_url=inputs.get("repositoryUrl"),
-        )
+        return ImageArgs(**inputs)
 
 
 class Image(pulumi.ComponentResource):
-    name: pulumi.Output[str]
     uri: pulumi.Output[str]
 
     def __init__(
         self,
         resource_name: str,
         args: ImageArgs,
-        props: Optional[dict] = None,
-        opts: Optional[pulumi.ResourceOptions] = None,
+        props: dict | None = None,
+        opts: pulumi.ResourceOptions | None = None,
     ) -> None:
         super().__init__("nuage:aws:Image", resource_name, props, opts)
 
-        architecture = Architecture[args.architecture]
+        self.uri = args.repository_url.apply(lambda url: f"{url}:{resource_name}")
 
         # FIXME: There is no cache-to and extra_options parameter in Pulumi Docker 4.0 (Only cache_from)
         # if os.getenv("GITHUB_ACTIONS"):
         #    # If we're running on a GitHub Actions runner, enable Caching API
         #    extra_options += ["--cache-to=type=gha,mode=max", "--cache-from=type=gha"]
 
+        architecture = Architecture[args.architecture]
         build = docker.DockerBuildArgs(
-            context=args.context,
             dockerfile=args.dockerfile,
+            context=args.context,
             target=args.target,
             platform=architecture.docker_value,
             # cache_from=docker.CacheFromArgs(images=["type=gha"]),
+            # cache_to=docker.CacheToArgs(mode="max", type="gha"),
         )
 
         # Authenticate with ECR and get credentials
-        registry_id = args.repository_url.apply(lambda x: x.split(".")[0])
-        auth = aws.ecr.get_authorization_token(registry_id=registry_id)
-
-        ecr_uri = pulumi.Output.all(url=args.repository_url, name=resource_name).apply(
-            lambda args: f"{args['url']}:{args['name']}"
-        )
-
-        self.name = f"{pulumi.get_organization()}:{resource_name}"
+        auth = aws.ecr.get_authorization_token()
         # Build and Push docker Image.
         image = docker.Image(
             resource_name,
             build=build,
-            image_name=ecr_uri,
+            image_name=self.uri,
             # FIXME: local_image_name doesn't exists in Docker 4.0 yet
             # local_image_name=self.name,
             registry=docker.RegistryArgs(
@@ -92,20 +79,5 @@ class Image(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(parent=self, ignore_changes=[]),
         )
-
-        outputs = {
-            "uri": image.image_name,
-            "repo_digest": image.repo_digest,
-            "name": self.name,
-        }
-        self.set_outputs(outputs)
-
-    def set_outputs(self, outputs: Dict[str, Any]):
-        """
-        Adds the Pulumi outputs as attributes on the current object so they can be
-        used as outputs by the caller, as well as registering them.
-        """
-        for output_name in outputs.keys():
-            setattr(self, output_name, outputs[output_name])
-
-        self.register_outputs(outputs)
+        self.repo_digest = image.repo_digest
+        self.register_outputs({"uri": self.uri, "repo_digest": self.repo_digest})
