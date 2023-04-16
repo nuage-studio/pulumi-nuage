@@ -1,125 +1,107 @@
-VERSION         := ${versionNumber}
+PROJECT_NAME := Pulumi Nuage Resource Provider
 
-PACK            := nuage
-PROJECT         := github.com/pulumi/pulumi-${PACK}
+PACK             := nuage
+PACKDIR          := sdk
+PROJECT          := github.com/pulumi/pulumi-nuage
+NODE_MODULE_NAME := @pulumi/nuage
+NUGET_PKG_NAME   := Pulumi.Nuage
 
 PROVIDER        := pulumi-resource-${PACK}
-CODEGEN         := pulumi-gen-${PACK}
-VERSION_PATH    := provider/pkg/version.Version
+VERSION         ?= $(shell pulumictl get version)
+PROVIDER_PATH   := provider
+VERSION_PATH     := ${PROVIDER_PATH}/cmd/main.Version
+
+GOPATH			:= $(shell go env GOPATH)
 
 WORKING_DIR     := $(shell pwd)
-SCHEMA_PATH     := ${WORKING_DIR}/schema.json
+TESTPARALLELISM := 4
 
-SRC             := provider/cmd/pulumi-resource-${PACK}
+ensure::
+	cd provider && go mod tidy
+	cd sdk && go mod tidy
+	cd tests && go mod tidy
 
-generate:: gen_go_sdk gen_nodejs_sdk gen_python_sdk # gen_dotnet_sdk
+provider::
+	(cd provider && go build -o $(WORKING_DIR)/bin/${PROVIDER} -ldflags "-X ${PROJECT}/${VERSION_PATH}=${VERSION}" $(PROJECT)/${PROVIDER_PATH}/cmd/$(PROVIDER))
 
-build:: build_provider build_nodejs_sdk build_python_sdk # build_dotnet_sdk
-install:: install_nodejs_sdk # install_dotnet_sdk 
+provider_debug::
+	(cd provider && go build -o $(WORKING_DIR)/bin/${PROVIDER} -gcflags="all=-N -l" -ldflags "-X ${PROJECT}/${VERSION_PATH}=${VERSION}" $(PROJECT)/${PROVIDER_PATH}/cmd/$(PROVIDER))
 
+test_provider::
+	cd provider/pkg && go test -short -v -count=1 -cover -timeout 2h -parallel ${TESTPARALLELISM} ./...
 
-# Provider
-
-PROVIDER_FILES =  bin/PulumiPlugin.yaml bin/requirements.txt bin/run-provider.py
-PROVIDER_FILES += bin/pulumi-resource-${PACK}.cmd bin/pulumi-resource-${PACK}
-
-build_provider::	bin/venv bin/${PACK}_provider ${PROVIDER_FILES}
-
-bin/venv:		${SRC}/requirements.txt
-	rm -rf $@
-	python3 -m venv $@
-	./bin/venv/bin/python -m pip install -r $<
-
-bin/${PACK}_provider:	${SRC}/	${SRC}/${PACK}_provider/VERSION
-	rm -rf $@
-	cp ${WORKING_DIR}/schema.json ${SRC}/${PACK}_provider/schema.json
-	./bin/venv/bin/python -m pip install --no-deps provider/cmd/pulumi-resource-${PACK}/ -t bin/
-
-bin/PulumiPlugin.yaml:			${SRC}/PulumiPlugin.yaml
-bin/requirements.txt:			${SRC}/requirements.txt
-bin/pulumi-resource-${PACK}.cmd:	${SRC}/pulumi-resource-${PACK}.cmd
-bin/pulumi-resource-${PACK}:		${SRC}/pulumi-resource-${PACK}
-bin/run-provider.py:			${SRC}/run-provider.py
-
-bin/%:
-	cp -f $< $@
-
-${SRC}/${PACK}_provider/VERSION:
-	echo "${VERSION}" > ${SRC}/${PACK}_provider/VERSION
-
-# Go SDK
-
-gen_go_sdk::
-	rm -rf sdk/go
-	cd provider/cmd/${CODEGEN} && go run . go ../../../sdk/go ${SCHEMA_PATH}
-
-
-# .NET SDK
-
-gen_dotnet_sdk::
+dotnet_sdk:: DOTNET_VERSION := $(shell pulumictl get version --language dotnet)
+dotnet_sdk::
 	rm -rf sdk/dotnet
-	cd provider/cmd/${CODEGEN} && go run . dotnet ../../../sdk/dotnet ${SCHEMA_PATH}
-
-build_dotnet_sdk:: DOTNET_VERSION := ${VERSION}
-build_dotnet_sdk:: gen_dotnet_sdk
-	cd sdk/dotnet/ && \
+	pulumi package gen-sdk $(WORKING_DIR)/bin/$(PROVIDER) --language dotnet
+	cd ${PACKDIR}/dotnet/&& \
 		echo "${DOTNET_VERSION}" >version.txt && \
 		dotnet build /p:Version=${DOTNET_VERSION}
 
-install_dotnet_sdk:: build_dotnet_sdk
-	rm -rf ${WORKING_DIR}/nuget
-	mkdir -p ${WORKING_DIR}/nuget
-	find . -name '*.nupkg' -print -exec cp -p {} ${WORKING_DIR}/nuget \;
+go_sdk:: $(WORKING_DIR)/bin/$(PROVIDER)
+	rm -rf sdk/go
+	pulumi package gen-sdk $(WORKING_DIR)/bin/$(PROVIDER) --language go
 
-
-# Node.js SDK
-
-gen_nodejs_sdk::
+nodejs_sdk:: VERSION := $(shell pulumictl get version --language javascript)
+nodejs_sdk::
 	rm -rf sdk/nodejs
-	cd provider/cmd/${CODEGEN} && go run . nodejs ../../../sdk/nodejs ${SCHEMA_PATH}
-
-build_nodejs_sdk:: gen_nodejs_sdk
-	cd sdk/nodejs/ && \
+	pulumi package gen-sdk $(WORKING_DIR)/bin/$(PROVIDER) --language nodejs
+	cd ${PACKDIR}/nodejs/ && \
 		yarn install && \
-		yarn run tsc --version && \
 		yarn run tsc && \
 		cp -R scripts/ bin && \
-		cp ../../README.md ../../LICENSE package.json yarn.lock ./bin/ && \
-		sed -i.bak -e "s/\$${VERSION}/$(VERSION)/g" ./bin/package.json && \
+		cp ../../README.md ../../LICENSE package.json yarn.lock bin/ && \
+		sed -i.bak 's/$${VERSION}/$(VERSION)/g' bin/package.json && \
 		rm ./bin/package.json.bak
 
-install_nodejs_sdk:: build_nodejs_sdk
-	yarn link --cwd ${WORKING_DIR}/sdk/nodejs/bin
-
-
-# Python SDK
-
-gen_python_sdk::
+python_sdk:: PYPI_VERSION := $(shell pulumictl get version --language python)
+python_sdk::
 	rm -rf sdk/python
-	cd provider/cmd/${CODEGEN} && go run . python ../../../sdk/python ${SCHEMA_PATH}
-	cp ${WORKING_DIR}/README.md sdk/python
-
-build_python_sdk:: PYPI_VERSION := ${VERSION}
-build_python_sdk:: gen_python_sdk
-	cd sdk/python/ && \
+	pulumi package gen-sdk $(WORKING_DIR)/bin/$(PROVIDER) --language python
+	cp README.md ${PACKDIR}/python/
+	cd ${PACKDIR}/python/ && \
 		python3 setup.py clean --all 2>/dev/null && \
 		rm -rf ./bin/ ../python.bin/ && cp -R . ../python.bin && mv ../python.bin ./bin && \
-		sed -i.bak -e "s/\$${VERSION}/${PYPI_VERSION}/g" -e "s/\$${PLUGIN_VERSION}/${VERSION}/g" ./bin/setup.py && \
+		sed -i.bak -e 's/^VERSION = .*/VERSION = "$(PYPI_VERSION)"/g' -e 's/^PLUGIN_VERSION = .*/PLUGIN_VERSION = "$(VERSION)"/g' ./bin/setup.py && \
 		rm ./bin/setup.py.bak && \
 		cd ./bin && python3 setup.py build sdist
 
+.PHONY: build
+build:: provider dotnet_sdk go_sdk nodejs_sdk python_sdk
 
-# Output tarballs for plugin distribution. Example use:
-#
-# pulumi plugin install resource nuage 0.0.1 --file pulumi-resource-nuage-v0.0.1-linux-amd64.tar.gz
+# Required for the codegen action that runs in pulumi/pulumi
+only_build:: build
 
-dist::	build_provider
-	rm -rf dist
-	mkdir -p dist
-	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK}.cmd -cf ../dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz .)
-	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-amd64.tar.gz
-	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-arm64.tar.gz
-	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK} -cf ../dist/pulumi-resource-${PACK}-v${VERSION}-windows-amd64.tar.gz .)
+lint::
+	for DIR in "provider" "sdk" "tests" ; do \
+		pushd $$DIR && golangci-lint run -c ../.golangci.yml --timeout 10m && popd ; \
+	done
 
-run_tests::
-	python3 -m unittest discover provider/cmd/pulumi-resource-nuage/tests/ 
+
+install:: install_nodejs_sdk install_dotnet_sdk
+	cp $(WORKING_DIR)/bin/${PROVIDER} ${GOPATH}/bin
+
+
+GO_TEST 	 := go test -v -count=1 -cover -timeout 2h -parallel ${TESTPARALLELISM}
+
+test_all::
+	cd provider/pkg && $(GO_TEST) ./...
+	cd tests/sdk/nodejs && $(GO_TEST) ./...
+	cd tests/sdk/python && $(GO_TEST) ./...
+	cd tests/sdk/dotnet && $(GO_TEST) ./...
+	cd tests/sdk/go && $(GO_TEST) ./...
+
+install_dotnet_sdk::
+	rm -rf $(WORKING_DIR)/nuget/$(NUGET_PKG_NAME).*.nupkg
+	mkdir -p $(WORKING_DIR)/nuget
+	find . -name '*.nupkg' -print -exec cp -p {} ${WORKING_DIR}/nuget \;
+
+install_python_sdk::
+	#target intentionally blank
+
+install_go_sdk::
+	#target intentionally blank
+
+install_nodejs_sdk::
+	-yarn unlink --cwd $(WORKING_DIR)/sdk/nodejs/bin
+	yarn link --cwd $(WORKING_DIR)/sdk/nodejs/bin
