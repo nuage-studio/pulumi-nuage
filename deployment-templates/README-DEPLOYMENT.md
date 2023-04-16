@@ -8,14 +8,13 @@
 
 1. Add any needed tokens to the actions secrets for your repository or organization
 
-1. Customize the release.yml with the correct tokens using the format:  
+1. Customize the release.yml with the correct tokens using the format:
 
       `${{ secrets.MyTokenName }}`
 
 1. Delete this directory if desired
 
-
-# Deploy
+## Deploy
 
 1. Push a tag to your repo in the format "v0.0.0" to initiate a release
 
