@@ -10,16 +10,12 @@
   // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {
     // https://github.com/devcontainers/features/tree/main/src/common-utils
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "configureZshAsDefaultShell": true,
-      "upgradePackages": true
-    },
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {},
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.9",
       "installTools": false
     },
+    "ghcr.io/devcontainers-contrib/features/poetry:2": {},
     "ghcr.io/devcontainers/features/node:1": {
       "version": "14"
     },
@@ -29,19 +25,13 @@
     "ghcr.io/devcontainers/features/dotnet": {
       "version": "3.1"
     },
-    "ghcr.io/devcontainers/features/aws-cli:1": {
-      "version": "latest"
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/eitsupi/devcontainer-features/go-task:1": {},
+    "ghcr.io/devcontainers-contrib/features/pulumi:1": {
+      "version": "3.63.0",
+      "bashCompletion": false
     },
-    "ghcr.io/eitsupi/devcontainer-features/go-task:1": {
-      "version": "3.23.0"
-    },
-    "ghcr.io/devcontainers-contrib/features/poetry:2": {
-      "version": "1.4.2"
-    }
-    // "ghcr.io/devcontainers-contrib/features/pulumi:1": {
-    //   "version": "3.63.0",
-    //   "bashCompletion": false
-    // }
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
@@ -52,9 +42,9 @@
     // Configure properties specific to VS Code.
     "vscode": {
       // Set *default* container specific settings.json values on container create.
-      // "settings": {
-      //   "terminal.integrated.defaultProfile.linux": "zsh"
-      // },
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      },
       // Add the IDs of extensions you want installed when the container is created.
       "extensions": [
         // VSCode
