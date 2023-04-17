@@ -27,6 +27,7 @@ from .prefixed_component_resource import PrefixedComponentResource, PrefixedComp
 class ContainerFunctionArgs(PrefixedComponentResourceArgs):
     description: Optional[pulumi.Input[str]]
     image_uri: pulumi.Input[str]
+    image_config: Optional[pulumi.Input[aws.lambda_.FunctionImageConfigArgs]]
     architecture: Optional[str]
     memory_size: Optional[pulumi.Input[int]]
     timeout: Optional[pulumi.Input[int]]
@@ -48,6 +49,7 @@ class ContainerFunctionArgs(PrefixedComponentResourceArgs):
             name_prefix=inputs.get("namePrefix", None),
             description=inputs.get("description", None),
             image_uri=inputs.get("imageUri"),
+            image_config=inputs.get("imageConfig", None),
             architecture=inputs.get("architecture", "X86_64"),
             memory_size=int(inputs.get("memorySize", 512)),
             timeout=int(inputs.get("timeout", 3)),
@@ -145,6 +147,7 @@ class ContainerFunction(PrefixedComponentResource):
             description=args.description,
             package_type="Image",
             image_uri=args.image_uri,
+            image_config=args.image_config,
             memory_size=args.memory_size,
             timeout=args.timeout,
             architectures=[architecture.lambda_value],
