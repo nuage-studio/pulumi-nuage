@@ -20,4 +20,4 @@ Should you need to give us access to your existing AWS account, you can use the 
 
 You will need a SAML Metadata document (XML) which we'll happily provide you via email.
 
-[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=nuage-sso&templateURL=https://s3.eu-west-1.amazonaws.com/nuage.studio/nuage-sso-template.yml)
+[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=nuage-sso&templateURL=https://github.com/nuage-studio/pulumi-nuage/blob/master/cloudformation/nuage-sso.yml)
